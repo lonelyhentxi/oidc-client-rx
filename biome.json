@@ -1,0 +1,25 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": ["ultracite"],
+  "linter": {
+    "rules": {
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "correctness": {
+        "noUnusedImports": {
+          "fix": "none",
+          "level": "warn"
+        }
+      }
+    }
+  },
+  "files": {
+    "ignore": [
+      ".vscode/*.json"
+    ]
+  }
+}

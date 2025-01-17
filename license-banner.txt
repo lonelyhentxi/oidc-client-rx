@@ -1,0 +1,4 @@
+/**
+ * @license oidc-client-rx
+ * MIT license
+ */
