@@ -1,5 +1,5 @@
 /*
- * Public API Surface of angular-auth-oidc-client
+ * Public API Surface of oidc-client-rx
  */
 
 export * from '.';

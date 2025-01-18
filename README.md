@@ -1,9 +1,9 @@
 # Angular Lib for OpenID Connect & OAuth2
 
-![Build Status](https://github.com/damienbod/angular-auth-oidc-client/actions/workflows/build.yml/badge.svg?branch=main) [![npm](https://img.shields.io/npm/v/angular-auth-oidc-client.svg)](https://www.npmjs.com/package/angular-auth-oidc-client) [![npm](https://img.shields.io/npm/dm/angular-auth-oidc-client.svg)](https://www.npmjs.com/package/angular-auth-oidc-client) [![npm](https://img.shields.io/npm/l/angular-auth-oidc-client.svg)](https://www.npmjs.com/package/angular-auth-oidc-client) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Coverage Status](https://coveralls.io/repos/github/damienbod/angular-auth-oidc-client/badge.svg?branch=main)](https://coveralls.io/github/damienbod/angular-auth-oidc-client?branch=main)
+![Build Status](https://github.com/damienbod/oidc-client-rx/actions/workflows/build.yml/badge.svg?branch=main) [![npm](https://img.shields.io/npm/v/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![npm](https://img.shields.io/npm/dm/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![npm](https://img.shields.io/npm/l/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Coverage Status](https://coveralls.io/repos/github/damienbod/oidc-client-rx/badge.svg?branch=main)](https://coveralls.io/github/damienbod/oidc-client-rx?branch=main)
 
 <p align="center">
-  <a href="https://angular-auth-oidc-client.com/"><img src="https://raw.githubusercontent.com/damienbod/angular-auth-oidc-client/main/.github/angular-auth-logo.png" alt="" width="350" /></a>
+  <a href="https://oidc-client-rx.com/"><img src="https://raw.githubusercontent.com/damienbod/oidc-client-rx/main/.github/angular-auth-logo.png" alt="" width="350" /></a>
 </p>
 
 Secure your Angular app using the latest standards for OpenID Connect & OAuth2. Provides support for token refresh, all modern OIDC Identity Providers and more.
@@ -18,7 +18,7 @@ This library is <a href="http://openid.net/certification/#RPs">certified</a> by 
 
 ## Features
 
-- [Code samples](https://angular-auth-oidc-client.com/docs/samples/) for most of the common use cases
+- [Code samples](https://oidc-client-rx.com/docs/samples/) for most of the common use cases
 - Supports schematics via `ng add` support
 - Supports all modern OIDC identity providers
 - Supports OpenID Connect Code Flow with PKCE
@@ -42,38 +42,38 @@ This library is <a href="http://openid.net/certification/#RPs">certified</a> by 
 You can use the schematics and `ng add` the library.
 
 ```shell
-ng add angular-auth-oidc-client
+ng add oidc-client-rx
 ```
 
 And answer the questions. A module will be created which encapsulates your configuration.
 
-![angular-auth-oidc-client schematics](https://raw.githubusercontent.com/damienbod/angular-auth-oidc-client/main/.github/angular-auth-oidc-client-schematics-720.gif)
+![oidc-client-rx schematics](https://raw.githubusercontent.com/damienbod/oidc-client-rx/main/.github/oidc-client-rx-schematics-720.gif)
 
 ### Npm / Yarn
 
 Navigate to the level of your `package.json` and type
 
 ```shell
- npm install angular-auth-oidc-client
+ npm install oidc-client-rx
 ```
 
 or with yarn
 
 ```shell
- yarn add angular-auth-oidc-client
+ yarn add oidc-client-rx
 ```
 
 ## Documentation
 
-[Read the docs here](https://angular-auth-oidc-client.com/)
+[Read the docs here](https://oidc-client-rx.com/)
 
 ## Samples
 
-[Explore the Samples here](https://angular-auth-oidc-client.com/docs/samples/)
+[Explore the Samples here](https://oidc-client-rx.com/docs/samples/)
 
 ## Quickstart
 
-For the example of the Code Flow. For further examples please check the [Samples](https://angular-auth-oidc-client.com/docs/samples/) Section.
+For the example of the Code Flow. For further examples please check the [Samples](https://oidc-client-rx.com/docs/samples/) Section.
 
 > If you have done the installation with the schematics, these modules and files should be available already!
 
@@ -83,7 +83,7 @@ Import the `AuthModule` in your module.
 
 ```ts
 import { NgModule } from '@angular/core';
-import { AuthModule, LogLevel } from 'angular-auth-oidc-client';
+import { AuthModule, LogLevel } from 'oidc-client-rx';
 // ...
 
 @NgModule({
@@ -113,7 +113,7 @@ And call the method `checkAuth()` from your `app.component.ts`. The method `chec
 
 ```ts
 import { Component, OnInit, inject } from '@angular/core';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { OidcSecurityService } from 'oidc-client-rx';
 
 @Component({
   /*...*/
@@ -187,15 +187,15 @@ AuthModule.forRoot({
 
 Current Version is Version 19.x
 
-- [Info about Version 18](https://github.com/damienbod/angular-auth-oidc-client/tree/version-18)
-- [Info about Version 17](https://github.com/damienbod/angular-auth-oidc-client/tree/version-17)
-- [Info about Version 16](https://github.com/damienbod/angular-auth-oidc-client/tree/version-16)
-- [Info about Version 15](https://github.com/damienbod/angular-auth-oidc-client/tree/version-15)
-- [Info about Version 14](https://github.com/damienbod/angular-auth-oidc-client/tree/version-14)
-- [Info about Version 13](https://github.com/damienbod/angular-auth-oidc-client/tree/version-13)
-- [Info about Version 12](https://github.com/damienbod/angular-auth-oidc-client/tree/version-12)
-- [Info about Version 11](https://github.com/damienbod/angular-auth-oidc-client/tree/version-11)
-- [Info about Version 10](https://github.com/damienbod/angular-auth-oidc-client/tree/version-10)
+- [Info about Version 18](https://github.com/damienbod/oidc-client-rx/tree/version-18)
+- [Info about Version 17](https://github.com/damienbod/oidc-client-rx/tree/version-17)
+- [Info about Version 16](https://github.com/damienbod/oidc-client-rx/tree/version-16)
+- [Info about Version 15](https://github.com/damienbod/oidc-client-rx/tree/version-15)
+- [Info about Version 14](https://github.com/damienbod/oidc-client-rx/tree/version-14)
+- [Info about Version 13](https://github.com/damienbod/oidc-client-rx/tree/version-13)
+- [Info about Version 12](https://github.com/damienbod/oidc-client-rx/tree/version-12)
+- [Info about Version 11](https://github.com/damienbod/oidc-client-rx/tree/version-11)
+- [Info about Version 10](https://github.com/damienbod/oidc-client-rx/tree/version-10)
 
 ## License
 

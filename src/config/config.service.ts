@@ -88,7 +88,7 @@ export class ConfigurationService {
       const config = this.configsInternal[configId!];
 
       if(!config && isDevMode()) {
-        console.warn(`[angular-auth-oidc-client] No configuration found for config id '${configId}'.`);
+        console.warn(`[oidc-client-rx] No configuration found for config id '${configId}'.`);
       }
 
       return config || null;

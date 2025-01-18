@@ -51,3 +51,7 @@ debug.log
 
 /.husky
 /.nx
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
