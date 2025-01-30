@@ -1,8 +1,8 @@
-import { DOCUMENT } from '../dom';
-import { Injectable, NgZone, OnDestroy, inject } from 'injection-js';
+import { Injectable, NgZone, type OnDestroy, inject } from 'injection-js';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { DOCUMENT } from '../dom';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
@@ -74,7 +74,7 @@ export class CheckSessionService implements OnDestroy {
   }
 
   start(configuration: OpenIdConfiguration): void {
-    if (!!this.scheduledHeartBeatRunning) {
+    if (this.scheduledHeartBeatRunning) {
       return;
     }
 
@@ -141,13 +141,13 @@ export class CheckSessionService implements OnDestroy {
       return of();
     }
 
-    if (!contentWindow) {
+    if (contentWindow) {
+      contentWindow.location.replace(checkSessionIframe);
+    } else {
       this.loggerService.logWarning(
         configuration,
         'CheckSession - init check session: IFrame contentWindow does not exist'
       );
-    } else {
-      contentWindow.location.replace(checkSessionIframe);
     }
 
     return new Observable((observer) => {
@@ -197,7 +197,7 @@ export class CheckSessionService implements OnDestroy {
 
               this.outstandingMessages++;
               contentWindow.postMessage(
-                clientId + ' ' + sessionState,
+                `${clientId} ${sessionState}`,
                 iframeOrigin
               );
             } else {

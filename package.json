@@ -32,7 +32,8 @@
     "publish": "npm run build && npm publish ./dist",
     "coverage": "vitest run --coverage",
     "lint": "ultracite lint",
-    "format": "ultracite format"
+    "format": "ultracite format",
+    "cli": "tsx scripts/cli.ts"
   },
   "dependencies": {
     "@ngify/http": "^2.0.4",
@@ -43,18 +44,24 @@
     "rxjs": "^7.4.0||>=8.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@biomejs/js-api": "0.7.1",
+    "@biomejs/wasm-nodejs": "^1.9.4",
     "@evilmartians/lefthook": "^1.0.3",
     "@playwright/test": "^1.49.1",
     "@rslib/core": "^0.3.1",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^22.10.1",
     "@vitest/coverage-v8": "^3.0.1",
+    "commander": "^13.1.0",
     "lodash-es": "^4.17.21",
+    "oxc-parser": "^0.48.1",
+    "oxc-walker": "^0.2.2",
     "rfc4648": "^1.5.0",
+    "rxjs": "^7.4.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "ultracite": "^4.1.15",
-    "vitest": "^3.0.1",
-    "rxjs": "^7.4.0"
+    "vitest": "^3.0.1"
   },
   "keywords": [
     "rxjs",

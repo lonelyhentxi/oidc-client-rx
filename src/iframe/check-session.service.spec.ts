@@ -346,11 +346,9 @@ describe('CheckSessionService', () => {
 
   describe('checkSessionChanged$', () => {
     it('emits when internal event is thrown', async () => {
-      checkSessionService.checkSessionChanged$
-        .pipe(skip(1))
-        .subscribe((result) => {
-          expect(result).toBe(true);
-        });
+      const result = await lastValueFrom(checkSessionService.checkSessionChanged$
+        .pipe(skip(1)));
+expect(result).toBe(true);
 
       const serviceAsAny = checkSessionService as any;
 
@@ -358,9 +356,8 @@ describe('CheckSessionService', () => {
     });
 
     it('emits false initially', async () => {
-      checkSessionService.checkSessionChanged$.subscribe((result) => {
-        expect(result).toBe(false);
-      });
+      const result = await lastValueFrom(checkSessionService.checkSessionChanged$);
+expect(result).toBe(false);
     });
 
     it('emits false then true when emitted', async () => {

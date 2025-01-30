@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { mockProvider } from '../testing/mock';
@@ -20,9 +20,6 @@ describe('RefreshSessionIframeService ', () => {
         mockProvider(UrlService),
       ],
     });
-  });
-
-  beforeEach(() => {
     refreshSessionIframeService = TestBed.inject(RefreshSessionIframeService);
     urlService = TestBed.inject(UrlService);
   });
@@ -62,7 +59,9 @@ describe('RefreshSessionIframeService ', () => {
     it('dispatches customevent to window object', async () => {
       const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
 
-      (refreshSessionIframeService as any).initSilentRenewRequest();
+      await lastValueFrom(
+        (refreshSessionIframeService as any).initSilentRenewRequest()
+      );
 
       expect(dispatchEventSpy).toHaveBeenCalledExactlyOnceWith(
         new CustomEvent('oidc-silent-renew-init', {

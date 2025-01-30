@@ -1,5 +1,5 @@
-import { TestBed } from '@/testing';
-import { of } from 'rxjs';
+import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { FlowsDataService } from '../../flows/flows-data.service';
@@ -1044,9 +1044,8 @@ describe('UrlService Tests', () => {
 
   describe('getAuthorizeUrl', () => {
     it('returns null if no config is given', async () => {
-      service.getAuthorizeUrl(null).subscribe((url) => {
-        expect(url).toBeNull();
-      });
+      const url = await lastValueFrom(service.getAuthorizeUrl(null));
+      expect(url).toBeNull();
     });
 
     it('returns null if current flow is code flow and no redirect url is defined', async () => {
@@ -1383,7 +1382,7 @@ describe('UrlService Tests', () => {
 
       resultObs$.subscribe((result) => {
         expect(result).toBe(
-          `client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256`
+          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256'
         );
       });
     });
@@ -1414,7 +1413,7 @@ describe('UrlService Tests', () => {
 
       resultObs$.subscribe((result) => {
         expect(result).toBe(
-          `client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam`
+          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam'
         );
       });
     });
@@ -1445,7 +1444,7 @@ describe('UrlService Tests', () => {
 
       resultObs$.subscribe((result) => {
         expect(result).toBe(
-          `client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing`
+          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing'
         );
       });
     });
@@ -1480,7 +1479,7 @@ describe('UrlService Tests', () => {
 
       resultObs$.subscribe((result) => {
         expect(result).toBe(
-          `client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing&any=otherThing`
+          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing&any=otherThing'
         );
       });
     });
@@ -1904,8 +1903,7 @@ describe('UrlService Tests', () => {
 
       resultObs$.subscribe((result: any) => {
         expect(result).toBe(
-          `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com` +
-            `&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&to=add&as=well`
+          `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&to=add&as=well`
         );
       });
     });
@@ -2121,7 +2119,8 @@ describe('UrlService Tests', () => {
       const value = service.getEndSessionUrl(config);
 
       // Assert
-      const expectValue = `something.auth0.com/v2/logout?client_id=someClientId&returnTo=https://localhost:1234/unauthorized`;
+      const expectValue =
+        'something.auth0.com/v2/logout?client_id=someClientId&returnTo=https://localhost:1234/unauthorized';
 
       expect(value).toEqual(expectValue);
     });
