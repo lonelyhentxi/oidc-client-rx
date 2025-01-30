@@ -1,15 +1,15 @@
 import { Injectable, inject } from 'injection-js';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, type Observable, throwError } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { AuthResult } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { AuthResult } from '../flows/callback-context';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { TokenValidationService } from '../validation/token-validation.service';
-import { AuthenticatedResult } from './auth-result';
-import { AuthStateResult } from './auth-state';
+import type { AuthenticatedResult } from './auth-result';
+import type { AuthStateResult } from './auth-state';
 
 const DEFAULT_AUTHRESULT = {
   isAuthenticated: false,
@@ -293,7 +293,7 @@ export class AuthStateService {
       };
     }
 
-    return this.checkAllConfigsIfTheyAreAuthenticated(allConfigs);
+    return this.checkallConfigsIfTheyAreAuthenticated(allConfigs);
   }
 
   private composeUnAuthenticatedResult(
@@ -310,10 +310,10 @@ export class AuthStateService {
       };
     }
 
-    return this.checkAllConfigsIfTheyAreAuthenticated(allConfigs);
+    return this.checkallConfigsIfTheyAreAuthenticated(allConfigs);
   }
 
-  private checkAllConfigsIfTheyAreAuthenticated(
+  private checkallConfigsIfTheyAreAuthenticated(
     allConfigs: OpenIdConfiguration[]
   ): AuthenticatedResult {
     const allConfigsAuthenticated = allConfigs.map((config) => ({

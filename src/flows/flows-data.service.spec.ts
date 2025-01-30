@@ -1,7 +1,8 @@
-import { TestBed } from '@angular/core/testing';
-import { mockProvider } from '../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockProvider } from '../testing/mock';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import { FlowsDataService } from './flows-data.service';
 import { RandomService } from './random/random.service';
@@ -37,12 +38,12 @@ describe('Flows Data Service', () => {
 
   describe('createNonce', () => {
     it('createNonce returns nonce and stores it', () => {
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       const result = service.createNonce({ configId: 'configId1' });
 
       expect(result).toBeTruthy();
-      expect(spy).toHaveBeenCalledOnceWith('authNonce', result, {
+      expect(spy).toHaveBeenCalledExactlyOnceWith('authNonce', result, {
         configId: 'configId1',
       });
     });
@@ -50,32 +51,38 @@ describe('Flows Data Service', () => {
 
   describe('AuthStateControl', () => {
     it('getAuthStateControl returns property from store', () => {
-      const spy = spyOn(storagePersistenceService, 'read');
+      const spy = vi.spyOn(storagePersistenceService, 'read');
 
       service.getAuthStateControl({ configId: 'configId1' });
 
-      expect(spy).toHaveBeenCalledOnceWith('authStateControl', {
+      expect(spy).toHaveBeenCalledExactlyOnceWith('authStateControl', {
         configId: 'configId1',
       });
     });
 
     it('setAuthStateControl saves property in store', () => {
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.setAuthStateControl('ToSave', { configId: 'configId1' });
 
-      expect(spy).toHaveBeenCalledOnceWith('authStateControl', 'ToSave', {
-        configId: 'configId1',
-      });
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        'authStateControl',
+        'ToSave',
+        {
+          configId: 'configId1',
+        }
+      );
     });
   });
 
   describe('getExistingOrCreateAuthStateControl', () => {
     it('if nothing stored it creates a 40 char one and saves the authStateControl', () => {
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authStateControl', { configId: 'configId1' })
-        .and.returnValue(null);
-      const setSpy = spyOn(storagePersistenceService, 'write');
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authStateControl', { configId: 'configId1' }],
+        () => null
+      );
+      const setSpy = vi.spyOn(storagePersistenceService, 'write');
 
       const result = service.getExistingOrCreateAuthStateControl({
         configId: 'configId1',
@@ -83,16 +90,22 @@ describe('Flows Data Service', () => {
 
       expect(result).toBeTruthy();
       expect(result.length).toBe(41);
-      expect(setSpy).toHaveBeenCalledOnceWith('authStateControl', result, {
-        configId: 'configId1',
-      });
+      expect(setSpy).toHaveBeenCalledExactlyOnceWith(
+        'authStateControl',
+        result,
+        {
+          configId: 'configId1',
+        }
+      );
     });
 
     it('if stored it returns the value and does NOT Store the value again', () => {
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authStateControl', { configId: 'configId1' })
-        .and.returnValue('someAuthStateControl');
-      const setSpy = spyOn(storagePersistenceService, 'write');
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authStateControl', { configId: 'configId1' }],
+        () => 'someAuthStateControl'
+      );
+      const setSpy = vi.spyOn(storagePersistenceService, 'write');
 
       const result = service.getExistingOrCreateAuthStateControl({
         configId: 'configId1',
@@ -106,11 +119,11 @@ describe('Flows Data Service', () => {
 
   describe('setSessionState', () => {
     it('setSessionState saves the value in the storage', () => {
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.setSessionState('Genesis', { configId: 'configId1' });
 
-      expect(spy).toHaveBeenCalledOnceWith('session_state', 'Genesis', {
+      expect(spy).toHaveBeenCalledExactlyOnceWith('session_state', 'Genesis', {
         configId: 'configId1',
       });
     });
@@ -118,7 +131,7 @@ describe('Flows Data Service', () => {
 
   describe('resetStorageFlowData', () => {
     it('resetStorageFlowData calls correct method on storagePersistenceService', () => {
-      const spy = spyOn(storagePersistenceService, 'resetStorageFlowData');
+      const spy = vi.spyOn(storagePersistenceService, 'resetStorageFlowData');
 
       service.resetStorageFlowData({ configId: 'configId1' });
 
@@ -128,26 +141,27 @@ describe('Flows Data Service', () => {
 
   describe('codeVerifier', () => {
     it('getCodeVerifier returns value from the store', () => {
-      const spy = spyOn(storagePersistenceService, 'read')
+      const spy = vi
+        .spyOn(storagePersistenceService, 'read')
         .withArgs('codeVerifier', { configId: 'configId1' })
-        .and.returnValue('Genesis');
+        .mockReturnValue('Genesis');
 
       const result = service.getCodeVerifier({ configId: 'configId1' });
 
       expect(result).toBe('Genesis');
-      expect(spy).toHaveBeenCalledOnceWith('codeVerifier', {
+      expect(spy).toHaveBeenCalledExactlyOnceWith('codeVerifier', {
         configId: 'configId1',
       });
     });
 
     it('createCodeVerifier returns random createCodeVerifier and stores it', () => {
-      const setSpy = spyOn(storagePersistenceService, 'write');
+      const setSpy = vi.spyOn(storagePersistenceService, 'write');
 
       const result = service.createCodeVerifier({ configId: 'configId1' });
 
       expect(result).toBeTruthy();
       expect(result.length).toBe(67);
-      expect(setSpy).toHaveBeenCalledOnceWith('codeVerifier', result, {
+      expect(setSpy).toHaveBeenCalledExactlyOnceWith('codeVerifier', result, {
         configId: 'configId1',
       });
     });
@@ -165,22 +179,26 @@ describe('Flows Data Service', () => {
 
       jasmine.clock().mockDate(baseTime);
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('storageCodeFlowInProgress', config)
-        .and.returnValue(true);
-      const spyWrite = spyOn(storagePersistenceService, 'write');
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['storageCodeFlowInProgress', config],
+        () => true
+      );
+      const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
       const isCodeFlowInProgressResult = service.isCodeFlowInProgress(config);
 
       expect(spyWrite).not.toHaveBeenCalled();
-      expect(isCodeFlowInProgressResult).toBeTrue();
+      expect(isCodeFlowInProgressResult).toBeTruthy();
     });
 
     it('state object does not exist returns false result', () => {
       // arrange
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('storageCodeFlowInProgress', { configId: 'configId1' })
-        .and.returnValue(null);
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['storageCodeFlowInProgress', { configId: 'configId1' }],
+        () => null
+      );
 
       // act
       const isCodeFlowInProgressResult = service.isCodeFlowInProgress({
@@ -188,7 +206,7 @@ describe('Flows Data Service', () => {
       });
 
       // assert
-      expect(isCodeFlowInProgressResult).toBeFalse();
+      expect(isCodeFlowInProgressResult).toBeFalsy();
     });
   });
 
@@ -200,23 +218,31 @@ describe('Flows Data Service', () => {
 
       jasmine.clock().mockDate(baseTime);
 
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.setCodeFlowInProgress({ configId: 'configId1' });
-      expect(spy).toHaveBeenCalledOnceWith('storageCodeFlowInProgress', true, {
-        configId: 'configId1',
-      });
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        'storageCodeFlowInProgress',
+        true,
+        {
+          configId: 'configId1',
+        }
+      );
     });
   });
 
   describe('resetCodeFlowInProgress', () => {
     it('set resetCodeFlowInProgress to false when called', () => {
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.resetCodeFlowInProgress({ configId: 'configId1' });
-      expect(spy).toHaveBeenCalledOnceWith('storageCodeFlowInProgress', false, {
-        configId: 'configId1',
-      });
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        'storageCodeFlowInProgress',
+        false,
+        {
+          configId: 'configId1',
+        }
+      );
     });
   });
 
@@ -238,21 +264,21 @@ describe('Flows Data Service', () => {
         dateOfLaunchedProcessUtc: baseTime.toISOString(),
       };
 
-      spyOn(storagePersistenceService, 'read')
+      vi.spyOn(storagePersistenceService, 'read')
         .withArgs('storageSilentRenewRunning', config)
-        .and.returnValue(JSON.stringify(storageObject));
-      const spyWrite = spyOn(storagePersistenceService, 'write');
+        .mockReturnValue(JSON.stringify(storageObject));
+      const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
       jasmine.clock().tick((config.silentRenewTimeoutInSeconds + 1) * 1000);
 
       const isSilentRenewRunningResult = service.isSilentRenewRunning(config);
 
-      expect(spyWrite).toHaveBeenCalledOnceWith(
+      expect(spyWrite).toHaveBeenCalledExactlyOnceWith(
         'storageSilentRenewRunning',
         '',
         config
       );
-      expect(isSilentRenewRunningResult).toBeFalse();
+      expect(isSilentRenewRunningResult).toBeFalsy();
     });
 
     it('checks silent renew process and returns result', () => {
@@ -272,27 +298,29 @@ describe('Flows Data Service', () => {
         dateOfLaunchedProcessUtc: baseTime.toISOString(),
       };
 
-      spyOn(storagePersistenceService, 'read')
+      vi.spyOn(storagePersistenceService, 'read')
         .withArgs('storageSilentRenewRunning', config)
-        .and.returnValue(JSON.stringify(storageObject));
-      const spyWrite = spyOn(storagePersistenceService, 'write');
+        .mockReturnValue(JSON.stringify(storageObject));
+      const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
       const isSilentRenewRunningResult = service.isSilentRenewRunning(config);
 
       expect(spyWrite).not.toHaveBeenCalled();
-      expect(isSilentRenewRunningResult).toBeTrue();
+      expect(isSilentRenewRunningResult).toBeTruthy();
     });
 
     it('state object does not exist returns false result', () => {
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('storageSilentRenewRunning', { configId: 'configId1' })
-        .and.returnValue(null);
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['storageSilentRenewRunning', { configId: 'configId1' }],
+        () => null
+      );
 
       const isSilentRenewRunningResult = service.isSilentRenewRunning({
         configId: 'configId1',
       });
 
-      expect(isSilentRenewRunningResult).toBeFalse();
+      expect(isSilentRenewRunningResult).toBeFalsy();
     });
   });
 
@@ -309,10 +337,10 @@ describe('Flows Data Service', () => {
         dateOfLaunchedProcessUtc: baseTime.toISOString(),
       };
 
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.setSilentRenewRunning({ configId: 'configId1' });
-      expect(spy).toHaveBeenCalledOnceWith(
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
         'storageSilentRenewRunning',
         JSON.stringify(storageObject),
         { configId: 'configId1' }
@@ -322,12 +350,16 @@ describe('Flows Data Service', () => {
 
   describe('resetSilentRenewRunning', () => {
     it('set resetSilentRenewRunning to empty string when called', () => {
-      const spy = spyOn(storagePersistenceService, 'write');
+      const spy = vi.spyOn(storagePersistenceService, 'write');
 
       service.resetSilentRenewRunning({ configId: 'configId1' });
-      expect(spy).toHaveBeenCalledOnceWith('storageSilentRenewRunning', '', {
-        configId: 'configId1',
-      });
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        'storageSilentRenewRunning',
+        '',
+        {
+          configId: 'configId1',
+        }
+      );
     });
   });
 });

@@ -1,6 +1,6 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { of } from 'rxjs';
-import { mockProvider } from '../test/auto-mock';
+import { vi } from 'vitest';
 import { PASSED_CONFIG } from './auth-config';
 import { AuthModule } from './auth.module';
 import { ConfigurationService } from './config/config.service';
@@ -9,19 +9,20 @@ import {
   StsConfigLoader,
   StsConfigStaticLoader,
 } from './config/loader/config-loader';
+import { mockProvider } from './testing/mock';
 
 describe('AuthModule', () => {
   describe('APP_CONFIG', () => {
-    beforeEach(waitForAsync(() => {
-      TestBed.configureTestingModule({
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
         imports: [AuthModule.forRoot({ config: { authority: 'something' } })],
         providers: [mockProvider(ConfigurationService)],
       }).compileComponents();
-    }));
+    });
 
     it('should create', () => {
       expect(AuthModule).toBeDefined();
-      expect(AuthModule.forRoot({})).toBeDefined();
+      expect(new AuthModule()).toBeDefined();
     });
 
     it('should provide config', () => {
@@ -38,8 +39,8 @@ describe('AuthModule', () => {
   });
 
   describe('StsConfigHttpLoader', () => {
-    beforeEach(waitForAsync(() => {
-      TestBed.configureTestingModule({
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
         imports: [
           AuthModule.forRoot({
             loader: {
@@ -50,7 +51,7 @@ describe('AuthModule', () => {
         ],
         providers: [mockProvider(ConfigurationService)],
       }).compileComponents();
-    }));
+    });
 
     it('should create StsConfigStaticLoader if config is passed', () => {
       const configLoader = TestBed.inject(StsConfigLoader);

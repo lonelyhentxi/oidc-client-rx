@@ -1,6 +1,6 @@
-﻿import { inject, Injectable } from 'injection-js';
-import { AuthResult } from '../flows/callback-context';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+﻿import { inject } from 'injection-js';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { AuthResult } from '../flows/callback-context';
 import { BrowserStorageService } from './browser-storage.service';
 
 export type StorageKeys =
@@ -23,7 +23,6 @@ export type StorageKeys =
   | 'configIds'
   | 'jwtKeys'
   | 'popupauth';
-
 
 export class StoragePersistenceService {
   private readonly browserStorageService = inject(BrowserStorageService);

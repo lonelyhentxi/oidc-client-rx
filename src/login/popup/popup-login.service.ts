@@ -1,16 +1,16 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of, throwError } from 'rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
-import { AuthOptions } from '../../auth-options';
+import type { AuthOptions } from '../../auth-options';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { UrlService } from '../../utils/url/url.service';
-import { LoginResponse } from '../login-response';
+import type { LoginResponse } from '../login-response';
 import { ResponseTypeValidationService } from '../response-type-validation/response-type-validation.service';
-import { PopupOptions } from './popup-options';
-import { PopupResult } from './popup-result';
+import type { PopupOptions } from './popup-options';
+import type { PopupResult } from './popup-result';
 import { PopUpService } from './popup.service';
 
 @Injectable()

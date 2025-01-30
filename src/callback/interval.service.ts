@@ -1,11 +1,9 @@
-import { Injectable, NgZone, inject } from 'injection-js';
-import { Observable, Subscription } from 'rxjs';
-import { DOCUMENT } from '../../dom';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, type Subscription, interval } from 'rxjs';
+import { DOCUMENT } from '../dom';
 
 @Injectable()
 export class IntervalService {
-  private readonly zone = inject(NgZone);
-
   private readonly document = inject(DOCUMENT);
 
   runTokenValidationRunning: Subscription | null = null;
@@ -24,19 +22,6 @@ export class IntervalService {
   startPeriodicTokenCheck(repeatAfterSeconds: number): Observable<unknown> {
     const millisecondsDelayBetweenTokenCheck = repeatAfterSeconds * 1000;
 
-    return new Observable((subscriber) => {
-      let intervalId: number | undefined;
-
-      this.zone.runOutsideAngular(() => {
-        intervalId = this.document?.defaultView?.setInterval(
-          () => this.zone.run(() => subscriber.next()),
-          millisecondsDelayBetweenTokenCheck
-        );
-      });
-
-      return (): void => {
-        clearInterval(intervalId);
-      };
-    });
+    return interval(millisecondsDelayBetweenTokenCheck);
   }
 }

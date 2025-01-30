@@ -1,10 +1,10 @@
-import { inject, Injectable } from 'injection-js';
-import { forkJoin, Observable, of, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, forkJoin, of, throwError } from 'rxjs';
+import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
 import { RefreshSessionIframeService } from '../iframe/refresh-session-iframe.service';
@@ -52,7 +52,7 @@ export class PeriodicallyTokenCheckService {
   startTokenValidationPeriodically(
     allConfigs: OpenIdConfiguration[],
     currentConfig: OpenIdConfiguration
-  ): void {
+  ): Observable<void> {
     const configsWithSilentRenewEnabled =
       this.getConfigsWithSilentRenewEnabled(allConfigs);
 
@@ -75,46 +75,51 @@ export class PeriodicallyTokenCheckService {
             [id: string]: Observable<boolean | CallbackContext | null>;
           } = {};
 
-          configsWithSilentRenewEnabled.forEach((config) => {
+          for (const config of configsWithSilentRenewEnabled) {
             const identifier = config.configId as string;
             const refreshEvent = this.getRefreshEvent(config, allConfigs);
 
             objectWithConfigIdsAndRefreshEvent[identifier] = refreshEvent;
-          });
+          }
 
           return forkJoin(objectWithConfigIdsAndRefreshEvent);
         })
       );
 
-    this.intervalService.runTokenValidationRunning = periodicallyCheck$
-      .pipe(catchError((error) => throwError(() => new Error(error))))
-      .subscribe({
-        next: (objectWithConfigIds) => {
-          for (const [configId, _] of Object.entries(objectWithConfigIds)) {
-            this.configurationService
-              .getOpenIDConfiguration(configId)
-              .subscribe((config) => {
-                this.loggerService.logDebug(
-                  config,
-                  'silent renew, periodic check finished!'
-                );
+    const o$ = periodicallyCheck$.pipe(
+      catchError((error) => throwError(() => new Error(error))),
+      map((objectWithConfigIds) => {
+        for (const [configId, _] of Object.entries(objectWithConfigIds)) {
+          this.configurationService
+            .getOpenIDConfiguration(configId)
+            .subscribe((config) => {
+              this.loggerService.logDebug(
+                config,
+                'silent renew, periodic check finished!'
+              );
 
-                if (
-                  this.flowHelper.isCurrentFlowCodeFlowWithRefreshTokens(config)
-                ) {
-                  this.flowsDataService.resetSilentRenewRunning(config);
-                }
-              });
-          }
-        },
-        error: (error) => {
-          this.loggerService.logError(
-            currentConfig,
-            'silent renew failed!',
-            error
-          );
-        },
-      });
+              if (
+                this.flowHelper.isCurrentFlowCodeFlowWithRefreshTokens(config)
+              ) {
+                this.flowsDataService.resetSilentRenewRunning(config);
+              }
+            });
+        }
+      }),
+      catchError((error) => {
+        this.loggerService.logError(
+          currentConfig,
+          'silent renew failed!',
+          error
+        );
+        return throwError(() => error);
+      }),
+      shareReplay(1)
+    );
+
+    this.intervalService.runTokenValidationRunning = o$.subscribe();
+
+    return o$;
   }
 
   private getRefreshEvent(

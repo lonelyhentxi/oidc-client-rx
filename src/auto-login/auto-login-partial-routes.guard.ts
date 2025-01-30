@@ -1,15 +1,16 @@
-import { inject, Injectable } from 'injection-js';
-import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AuthOptions } from '../auth-options';
+import type { AuthOptions } from '../auth-options';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
+import { injectAbstractType } from '../injection';
 import { LoginService } from '../login/login.service';
+import {
+  AbstractRouter,
+  type ActivatedRouteSnapshot,
+  type RouterStateSnapshot,
+} from '../router';
 import { AutoLoginService } from './auto-login.service';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class AutoLoginPartialRoutesGuard {
 
   private readonly configurationService = inject(ConfigurationService);
 
-  private readonly router = inject(Router);
+  private readonly router = injectAbstractType(AbstractRouter);
 
   canLoad(): Observable<boolean> {
     const url =
@@ -79,14 +80,14 @@ export class AutoLoginPartialRoutesGuard {
 
 export function autoLoginPartialRoutesGuard(
   route?: ActivatedRouteSnapshot,
-  state?: RouterStateSnapshot,
+  _state?: RouterStateSnapshot,
   configId?: string
 ): Observable<boolean> {
   const configurationService = inject(ConfigurationService);
   const authStateService = inject(AuthStateService);
   const loginService = inject(LoginService);
   const autoLoginService = inject(AutoLoginService);
-  const router = inject(Router);
+  const router = injectAbstractType(AbstractRouter);
   const authOptions: AuthOptions | undefined = route?.data
     ? { customParams: route.data }
     : undefined;

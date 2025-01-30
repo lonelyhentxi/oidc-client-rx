@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import {
   JwkExtractor,

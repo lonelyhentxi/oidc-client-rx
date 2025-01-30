@@ -1,12 +1,13 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/lib",
-    "declaration": true,
-    "declarationMap": true,
-    "inlineSources": true,
-    "types": ["node"],
-    "lib": ["dom", "es2018"]
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "./dist/tsc-lib",
+    "lib": ["dom", "es2018"],
+    "paths": {
+      "injection-js": ["./node_modules/injection-js/lib/index.ts"]
+    }
   },
-  "exclude": ["src/test.ts", "**/*.spec.ts"]
+  "include": ["src"],
+  "exclude": ["src/testing/**/*", "**/*.spec.ts"]
 }

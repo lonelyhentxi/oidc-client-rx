@@ -1,11 +1,11 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { TestBed, mockRouterProvider } from '@/testing';
+import { AbstractRouter } from 'oidc-client-rx';
 import { of, throwError } from 'rxjs';
-import { mockProvider } from '../../test/auto-mock';
-import { CallbackContext } from '../flows/callback-context';
+import { vi } from 'vitest';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { FlowsService } from '../flows/flows.service';
+import { mockProvider } from '../testing/mock';
 import { CodeFlowCallbackService } from './code-flow-callback.service';
 import { IntervalService } from './interval.service';
 
@@ -14,26 +14,24 @@ describe('CodeFlowCallbackService ', () => {
   let intervalService: IntervalService;
   let flowsService: FlowsService;
   let flowsDataService: FlowsDataService;
-  let router: Router;
+  let router: AbstractRouter;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [],
       providers: [
+        mockRouterProvider(),
         CodeFlowCallbackService,
         mockProvider(FlowsService),
         mockProvider(FlowsDataService),
         mockProvider(IntervalService),
       ],
     });
-  });
-
-  beforeEach(() => {
     codeFlowCallbackService = TestBed.inject(CodeFlowCallbackService);
     intervalService = TestBed.inject(IntervalService);
     flowsDataService = TestBed.inject(FlowsDataService);
     flowsService = TestBed.inject(FlowsService);
-    router = TestBed.inject(Router);
+    router = TestBed.inject(AbstractRouter);
   });
 
   it('should create', () => {
@@ -42,11 +40,10 @@ describe('CodeFlowCallbackService ', () => {
 
   describe('authenticatedCallbackWithCode', () => {
     it('calls flowsService.processCodeFlowCallback with correct url', () => {
-      const spy = spyOn(
-        flowsService,
-        'processCodeFlowCallback'
-      ).and.returnValue(of({} as CallbackContext));
-      //spyOn(configurationProvider, 'getOpenIDConfiguration').and.returnValue({ triggerAuthorizationResultEvent: true });
+      const spy = vi
+        .spyOn(flowsService, 'processCodeFlowCallback')
+        .mockReturnValue(of({} as CallbackContext));
+      //spyOn(configurationProvider, 'getOpenIDConfiguration').mockReturnValue({ triggerAuthorizationResultEvent: true });
 
       const config = {
         configId: 'configId1',
@@ -58,10 +55,12 @@ describe('CodeFlowCallbackService ', () => {
         config,
         [config]
       );
-      expect(spy).toHaveBeenCalledOnceWith('some-url1', config, [config]);
+      expect(spy).toHaveBeenCalledExactlyOnceWith('some-url1', config, [
+        config,
+      ]);
     });
 
-    it('does only call resetCodeFlowInProgress if triggerAuthorizationResultEvent is true and isRenewProcess is true', waitForAsync(() => {
+    it('does only call resetCodeFlowInProgress if triggerAuthorizationResultEvent is true and isRenewProcess is true', async () => {
       const callbackContext = {
         code: '',
         refreshToken: '',
@@ -73,12 +72,14 @@ describe('CodeFlowCallbackService ', () => {
         validationResult: null,
         existingIdToken: '',
       };
-      const spy = spyOn(
-        flowsService,
-        'processCodeFlowCallback'
-      ).and.returnValue(of(callbackContext));
-      const flowsDataSpy = spyOn(flowsDataService, 'resetCodeFlowInProgress');
-      const routerSpy = spyOn(router, 'navigateByUrl');
+      const spy = vi
+        .spyOn(flowsService, 'processCodeFlowCallback')
+        .mockReturnValue(of(callbackContext));
+      const flowsDataSpy = vi.spyOn(
+        flowsDataService,
+        'resetCodeFlowInProgress'
+      );
+      const routerSpy = vi.spyOn(router, 'navigateByUrl');
       const config = {
         configId: 'configId1',
         triggerAuthorizationResultEvent: true,
@@ -87,13 +88,15 @@ describe('CodeFlowCallbackService ', () => {
       codeFlowCallbackService
         .authenticatedCallbackWithCode('some-url2', config, [config])
         .subscribe(() => {
-          expect(spy).toHaveBeenCalledOnceWith('some-url2', config, [config]);
+          expect(spy).toHaveBeenCalledExactlyOnceWith('some-url2', config, [
+            config,
+          ]);
           expect(routerSpy).not.toHaveBeenCalled();
           expect(flowsDataSpy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('calls router and resetCodeFlowInProgress if triggerAuthorizationResultEvent is false and isRenewProcess is false', waitForAsync(() => {
+    it('calls router and resetCodeFlowInProgress if triggerAuthorizationResultEvent is false and isRenewProcess is false', async () => {
       const callbackContext = {
         code: '',
         refreshToken: '',
@@ -105,12 +108,14 @@ describe('CodeFlowCallbackService ', () => {
         validationResult: null,
         existingIdToken: '',
       };
-      const spy = spyOn(
-        flowsService,
-        'processCodeFlowCallback'
-      ).and.returnValue(of(callbackContext));
-      const flowsDataSpy = spyOn(flowsDataService, 'resetCodeFlowInProgress');
-      const routerSpy = spyOn(router, 'navigateByUrl');
+      const spy = vi
+        .spyOn(flowsService, 'processCodeFlowCallback')
+        .mockReturnValue(of(callbackContext));
+      const flowsDataSpy = vi.spyOn(
+        flowsDataService,
+        'resetCodeFlowInProgress'
+      );
+      const routerSpy = vi.spyOn(router, 'navigateByUrl');
       const config = {
         configId: 'configId1',
         triggerAuthorizationResultEvent: false,
@@ -120,25 +125,27 @@ describe('CodeFlowCallbackService ', () => {
       codeFlowCallbackService
         .authenticatedCallbackWithCode('some-url3', config, [config])
         .subscribe(() => {
-          expect(spy).toHaveBeenCalledOnceWith('some-url3', config, [config]);
-          expect(routerSpy).toHaveBeenCalledOnceWith('postLoginRoute');
+          expect(spy).toHaveBeenCalledExactlyOnceWith('some-url3', config, [
+            config,
+          ]);
+          expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
           expect(flowsDataSpy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('resetSilentRenewRunning, resetCodeFlowInProgress and stopPeriodicallTokenCheck in case of error', waitForAsync(() => {
-      spyOn(flowsService, 'processCodeFlowCallback').and.returnValue(
+    it('resetSilentRenewRunning, resetCodeFlowInProgress and stopPeriodicallTokenCheck in case of error', async () => {
+      vi.spyOn(flowsService, 'processCodeFlowCallback').mockReturnValue(
         throwError(() => new Error('error'))
       );
-      const resetSilentRenewRunningSpy = spyOn(
+      const resetSilentRenewRunningSpy = vi.spyOn(
         flowsDataService,
         'resetSilentRenewRunning'
       );
-      const resetCodeFlowInProgressSpy = spyOn(
+      const resetCodeFlowInProgressSpy = vi.spyOn(
         flowsDataService,
         'resetCodeFlowInProgress'
       );
-      const stopPeriodicallTokenCheckSpy = spyOn(
+      const stopPeriodicallTokenCheckSpy = vi.spyOn(
         intervalService,
         'stopPeriodicTokenCheck'
       );
@@ -159,23 +166,23 @@ describe('CodeFlowCallbackService ', () => {
             expect(err).toBeTruthy();
           },
         });
-    }));
+    });
 
     it(`navigates to unauthorizedRoute in case of error and  in case of error and
-            triggerAuthorizationResultEvent is false`, waitForAsync(() => {
-      spyOn(flowsDataService, 'isSilentRenewRunning').and.returnValue(false);
-      spyOn(flowsService, 'processCodeFlowCallback').and.returnValue(
+            triggerAuthorizationResultEvent is false`, async () => {
+      vi.spyOn(flowsDataService, 'isSilentRenewRunning').mockReturnValue(false);
+      vi.spyOn(flowsService, 'processCodeFlowCallback').mockReturnValue(
         throwError(() => new Error('error'))
       );
-      const resetSilentRenewRunningSpy = spyOn(
+      const resetSilentRenewRunningSpy = vi.spyOn(
         flowsDataService,
         'resetSilentRenewRunning'
       );
-      const stopPeriodicallTokenCheckSpy = spyOn(
+      const stopPeriodicallTokenCheckSpy = vi.spyOn(
         intervalService,
         'stopPeriodicTokenCheck'
       );
-      const routerSpy = spyOn(router, 'navigateByUrl');
+      const routerSpy = vi.spyOn(router, 'navigateByUrl');
 
       const config = {
         configId: 'configId1',
@@ -190,9 +197,11 @@ describe('CodeFlowCallbackService ', () => {
             expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
             expect(stopPeriodicallTokenCheckSpy).toHaveBeenCalled();
             expect(err).toBeTruthy();
-            expect(routerSpy).toHaveBeenCalledOnceWith('unauthorizedRoute');
+            expect(routerSpy).toHaveBeenCalledExactlyOnceWith(
+              'unauthorizedRoute'
+            );
           },
         });
-    }));
+    });
   });
 });

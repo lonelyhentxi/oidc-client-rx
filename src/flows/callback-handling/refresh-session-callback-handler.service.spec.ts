@@ -1,8 +1,9 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
-import { mockProvider } from '../../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
-import { CallbackContext } from '../callback-context';
+import { mockProvider } from '../../testing/mock';
+import type { CallbackContext } from '../callback-context';
 import { FlowsDataService } from '../flows-data.service';
 import { RefreshSessionCallbackHandlerService } from './refresh-session-callback-handler.service';
 
@@ -33,15 +34,15 @@ describe('RefreshSessionCallbackHandlerService', () => {
   });
 
   describe('refreshSessionWithRefreshTokens', () => {
-    it('returns callbackContext if all params are good', waitForAsync(() => {
-      spyOn(
+    it('returns callbackContext if all params are good', async () => {
+      vi.spyOn(
         flowsDataService,
         'getExistingOrCreateAuthStateControl'
-      ).and.returnValue('state-data');
-      spyOn(authStateService, 'getRefreshToken').and.returnValue(
+      ).mockReturnValue('state-data');
+      vi.spyOn(authStateService, 'getRefreshToken').mockReturnValue(
         'henlo-furiend'
       );
-      spyOn(authStateService, 'getIdToken').and.returnValue('henlo-legger');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('henlo-legger');
 
       const expectedCallbackContext = {
         code: '',
@@ -60,15 +61,15 @@ describe('RefreshSessionCallbackHandlerService', () => {
         .subscribe((callbackContext) => {
           expect(callbackContext).toEqual(expectedCallbackContext);
         });
-    }));
+    });
 
-    it('throws error if no refresh token is given', waitForAsync(() => {
-      spyOn(
+    it('throws error if no refresh token is given', async () => {
+      vi.spyOn(
         flowsDataService,
         'getExistingOrCreateAuthStateControl'
-      ).and.returnValue('state-data');
-      spyOn(authStateService, 'getRefreshToken').and.returnValue('');
-      spyOn(authStateService, 'getIdToken').and.returnValue('henlo-legger');
+      ).mockReturnValue('state-data');
+      vi.spyOn(authStateService, 'getRefreshToken').mockReturnValue('');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('henlo-legger');
 
       service
         .refreshSessionWithRefreshTokens({ configId: 'configId1' })
@@ -77,6 +78,6 @@ describe('RefreshSessionCallbackHandlerService', () => {
             expect(err).toBeTruthy();
           },
         });
-    }));
+    });
   });
 });

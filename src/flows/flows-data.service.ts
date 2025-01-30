@@ -1,8 +1,8 @@
-import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import { Injectable, inject } from 'injection-js';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
-import { SilentRenewRunning } from './flows.models';
+import type { SilentRenewRunning } from './flows.models';
 import { RandomService } from './random/random.service';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class FlowsDataService {
   createNonce(configuration: OpenIdConfiguration): string {
     const nonce = this.randomService.createRandom(40, configuration);
 
-    this.loggerService.logDebug(configuration, 'Nonce created. nonce:' + nonce);
+    this.loggerService.logDebug(configuration, `Nonce created. nonce:${nonce}`);
     this.setNonce(nonce, configuration);
 
     return nonce;

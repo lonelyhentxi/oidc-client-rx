@@ -1,6 +1,7 @@
-﻿import {inject, Injectable, isDevMode} from 'injection-js';
-import { forkJoin, Observable, of } from 'rxjs';
+﻿import { Injectable, inject } from 'injection-js';
+import { type Observable, forkJoin, of } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
+import { injectAbstractType } from '../injection/inject';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
@@ -9,7 +10,7 @@ import { PlatformProvider } from '../utils/platform-provider/platform.provider';
 import { AuthWellKnownService } from './auth-well-known/auth-well-known.service';
 import { DEFAULT_CONFIG } from './default-config';
 import { StsConfigLoader } from './loader/config-loader';
-import { OpenIdConfiguration } from './openid-configuration';
+import type { OpenIdConfiguration } from './openid-configuration';
 import { ConfigValidationService } from './validation/config-validation.service';
 
 @Injectable()
@@ -26,7 +27,7 @@ export class ConfigurationService {
 
   private readonly authWellKnownService = inject(AuthWellKnownService);
 
-  private readonly loader = inject(StsConfigLoader);
+  private readonly loader = injectAbstractType(StsConfigLoader);
 
   private readonly configValidationService = inject(ConfigValidationService);
 
@@ -84,11 +85,14 @@ export class ConfigurationService {
   }
 
   private getConfig(configId?: string): OpenIdConfiguration | null {
-    if (Boolean(configId)) {
+    if (configId) {
       const config = this.configsInternal[configId!];
 
-      if(!config && isDevMode()) {
-        console.warn(`[oidc-client-rx] No configuration found for config id '${configId}'.`);
+      if (!config) {
+        // biome-ignore lint/suspicious/noConsole: <explanation>
+        console.warn(
+          `[oidc-client-rx] No configuration found for config id '${configId}'.`
+        );
       }
 
       return config || null;
@@ -165,7 +169,7 @@ export class ConfigurationService {
         configuration
       );
 
-    if (!!alreadyExistingAuthWellKnownEndpoints) {
+    if (alreadyExistingAuthWellKnownEndpoints) {
       configuration.authWellknownEndpoints =
         alreadyExistingAuthWellKnownEndpoints;
 
@@ -174,7 +178,7 @@ export class ConfigurationService {
 
     const passedAuthWellKnownEndpoints = configuration.authWellknownEndpoints;
 
-    if (!!passedAuthWellKnownEndpoints) {
+    if (passedAuthWellKnownEndpoints) {
       this.authWellKnownService.storeWellKnownEndpoints(
         configuration,
         passedAuthWellKnownEndpoints

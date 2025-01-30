@@ -1,9 +1,9 @@
-import { inject, Injectable } from 'injection-js';
 import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { FlowsService } from '../flows/flows.service';
 import { IntervalService } from './interval.service';

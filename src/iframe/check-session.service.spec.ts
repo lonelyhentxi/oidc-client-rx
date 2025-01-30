@@ -1,13 +1,14 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { of } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { mockAbstractProvider, mockProvider } from '../../test/auto-mock';
+import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { OidcSecurityService } from '../oidc.security.service';
 import { PublicEventsService } from '../public-events/public-events.service';
 import { AbstractSecurityStorage } from '../storage/abstract-security-storage';
 import { DefaultSessionStorageService } from '../storage/default-sessionstorage.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockAbstractProvider, mockProvider } from '../testing/mock';
 import { PlatformProvider } from '../utils/platform-provider/platform.provider';
 import { CheckSessionService } from './check-session.service';
 import { IFrameService } from './existing-iframe.service';
@@ -67,7 +68,7 @@ describe('CheckSessionService', () => {
   });
 
   it('getOrCreateIframe calls iFrameService.addIFrameToWindowBody if no Iframe exists', () => {
-    spyOn(iFrameService, 'addIFrameToWindowBody').and.callThrough();
+    vi.spyOn(iFrameService, 'addIFrameToWindowBody')();
 
     const result = (checkSessionService as any).getOrCreateIframe({
       configId: 'configId1',
@@ -89,7 +90,7 @@ describe('CheckSessionService', () => {
 
   it('init appends iframe on body with correct values', () => {
     expect((checkSessionService as any).sessionIframe).toBeFalsy();
-    spyOn<any>(loggerService, 'logDebug').and.callFake(() => undefined);
+    vi.spyOn(loggerService, 'logDebug').mockImplementation(() => undefined);
 
     (checkSessionService as any).init();
     const iframe = (checkSessionService as any).getOrCreateIframe({
@@ -105,29 +106,34 @@ describe('CheckSessionService', () => {
   });
 
   it('log warning if authWellKnownEndpoints.check_session_iframe is not existing', () => {
-    const spyLogWarning = spyOn<any>(loggerService, 'logWarning');
+    const spyLogWarning = vi.spyOn<any>(loggerService, 'logWarning');
     const config = { configId: 'configId1' };
 
-    spyOn<any>(loggerService, 'logDebug').and.callFake(() => undefined);
-    spyOn(storagePersistenceService, 'read')
+    vi.spyOn<any>(loggerService, 'logDebug').mockImplementation(
+      () => undefined
+    );
+    vi.spyOn(storagePersistenceService, 'read')
       .withArgs('authWellKnownEndPoints', config)
-      .and.returnValue({ checkSessionIframe: undefined });
+      .mockReturnValue({ checkSessionIframe: undefined });
     (checkSessionService as any).init(config);
 
-    expect(spyLogWarning).toHaveBeenCalledOnceWith(config, jasmine.any(String));
+    expect(spyLogWarning).toHaveBeenCalledExactlyOnceWith(
+      config,
+      expect.any(String)
+    );
   });
 
   it('start() calls pollserversession() with clientId if no scheduledheartbeat is set', () => {
-    const spy = spyOn<any>(checkSessionService, 'pollServerSession');
+    const spy = vi.spyOn<any>(checkSessionService, 'pollServerSession');
     const config = { clientId: 'clientId', configId: 'configId1' };
 
     checkSessionService.start(config);
-    expect(spy).toHaveBeenCalledOnceWith('clientId', config);
+    expect(spy).toHaveBeenCalledExactlyOnceWith('clientId', config);
   });
 
   it('start() does not call pollServerSession() if scheduledHeartBeatRunning is set', () => {
     const config = { configId: 'configId1' };
-    const spy = spyOn<any>(checkSessionService, 'pollServerSession');
+    const spy = vi.spyOn<any>(checkSessionService, 'pollServerSession');
 
     (checkSessionService as any).scheduledHeartBeatRunning = (): void =>
       undefined;
@@ -148,10 +154,10 @@ describe('CheckSessionService', () => {
 
   it('stopCheckingSession does nothing if scheduledHeartBeatRunning is not set', () => {
     (checkSessionService as any).scheduledHeartBeatRunning = null;
-    const spy = spyOn<any>(checkSessionService, 'clearScheduledHeartBeat');
+    const spy = vi.spyOn<any>(checkSessionService, 'clearScheduledHeartBeat');
 
     checkSessionService.stop();
-    expect(spy).not.toHaveBeenCalledOnceWith();
+    expect(spy).not.toHaveBeenCalledExactlyOnceWith();
   });
 
   describe('serverStateChanged', () => {
@@ -167,7 +173,7 @@ describe('CheckSessionService', () => {
       const config = { startCheckSession: true, configId: 'configId1' };
       const result = checkSessionService.serverStateChanged(config);
 
-      expect(result).toBeFalse();
+      expect(result).toBeFalsy();
     });
 
     it('returns true if startCheckSession is configured and checkSessionReceived is true', () => {
@@ -175,17 +181,17 @@ describe('CheckSessionService', () => {
       const config = { startCheckSession: true, configId: 'configId1' };
       const result = checkSessionService.serverStateChanged(config);
 
-      expect(result).toBeTrue();
+      expect(result).toBeTruthy();
     });
   });
 
   describe('pollServerSession', () => {
     beforeEach(() => {
-      spyOn<any>(checkSessionService, 'init').and.returnValue(of(undefined));
+      vi.spyOn<any>(checkSessionService, 'init').mockReturnValue(of(undefined));
     });
 
     it('increases outstandingMessages', () => {
-      spyOn<any>(checkSessionService, 'getExistingIframe').and.returnValue({
+      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue({
         contentWindow: { postMessage: () => undefined },
       });
       const authWellKnownEndpoints = {
@@ -193,18 +199,20 @@ describe('CheckSessionService', () => {
       };
       const config = { configId: 'configId1' };
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints)
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      )
         .withArgs('session_state', config)
-        .and.returnValue('session_state');
-      spyOn(loggerService, 'logDebug').and.callFake(() => undefined);
+        .mockReturnValue('session_state');
+      vi.spyOn(loggerService, 'logDebug').mockImplementation(() => undefined);
       (checkSessionService as any).pollServerSession('clientId', config);
       expect((checkSessionService as any).outstandingMessages).toBe(1);
     });
 
     it('logs warning if iframe does not exist', () => {
-      spyOn<any>(checkSessionService, 'getExistingIframe').and.returnValue(
+      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
         null
       );
       const authWellKnownEndpoints = {
@@ -212,77 +220,91 @@ describe('CheckSessionService', () => {
       };
       const config = { configId: 'configId1' };
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
-      const spyLogWarning = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
       );
+      const spyLogWarning = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
-      spyOn(loggerService, 'logDebug').and.callFake(() => undefined);
+      vi.spyOn(loggerService, 'logDebug').mockImplementation(() => undefined);
       (checkSessionService as any).pollServerSession('clientId', config);
-      expect(spyLogWarning).toHaveBeenCalledOnceWith(
+      expect(spyLogWarning).toHaveBeenCalledExactlyOnceWith(
         config,
-        jasmine.any(String)
+        expect.any(String)
       );
     });
 
     it('logs warning if clientId is not set', () => {
-      spyOn<any>(checkSessionService, 'getExistingIframe').and.returnValue({});
+      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
+        {}
+      );
       const authWellKnownEndpoints = {
         checkSessionIframe: 'https://some-testing-url.com',
       };
       const config = { configId: 'configId1' };
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
-      const spyLogWarning = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
       );
+      const spyLogWarning = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
-      spyOn(loggerService, 'logDebug').and.callFake(() => undefined);
+      vi.spyOn(loggerService, 'logDebug').mockImplementation(() => undefined);
       (checkSessionService as any).pollServerSession('', config);
-      expect(spyLogWarning).toHaveBeenCalledOnceWith(
+      expect(spyLogWarning).toHaveBeenCalledExactlyOnceWith(
         config,
-        jasmine.any(String)
+        expect.any(String)
       );
     });
 
     it('logs debug if session_state is not set', () => {
-      spyOn<any>(checkSessionService, 'getExistingIframe').and.returnValue({});
+      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
+        {}
+      );
       const authWellKnownEndpoints = {
         checkSessionIframe: 'https://some-testing-url.com',
       };
       const config = { configId: 'configId1' };
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints)
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      )
         .withArgs('session_state', config)
-        .and.returnValue(null);
+        .mockReturnValue(null);
 
-      const spyLogDebug = spyOn(loggerService, 'logDebug').and.callFake(
-        () => undefined
-      );
+      const spyLogDebug = vi
+        .spyOn(loggerService, 'logDebug')
+        .mockImplementation(() => undefined);
 
       (checkSessionService as any).pollServerSession('clientId', config);
       expect(spyLogDebug).toHaveBeenCalledTimes(2);
     });
 
     it('logs debug if session_state is set but authWellKnownEndpoints are not set', () => {
-      spyOn<any>(checkSessionService, 'getExistingIframe').and.returnValue({});
+      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
+        {}
+      );
       const authWellKnownEndpoints = null;
       const config = { configId: 'configId1' };
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints)
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      )
         .withArgs('session_state', config)
-        .and.returnValue('some_session_state');
-      const spyLogDebug = spyOn(loggerService, 'logDebug').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('some_session_state');
+      const spyLogDebug = vi
+        .spyOn(loggerService, 'logDebug')
+        .mockImplementation(() => undefined);
 
       (checkSessionService as any).pollServerSession('clientId', config);
       expect(spyLogDebug).toHaveBeenCalledTimes(2);
@@ -290,7 +312,7 @@ describe('CheckSessionService', () => {
   });
 
   describe('init', () => {
-    it('returns falsy observable when lastIframerefresh and iframeRefreshInterval are bigger than now', waitForAsync(() => {
+    it('returns falsy observable when lastIframerefresh and iframeRefreshInterval are bigger than now', async () => {
       const serviceAsAny = checkSessionService as any;
       const dateNow = new Date();
       const lastRefresh = dateNow.setMinutes(dateNow.getMinutes() + 30);
@@ -301,7 +323,7 @@ describe('CheckSessionService', () => {
       serviceAsAny.init().subscribe((result: any) => {
         expect(result).toBeUndefined();
       });
-    }));
+    });
   });
 
   describe('isCheckSessionConfigured', () => {
@@ -323,7 +345,7 @@ describe('CheckSessionService', () => {
   });
 
   describe('checkSessionChanged$', () => {
-    it('emits when internal event is thrown', waitForAsync(() => {
+    it('emits when internal event is thrown', async () => {
       checkSessionService.checkSessionChanged$
         .pipe(skip(1))
         .subscribe((result) => {
@@ -333,15 +355,15 @@ describe('CheckSessionService', () => {
       const serviceAsAny = checkSessionService as any;
 
       serviceAsAny.checkSessionChangedInternal$.next(true);
-    }));
+    });
 
-    it('emits false initially', waitForAsync(() => {
+    it('emits false initially', async () => {
       checkSessionService.checkSessionChanged$.subscribe((result) => {
         expect(result).toBe(false);
       });
-    }));
+    });
 
-    it('emits false then true when emitted', waitForAsync(() => {
+    it('emits false then true when emitted', async () => {
       const expectedResultsInOrder = [false, true];
       let counter = 0;
 
@@ -351,6 +373,6 @@ describe('CheckSessionService', () => {
       });
 
       (checkSessionService as any).checkSessionChangedInternal$.next(true);
-    }));
+    });
   });
 });

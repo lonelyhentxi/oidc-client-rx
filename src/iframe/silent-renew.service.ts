@@ -1,12 +1,12 @@
 ﻿import { HttpParams } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
-import { Observable, Subject, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ImplicitFlowCallbackService } from '../callback/implicit-flow-callback.service';
 import { IntervalService } from '../callback/interval.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { FlowsService } from '../flows/flows.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';

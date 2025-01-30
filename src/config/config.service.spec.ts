@@ -1,15 +1,16 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { of } from 'rxjs';
-import { mockAbstractProvider, mockProvider } from '../../test/auto-mock';
+import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockAbstractProvider, mockProvider } from '../testing/mock';
 import { PlatformProvider } from '../utils/platform-provider/platform.provider';
 import { AuthWellKnownService } from './auth-well-known/auth-well-known.service';
 import { ConfigurationService } from './config.service';
 import { StsConfigLoader, StsConfigStaticLoader } from './loader/config-loader';
-import { OpenIdConfiguration } from './openid-configuration';
+import type { OpenIdConfiguration } from './openid-configuration';
 import { ConfigValidationService } from './validation/config-validation.service';
 
 describe('Configuration Service', () => {
@@ -34,9 +35,6 @@ describe('Configuration Service', () => {
         mockAbstractProvider(StsConfigLoader, StsConfigStaticLoader),
       ],
     });
-  });
-
-  beforeEach(() => {
     configService = TestBed.inject(ConfigurationService);
     publicEventsService = TestBed.inject(PublicEventsService);
     authWellKnownService = TestBed.inject(AuthWellKnownService);
@@ -88,47 +86,53 @@ describe('Configuration Service', () => {
   });
 
   describe('getOpenIDConfiguration', () => {
-    it(`if config is already saved 'loadConfigs' is not called`, waitForAsync(() => {
+    it(`if config is already saved 'loadConfigs' is not called`, async () => {
       (configService as any).configsInternal = {
         configId1: { configId: 'configId1' },
         configId2: { configId: 'configId2' },
       };
-      const spy = spyOn(configService as any, 'loadConfigs');
+      const spy = vi.spyOn(configService as any, 'loadConfigs');
 
       configService.getOpenIDConfiguration('configId1').subscribe((config) => {
         expect(config).toBeTruthy();
         expect(spy).not.toHaveBeenCalled();
       });
-    }));
+    });
 
-    it(`if config is NOT already saved 'loadConfigs' is called`, waitForAsync(() => {
+    it(`if config is NOT already saved 'loadConfigs' is called`, async () => {
       const configs = [{ configId: 'configId1' }, { configId: 'configId2' }];
-      const spy = spyOn(configService as any, 'loadConfigs').and.returnValue(
-        of(configs)
-      );
+      const spy = vi
+        .spyOn(configService as any, 'loadConfigs')
+        .mockReturnValue(of(configs));
 
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
       configService.getOpenIDConfiguration('configId1').subscribe((config) => {
         expect(config).toBeTruthy();
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it(`returns null if config is not valid`, waitForAsync(() => {
+    it('returns null if config is not valid', async () => {
       const configs = [{ configId: 'configId1' }];
 
-      spyOn(configService as any, 'loadConfigs').and.returnValue(of(configs));
-      spyOn(configValidationService, 'validateConfig').and.returnValue(false);
-      const consoleSpy = spyOn(console, 'warn');
+      vi.spyOn(configService as any, 'loadConfigs').mockReturnValue(
+        of(configs)
+      );
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(
+        false
+      );
+      const consoleSpy = vi.spyOn(console, 'warn');
 
       configService.getOpenIDConfiguration('configId1').subscribe((config) => {
         expect(config).toBeNull();
-        expect(consoleSpy).toHaveBeenCalledOnceWith(`[oidc-client-rx] No configuration found for config id 'configId1'.`)
+        expect(consoleSpy).toHaveBeenCalledExactlyOnceWith(
+          `[oidc-client-rx] No configuration found for config id 'configId1'.`
+        );
       });
-    }));
+    });
 
-    it(`returns null if configs are stored but not existing ID is passed`, waitForAsync(() => {
+    it('returns null if configs are stored but not existing ID is passed', async () => {
       (configService as any).configsInternal = {
         configId1: { configId: 'configId1' },
         configId2: { configId: 'configId2' },
@@ -139,16 +143,18 @@ describe('Configuration Service', () => {
         .subscribe((config) => {
           expect(config).toBeNull();
         });
-    }));
+    });
 
-    it(`sets authWellKnownEndPoints on config if authWellKnownEndPoints is stored`, waitForAsync(() => {
+    it('sets authWellKnownEndPoints on config if authWellKnownEndPoints is stored', async () => {
       const configs = [{ configId: 'configId1' }];
 
-      spyOn(configService as any, 'loadConfigs').and.returnValue(of(configs));
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
-      const consoleSpy = spyOn(console, 'warn');
+      vi.spyOn(configService as any, 'loadConfigs').mockReturnValue(
+        of(configs)
+      );
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
+      const consoleSpy = vi.spyOn(console, 'warn');
 
-      spyOn(storagePersistenceService, 'read').and.returnValue({
+      vi.spyOn(storagePersistenceService, 'read').mockReturnValue({
         issuer: 'auth-well-known',
       });
 
@@ -156,30 +162,32 @@ describe('Configuration Service', () => {
         expect(config?.authWellknownEndpoints).toEqual({
           issuer: 'auth-well-known',
         });
-        expect(consoleSpy).not.toHaveBeenCalled()
+        expect(consoleSpy).not.toHaveBeenCalled();
       });
-    }));
+    });
 
-    it(`fires ConfigLoaded if authWellKnownEndPoints is stored`, waitForAsync(() => {
+    it('fires ConfigLoaded if authWellKnownEndPoints is stored', async () => {
       const configs = [{ configId: 'configId1' }];
 
-      spyOn(configService as any, 'loadConfigs').and.returnValue(of(configs));
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
-      spyOn(storagePersistenceService, 'read').and.returnValue({
+      vi.spyOn(configService as any, 'loadConfigs').mockReturnValue(
+        of(configs)
+      );
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
+      vi.spyOn(storagePersistenceService, 'read').mockReturnValue({
         issuer: 'auth-well-known',
       });
 
-      const spy = spyOn(publicEventsService, 'fireEvent');
+      const spy = vi.spyOn(publicEventsService, 'fireEvent');
 
       configService.getOpenIDConfiguration('configId1').subscribe(() => {
-        expect(spy).toHaveBeenCalledOnceWith(
+        expect(spy).toHaveBeenCalledExactlyOnceWith(
           EventTypes.ConfigLoaded,
-          jasmine.anything()
+          expect.anything()
         );
       });
-    }));
+    });
 
-    it(`stores, uses and fires event when authwellknownendpoints are passed`, waitForAsync(() => {
+    it('stores, uses and fires event when authwellknownendpoints are passed', async () => {
       const configs = [
         {
           configId: 'configId1',
@@ -187,58 +195,60 @@ describe('Configuration Service', () => {
         },
       ];
 
-      spyOn(configService as any, 'loadConfigs').and.returnValue(of(configs));
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
-      spyOn(storagePersistenceService, 'read').and.returnValue(null);
+      vi.spyOn(configService as any, 'loadConfigs').mockReturnValue(
+        of(configs)
+      );
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
+      vi.spyOn(storagePersistenceService, 'read').mockReturnValue(null);
 
-      const fireEventSpy = spyOn(publicEventsService, 'fireEvent');
-      const storeWellKnownEndpointsSpy = spyOn(
+      const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
+      const storeWellKnownEndpointsSpy = vi.spyOn(
         authWellKnownService,
         'storeWellKnownEndpoints'
       );
 
       configService.getOpenIDConfiguration('configId1').subscribe((config) => {
         expect(config).toBeTruthy();
-        expect(fireEventSpy).toHaveBeenCalledOnceWith(
+        expect(fireEventSpy).toHaveBeenCalledExactlyOnceWith(
           EventTypes.ConfigLoaded,
-          jasmine.anything()
+          expect.anything()
         );
-        expect(storeWellKnownEndpointsSpy).toHaveBeenCalledOnceWith(
+        expect(storeWellKnownEndpointsSpy).toHaveBeenCalledExactlyOnceWith(
           config as OpenIdConfiguration,
           {
             issuer: 'auth-well-known',
           }
         );
       });
-    }));
+    });
   });
 
   describe('getOpenIDConfigurations', () => {
-    it(`returns correct result`, waitForAsync(() => {
-      spyOn(stsConfigLoader, 'loadConfigs').and.returnValue(
+    it('returns correct result', async () => {
+      vi.spyOn(stsConfigLoader, 'loadConfigs').mockReturnValue(
         of([
           { configId: 'configId1' } as OpenIdConfiguration,
           { configId: 'configId2' } as OpenIdConfiguration,
         ])
       );
 
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
       configService.getOpenIDConfigurations('configId1').subscribe((result) => {
         expect(result.allConfigs.length).toEqual(2);
         expect(result.currentConfig).toBeTruthy();
       });
-    }));
+    });
 
-    it(`created configId when configId is not set`, waitForAsync(() => {
-      spyOn(stsConfigLoader, 'loadConfigs').and.returnValue(
+    it('created configId when configId is not set', async () => {
+      vi.spyOn(stsConfigLoader, 'loadConfigs').mockReturnValue(
         of([
           { clientId: 'clientId1' } as OpenIdConfiguration,
           { clientId: 'clientId2' } as OpenIdConfiguration,
         ])
       );
 
-      spyOn(configValidationService, 'validateConfig').and.returnValue(true);
+      vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
       configService.getOpenIDConfigurations().subscribe((result) => {
         expect(result.allConfigs.length).toEqual(2);
@@ -249,17 +259,19 @@ describe('Configuration Service', () => {
         expect(result.currentConfig).toBeTruthy();
         expect(result.currentConfig?.configId).toBeTruthy();
       });
-    }));
+    });
 
-    it(`returns empty array if config is not valid`, waitForAsync(() => {
-      spyOn(stsConfigLoader, 'loadConfigs').and.returnValue(
+    it('returns empty array if config is not valid', async () => {
+      vi.spyOn(stsConfigLoader, 'loadConfigs').mockReturnValue(
         of([
           { configId: 'configId1' } as OpenIdConfiguration,
           { configId: 'configId2' } as OpenIdConfiguration,
         ])
       );
 
-      spyOn(configValidationService, 'validateConfigs').and.returnValue(false);
+      vi.spyOn(configValidationService, 'validateConfigs').mockReturnValue(
+        false
+      );
 
       configService
         .getOpenIDConfigurations()
@@ -267,12 +279,12 @@ describe('Configuration Service', () => {
           expect(allConfigs).toEqual([]);
           expect(currentConfig).toBeNull();
         });
-    }));
+    });
   });
 
   describe('setSpecialCases', () => {
-    it(`should set special cases when current platform is browser`, () => {
-      spyOn(platformProvider, 'isBrowser').and.returnValue(false);
+    it('should set special cases when current platform is browser', () => {
+      vi.spyOn(platformProvider, 'isBrowser').mockReturnValue(false);
 
       const config = { configId: 'configId1' } as OpenIdConfiguration;
 

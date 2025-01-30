@@ -1,10 +1,11 @@
-import { fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { of, throwError } from 'rxjs';
-import { mockProvider } from '../../test/auto-mock';
-import { CallbackContext } from '../flows/callback-context';
+import { vi } from 'vitest';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsService } from '../flows/flows.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
 import { LoggerService } from '../logging/logger.service';
+import { mockProvider } from '../testing/mock';
 import { IntervalService } from './interval.service';
 import { RefreshSessionRefreshTokenService } from './refresh-session-refresh-token.service';
 
@@ -25,9 +26,6 @@ describe('RefreshSessionRefreshTokenService', () => {
         mockProvider(IntervalService),
       ],
     });
-  });
-
-  beforeEach(() => {
     flowsService = TestBed.inject(FlowsService);
     refreshSessionRefreshTokenService = TestBed.inject(
       RefreshSessionRefreshTokenService
@@ -41,10 +39,10 @@ describe('RefreshSessionRefreshTokenService', () => {
   });
 
   describe('refreshSessionWithRefreshTokens', () => {
-    it('calls flowsService.processRefreshToken()', waitForAsync(() => {
-      const spy = spyOn(flowsService, 'processRefreshToken').and.returnValue(
-        of({} as CallbackContext)
-      );
+    it('calls flowsService.processRefreshToken()', async () => {
+      const spy = vi
+        .spyOn(flowsService, 'processRefreshToken')
+        .mockReturnValue(of({} as CallbackContext));
 
       refreshSessionRefreshTokenService
         .refreshSessionWithRefreshTokens({ configId: 'configId1' }, [
@@ -53,13 +51,13 @@ describe('RefreshSessionRefreshTokenService', () => {
         .subscribe(() => {
           expect(spy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('resetAuthorizationData in case of error', waitForAsync(() => {
-      spyOn(flowsService, 'processRefreshToken').and.returnValue(
+    it('resetAuthorizationData in case of error', async () => {
+      vi.spyOn(flowsService, 'processRefreshToken').mockReturnValue(
         throwError(() => new Error('error'))
       );
-      const resetSilentRenewRunningSpy = spyOn(
+      const resetSilentRenewRunningSpy = vi.spyOn(
         resetAuthDataService,
         'resetAuthorizationData'
       );
@@ -74,13 +72,13 @@ describe('RefreshSessionRefreshTokenService', () => {
             expect(err).toBeTruthy();
           },
         });
-    }));
+    });
 
-    it('finalize with stopPeriodicTokenCheck in case of error', fakeAsync(() => {
-      spyOn(flowsService, 'processRefreshToken').and.returnValue(
+    it('finalize with stopPeriodicTokenCheck in case of error', async () => {
+      vi.spyOn(flowsService, 'processRefreshToken').mockReturnValue(
         throwError(() => new Error('error'))
       );
-      const stopPeriodicallyTokenCheckSpy = spyOn(
+      const stopPeriodicallyTokenCheckSpy = vi.spyOn(
         intervalService,
         'stopPeriodicTokenCheck'
       );
@@ -94,8 +92,8 @@ describe('RefreshSessionRefreshTokenService', () => {
             expect(err).toBeTruthy();
           },
         });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(stopPeriodicallyTokenCheckSpy).toHaveBeenCalled();
-    }));
+    });
   });
 });

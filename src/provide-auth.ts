@@ -1,15 +1,11 @@
+import type { Provider } from 'injection-js';
 import {
-  APP_INITIALIZER,
-  EnvironmentProviders,
-  makeEnvironmentProviders,
-  Provider,
-} from 'injection-js';
-import {
-  createStaticLoader,
   PASSED_CONFIG,
-  PassedInitialConfig,
+  type PassedInitialConfig,
+  createStaticLoader,
 } from './auth-config';
 import { StsConfigLoader } from './config/loader/config-loader';
+import { APP_INITIALIZER } from './injection';
 import { AbstractLoggerService } from './logging/abstract-logger.service';
 import { ConsoleLoggerService } from './logging/console-logger.service';
 import { OidcSecurityService } from './oidc.security.service';
@@ -26,14 +22,14 @@ export interface AuthFeature {
 export function provideAuth(
   passedConfig: PassedInitialConfig,
   ...features: AuthFeature[]
-): EnvironmentProviders {
+): Provider[] {
   const providers = _provideAuth(passedConfig);
 
   for (const feature of features) {
     providers.push(...feature.ɵproviders);
   }
 
-  return makeEnvironmentProviders(providers);
+  return providers;
 }
 
 export function _provideAuth(passedConfig: PassedInitialConfig): Provider[] {

@@ -1,5 +1,6 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { filter } from 'rxjs/operators';
+import { vi } from 'vitest';
 import { EventTypes } from './event-types';
 import { PublicEventsService } from './public-events.service';
 
@@ -20,7 +21,7 @@ describe('Events Service', () => {
     expect(eventsService).toBeTruthy();
   });
 
-  it('registering to single event with one event emit works', waitForAsync(() => {
+  it('registering to single event with one event emit works', async () => {
     eventsService.registerForEvents().subscribe((firedEvent) => {
       expect(firedEvent).toBeTruthy();
       expect(firedEvent).toEqual({
@@ -29,9 +30,9 @@ describe('Events Service', () => {
       });
     });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
-  }));
+  });
 
-  it('registering to single event with multiple same event emit works', waitForAsync(() => {
+  it('registering to single event with multiple same event emit works', async () => {
     const spy = jasmine.createSpy('spy');
 
     eventsService.registerForEvents().subscribe((firedEvent) => {
@@ -50,9 +51,9 @@ describe('Events Service', () => {
       type: EventTypes.ConfigLoaded,
       value: { myKey: 'myValue2' },
     });
-  }));
+  });
 
-  it('registering to single event with multiple emit works', waitForAsync(() => {
+  it('registering to single event with multiple emit works', async () => {
     eventsService
       .registerForEvents()
       .pipe(filter((x) => x.type === EventTypes.ConfigLoaded))
@@ -65,5 +66,5 @@ describe('Events Service', () => {
       });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
     eventsService.fireEvent(EventTypes.NewAuthenticationResult, true);
-  }));
+  });
 });

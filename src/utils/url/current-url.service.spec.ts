@@ -1,5 +1,6 @@
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
-import { TestBed } from '@angular/core/testing';
 import { CurrentUrlService } from './current-url.service';
 
 describe('CurrentUrlService with existing Url', () => {
@@ -36,7 +37,7 @@ describe('CurrentUrlService with existing Url', () => {
 
   describe('getStateParamFromCurrentUrl', () => {
     it('returns null if there is no current URL', () => {
-      spyOn(service, 'getCurrentUrl').and.returnValue(null);
+      vi.spyOn(service, 'getCurrentUrl').mockReturnValue(null);
 
       const stateParam = service.getStateParamFromCurrentUrl('');
 

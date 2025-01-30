@@ -1,8 +1,8 @@
-import { DOCUMENT } from '../dom';
 import { Injectable, RendererFactory2, inject } from 'injection-js';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { DOCUMENT } from '../dom';
 import { LoggerService } from '../logging/logger.service';
 import { UrlService } from '../utils/url/url.service';
 import { SilentRenewService } from './silent-renew.service';

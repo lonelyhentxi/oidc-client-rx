@@ -1,8 +1,8 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, throwError } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsService } from '../flows/flows.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
 import { LoggerService } from '../logging/logger.service';

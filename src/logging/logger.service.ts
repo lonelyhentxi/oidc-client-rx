@@ -1,11 +1,14 @@
-import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import { Injectable } from 'injection-js';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { injectAbstractType } from '../injection/inject';
 import { AbstractLoggerService } from './abstract-logger.service';
 import { LogLevel } from './log-level';
 
 @Injectable()
 export class LoggerService {
-  private readonly abstractLoggerService = inject(AbstractLoggerService);
+  private readonly abstractLoggerService = injectAbstractType(
+    AbstractLoggerService
+  );
 
   logError(
     configuration: OpenIdConfiguration,

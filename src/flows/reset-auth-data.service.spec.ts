@@ -1,7 +1,8 @@
-import { TestBed } from '@angular/core/testing';
-import { mockProvider } from '../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { LoggerService } from '../logging/logger.service';
+import { mockProvider } from '../testing/mock';
 import { UserService } from '../user-data/user.service';
 import { FlowsDataService } from './flows-data.service';
 import { ResetAuthDataService } from './reset-auth-data.service';
@@ -37,7 +38,7 @@ describe('ResetAuthDataService', () => {
 
   describe('resetAuthorizationData', () => {
     it('calls resetUserDataInStore when autoUserInfo is true', () => {
-      const resetUserDataInStoreSpy = spyOn(
+      const resetUserDataInStoreSpy = vi.spyOn(
         userService,
         'resetUserDataInStore'
       );
@@ -47,16 +48,16 @@ describe('ResetAuthDataService', () => {
         },
       ];
 
-      service.resetAuthorizationData(allConfigs[0], allConfigs);
+      service.resetAuthorizationData(allConfigs[0]!, allConfigs);
       expect(resetUserDataInStoreSpy).toHaveBeenCalled();
     });
 
     it('calls correct methods', () => {
-      const resetStorageFlowDataSpy = spyOn(
+      const resetStorageFlowDataSpy = vi.spyOn(
         flowsDataService,
         'resetStorageFlowData'
       );
-      const setUnauthorizedAndFireEventSpy = spyOn(
+      const setUnauthorizedAndFireEventSpy = vi.spyOn(
         authStateService,
         'setUnauthenticatedAndFireEvent'
       );
@@ -66,7 +67,7 @@ describe('ResetAuthDataService', () => {
         },
       ];
 
-      service.resetAuthorizationData(allConfigs[0], allConfigs);
+      service.resetAuthorizationData(allConfigs[0]!, allConfigs);
 
       expect(resetStorageFlowDataSpy).toHaveBeenCalled();
       expect(setUnauthorizedAndFireEventSpy).toHaveBeenCalled();

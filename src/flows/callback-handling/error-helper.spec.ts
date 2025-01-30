@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@ngify/http';
 import { isNetworkError } from './error-helper';
 
 describe('error helper', () => {
@@ -27,31 +27,31 @@ describe('error helper', () => {
     });
 
     it('returns true on http error with status = 0', () => {
-      expect(isNetworkError(CONNECTION_ERROR)).toBeTrue();
+      expect(isNetworkError(CONNECTION_ERROR)).toBeTruthy();
     });
 
     it('returns true on http error with status = 0 and unknown error', () => {
-      expect(isNetworkError(UNKNOWN_CONNECTION_ERROR)).toBeTrue();
+      expect(isNetworkError(UNKNOWN_CONNECTION_ERROR)).toBeTruthy();
     });
 
     it('returns true on http error with status <> 0 and error ProgressEvent', () => {
-      expect(isNetworkError(PARTIAL_CONNECTION_ERROR)).toBeTrue();
+      expect(isNetworkError(PARTIAL_CONNECTION_ERROR)).toBeTruthy();
     });
 
     it('returns false on non http error', () => {
-      expect(isNetworkError(new Error('not a HttpErrorResponse'))).toBeFalse();
+      expect(isNetworkError(new Error('not a HttpErrorResponse'))).toBeFalsy();
     });
 
     it('returns false on string error', () => {
-      expect(isNetworkError('not a HttpErrorResponse')).toBeFalse();
+      expect(isNetworkError('not a HttpErrorResponse')).toBeFalsy();
     });
 
     it('returns false on undefined', () => {
-      expect(isNetworkError(undefined)).toBeFalse();
+      expect(isNetworkError(undefined)).toBeFalsy();
     });
 
     it('returns false on empty http error', () => {
-      expect(isNetworkError(HTTP_ERROR)).toBeFalse();
+      expect(isNetworkError(HTTP_ERROR)).toBeFalsy();
     });
   });
 });

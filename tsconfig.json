@@ -3,24 +3,28 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "strict": true,
-    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
-    "declaration": false,
+    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "experimentalDecorators": true,
-    "skipLibCheck": true,
+    "emitDecoratorMetadata": true,
     "moduleResolution": "bundler",
-    "target": "ES2015",
+    "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "useDefineForClassFields": true,
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "injection-js": [
-        "./node_modules/injection-js/lib"
-      ]
-    }
+    "resolveJsonModule": true
   },
-  "include": ["src"]
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

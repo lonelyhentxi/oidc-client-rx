@@ -1,7 +1,10 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import {
+  TestBed,
+  mockImplementationWhenArgsEqual,
+  mockRouterProvider,
+} from '@/testing';
 import { of, throwError } from 'rxjs';
-import { mockAbstractProvider, mockProvider } from '../../test/auto-mock';
+import { vi } from 'vitest';
 import { AutoLoginService } from '../auto-login/auto-login.service';
 import { CallbackService } from '../callback/callback.service';
 import { PeriodicallyTokenCheckService } from '../callback/periodically-token-check.service';
@@ -10,16 +13,17 @@ import {
   StsConfigLoader,
   StsConfigStaticLoader,
 } from '../config/loader/config-loader';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { CheckSessionService } from '../iframe/check-session.service';
 import { SilentRenewService } from '../iframe/silent-renew.service';
 import { LoggerService } from '../logging/logger.service';
-import { LoginResponse } from '../login/login-response';
+import type { LoginResponse } from '../login/login-response';
 import { PopUpService } from '../login/popup/popup.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockAbstractProvider, mockProvider } from '../testing/mock';
 import { UserService } from '../user-data/user.service';
 import { CurrentUrlService } from '../utils/url/current-url.service';
 import { AuthStateService } from './auth-state.service';
@@ -42,8 +46,9 @@ describe('CheckAuthService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [],
       providers: [
+        mockRouterProvider(),
         mockProvider(CheckSessionService),
         mockProvider(SilentRenewService),
         mockProvider(UserService),
@@ -60,9 +65,6 @@ describe('CheckAuthService', () => {
         mockProvider(StoragePersistenceService),
       ],
     });
-  });
-
-  beforeEach(() => {
     checkAuthService = TestBed.inject(CheckAuthService);
     refreshSessionService = TestBed.inject(RefreshSessionService);
     userService = TestBed.inject(UserService);
@@ -80,6 +82,7 @@ describe('CheckAuthService', () => {
     publicEventsService = TestBed.inject(PublicEventsService);
   });
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   afterEach(() => {
     storagePersistenceService.clear({} as OpenIdConfiguration);
   });
@@ -89,97 +92,95 @@ describe('CheckAuthService', () => {
   });
 
   describe('checkAuth', () => {
-    it('uses config with matching state when url has state param and config with state param is stored', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        'the-state-param'
-      );
+    it('uses config with matching state when url has state param and config with state param is stored', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue('the-state-param');
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authStateControl', allConfigs[0])
-        .and.returnValue('the-state-param');
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authStateControl', allConfigs[0]!],
+        () => 'the-state-param'
+      );
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledOnceWith(
-          allConfigs[0],
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
+        expect(spy).toHaveBeenCalledExactlyOnceWith(
+          allConfigs[0]!,
           allConfigs,
           undefined
         );
       });
-    }));
+    });
 
-    it('throws error when url has state param and stored config with matching state param is not found', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        'the-state-param'
-      );
+    it('throws error when url has state param and stored config with matching state param is not found', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue('the-state-param');
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authStateControl', allConfigs[0])
-        .and.returnValue('not-matching-state-param');
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authStateControl', allConfigs[0]!],
+        () => 'not-matching-state-param'
+      );
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe({
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe({
         error: (err) => {
           expect(err).toBeTruthy();
           expect(spy).not.toHaveBeenCalled();
         },
       });
-    }));
+    });
 
-    it('uses first/default config when no param is passed', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        null
-      );
+    it('uses first/default config when no param is passed', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue(null);
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledOnceWith(
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
+        expect(spy).toHaveBeenCalledExactlyOnceWith(
           { configId: 'configId1', authority: 'some-authority' },
           allConfigs,
           undefined
         );
       });
-    }));
+    });
 
-    it('returns null and sendMessageToMainWindow if currently in a popup', waitForAsync(() => {
+    it('returns null and sendMessageToMainWindow if currently in a popup', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(popUpService as any, 'canAccessSessionStorage').and.returnValue(
+      vi.spyOn(popUpService as any, 'canAccessSessionStorage').mockReturnValue(
         true
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOnProperty(popUpService as any, 'windowInternal').and.returnValue({
+      vi.spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
         opener: {} as Window,
       });
-      spyOn(storagePersistenceService, 'read').and.returnValue(null);
+      vi.spyOn(storagePersistenceService, 'read').mockReturnValue(null);
 
-      spyOn(popUpService, 'isCurrentlyInPopup').and.returnValue(true);
-      const popupSpy = spyOn(popUpService, 'sendMessageToMainWindow');
+      vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
+      const popupSpy = vi.spyOn(popUpService, 'sendMessageToMainWindow');
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: false,
@@ -191,29 +192,28 @@ describe('CheckAuthService', () => {
           });
           expect(popupSpy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('returns isAuthenticated: false with error message in case handleCallbackAndFireEvents throws an error', waitForAsync(() => {
+    it('returns isAuthenticated: false with error message in case handleCallbackAndFireEvents throws an error', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(true);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(true);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
-      const spy = spyOn(
-        callBackService,
-        'handleCallbackAndFireEvents'
-      ).and.returnValue(throwError(() => new Error('ERROR')));
+      const spy = vi
+        .spyOn(callBackService, 'handleCallbackAndFireEvents')
+        .mockReturnValue(throwError(() => new Error('ERROR')));
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: false,
@@ -225,30 +225,29 @@ describe('CheckAuthService', () => {
           });
           expect(spy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('calls callbackService.handlePossibleStsCallback with current url when callback is true', waitForAsync(() => {
+    it('calls callbackService.handlePossibleStsCallback with current url when callback is true', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(true);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(true);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'getAccessToken').and.returnValue('at');
-      spyOn(authStateService, 'getIdToken').and.returnValue('idt');
+      vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
 
-      const spy = spyOn(
-        callBackService,
-        'handleCallbackAndFireEvents'
-      ).and.returnValue(of({} as CallbackContext));
+      const spy = vi
+        .spyOn(callBackService, 'handleCallbackAndFireEvents')
+        .mockReturnValue(of({} as CallbackContext));
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: true,
@@ -259,31 +258,30 @@ describe('CheckAuthService', () => {
           });
           expect(spy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('does NOT call handleCallbackAndFireEvents with current url when callback is false', waitForAsync(() => {
+    it('does NOT call handleCallbackAndFireEvents with current url when callback is false', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
-      const spy = spyOn(
-        callBackService,
-        'handleCallbackAndFireEvents'
-      ).and.returnValue(of({} as CallbackContext));
+      const spy = vi
+        .spyOn(callBackService, 'handleCallbackAndFireEvents')
+        .mockReturnValue(of({} as CallbackContext));
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'getAccessToken').and.returnValue('at');
-      spyOn(authStateService, 'getIdToken').and.returnValue('idt');
+      vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: true,
@@ -294,37 +292,37 @@ describe('CheckAuthService', () => {
           });
           expect(spy).not.toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('does fire the auth and user data events when it is not a callback from the security token service and is authenticated', waitForAsync(() => {
+    it('does fire the auth and user data events when it is not a callback from the security token service and is authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(userService, 'getUserDataFromStore').and.returnValue({
+      vi.spyOn(userService, 'getUserDataFromStore').mockReturnValue({
         some: 'user-data',
       });
-      spyOn(authStateService, 'getAccessToken').and.returnValue('at');
-      spyOn(authStateService, 'getIdToken').and.returnValue('idt');
+      vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
 
-      const setAuthorizedAndFireEventSpy = spyOn(
+      const setAuthorizedAndFireEventSpy = vi.spyOn(
         authStateService,
         'setAuthenticatedAndFireEvent'
       );
-      const userServiceSpy = spyOn(userService, 'publishUserDataIfExists');
+      const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: true,
@@ -338,34 +336,34 @@ describe('CheckAuthService', () => {
           expect(setAuthorizedAndFireEventSpy).toHaveBeenCalled();
           expect(userServiceSpy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('does NOT fire the auth and user data events when it is not a callback from the security token service and is NOT authenticated', waitForAsync(() => {
+    it('does NOT fire the auth and user data events when it is not a callback from the security token service and is NOT authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      spyOn(authStateService, 'getAccessToken').and.returnValue('at');
-      spyOn(authStateService, 'getIdToken').and.returnValue('it');
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('it');
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
 
-      const setAuthorizedAndFireEventSpy = spyOn(
+      const setAuthorizedAndFireEventSpy = vi.spyOn(
         authStateService,
         'setAuthenticatedAndFireEvent'
       );
-      const userServiceSpy = spyOn(userService, 'publishUserDataIfExists');
+      const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: false,
@@ -377,27 +375,27 @@ describe('CheckAuthService', () => {
           expect(setAuthorizedAndFireEventSpy).not.toHaveBeenCalled();
           expect(userServiceSpy).not.toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('if authenticated return true', waitForAsync(() => {
+    it('if authenticated return true', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'getAccessToken').and.returnValue('at');
-      spyOn(authStateService, 'getIdToken').and.returnValue('idt');
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
+      vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
       checkAuthService
-        .checkAuth(allConfigs[0], allConfigs)
+        .checkAuth(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toEqual({
             isAuthenticated: true,
@@ -407,273 +405,279 @@ describe('CheckAuthService', () => {
             idToken: 'idt',
           });
         });
-    }));
+    });
 
-    it('if authenticated set auth and fires event ', waitForAsync(() => {
+    it('if authenticated set auth and fires event ', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
-      const spy = spyOn(authStateService, 'setAuthenticatedAndFireEvent');
+      const spy = vi.spyOn(authStateService, 'setAuthenticatedAndFireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it('if authenticated publishUserdataIfExists', waitForAsync(() => {
+    it('if authenticated publishUserdataIfExists', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
-      const spy = spyOn(userService, 'publishUserDataIfExists');
+      const spy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it('if authenticated callbackService startTokenValidationPeriodically', waitForAsync(() => {
+    it('if authenticated callbackService startTokenValidationPeriodically', async () => {
       const config = {
         authority: 'authority',
         tokenRefreshInSeconds: 7,
       };
       const allConfigs = [config];
 
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      const spy = spyOn(
+      const spy = vi.spyOn(
         periodicallyTokenCheckService,
         'startTokenValidationPeriodically'
       );
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it('if isCheckSessionConfigured call checkSessionService.start()', waitForAsync(() => {
+    it('if isCheckSessionConfigured call checkSessionService.start()', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(checkSessionService, 'isCheckSessionConfigured').and.returnValue(
+      vi.spyOn(checkSessionService, 'isCheckSessionConfigured').mockReturnValue(
         true
       );
-      const spy = spyOn(checkSessionService, 'start');
+      const spy = vi.spyOn(checkSessionService, 'start');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it('if isSilentRenewConfigured call getOrCreateIframe()', waitForAsync(() => {
+    it('if isSilentRenewConfigured call getOrCreateIframe()', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(silentRenewService, 'isSilentRenewConfigured').and.returnValue(
+      vi.spyOn(silentRenewService, 'isSilentRenewConfigured').mockReturnValue(
         true
       );
-      const spy = spyOn(silentRenewService, 'getOrCreateIframe');
+      const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalled();
       });
-    }));
+    });
 
-    it('calls checkSavedRedirectRouteAndNavigate if authenticated', waitForAsync(() => {
+    it('calls checkSavedRedirectRouteAndNavigate if authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      const spy = spyOn(autoLoginService, 'checkSavedRedirectRouteAndNavigate');
+      const spy = vi.spyOn(
+        autoLoginService,
+        'checkSavedRedirectRouteAndNavigate'
+      );
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledOnceWith(allConfigs[0]);
+        expect(spy).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
       });
-    }));
+    });
 
-    it('does not call checkSavedRedirectRouteAndNavigate if not authenticated', waitForAsync(() => {
+    it('does not call checkSavedRedirectRouteAndNavigate if not authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      const spy = spyOn(autoLoginService, 'checkSavedRedirectRouteAndNavigate');
+      const spy = vi.spyOn(
+        autoLoginService,
+        'checkSavedRedirectRouteAndNavigate'
+      );
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
         expect(spy).toHaveBeenCalledTimes(0);
       });
-    }));
+    });
 
-    it('fires CheckingAuth-Event on start and finished event on end', waitForAsync(() => {
+    it('fires CheckingAuth-Event on start and finished event on end', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
 
-      const fireEventSpy = spyOn(publicEventsService, 'fireEvent');
+      const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
-        expect(fireEventSpy.calls.allArgs()).toEqual([
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
+        expect(fireEventSpy).toHaveBeenCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinished],
         ]);
       });
-    }));
+    });
 
-    it('fires CheckingAuth-Event on start and CheckingAuthFinishedWithError event on end if exception occurs', waitForAsync(() => {
+    it('fires CheckingAuth-Event on start and CheckingAuthFinishedWithError event on end if exception occurs', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
-      const fireEventSpy = spyOn(publicEventsService, 'fireEvent');
+      const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      spyOn(callBackService, 'isCallback').and.returnValue(true);
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(true);
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         throwError(() => new Error('ERROR'))
       );
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
-        expect(fireEventSpy.calls.allArgs()).toEqual([
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
+        expect(fireEventSpy).toHaveBeenCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinishedWithError, 'ERROR'],
         ]);
       });
-    }));
+    });
 
-    it('fires CheckingAuth-Event on start and finished event on end if not authenticated', waitForAsync(() => {
+    it('fires CheckingAuth-Event on start and finished event on end if not authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(currentUrlService, 'getCurrentUrl').and.returnValue(
+      vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
 
-      const fireEventSpy = spyOn(publicEventsService, 'fireEvent');
+      const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0], allConfigs).subscribe(() => {
-        expect(fireEventSpy.calls.allArgs()).toEqual([
+      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
+        expect(fireEventSpy).toBeCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinished],
         ]);
       });
-    }));
+    });
   });
 
   describe('checkAuthIncludingServer', () => {
-    it('if isSilentRenewConfigured call getOrCreateIframe()', waitForAsync(() => {
+    it('if isSilentRenewConfigured call getOrCreateIframe()', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      spyOn(refreshSessionService, 'forceRefreshSession').and.returnValue(
+      vi.spyOn(refreshSessionService, 'forceRefreshSession').mockReturnValue(
         of({ isAuthenticated: true } as LoginResponse)
       );
 
-      spyOn(silentRenewService, 'isSilentRenewConfigured').and.returnValue(
+      vi.spyOn(silentRenewService, 'isSilentRenewConfigured').mockReturnValue(
         true
       );
-      const spy = spyOn(silentRenewService, 'getOrCreateIframe');
+      const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
       checkAuthService
-        .checkAuthIncludingServer(allConfigs[0], allConfigs)
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
         .subscribe(() => {
           expect(spy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('does forceRefreshSession get called and is NOT authenticated', waitForAsync(() => {
+    it('does forceRefreshSession get called and is NOT authenticated', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
 
-      spyOn(refreshSessionService, 'forceRefreshSession').and.returnValue(
+      vi.spyOn(refreshSessionService, 'forceRefreshSession').mockReturnValue(
         of({
           idToken: 'idToken',
           accessToken: 'access_token',
@@ -684,42 +688,45 @@ describe('CheckAuthService', () => {
       );
 
       checkAuthService
-        .checkAuthIncludingServer(allConfigs[0], allConfigs)
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
         .subscribe((result) => {
           expect(result).toBeTruthy();
         });
-    }));
+    });
 
-    it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing with silentrenew', waitForAsync(() => {
+    it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing with silentrenew', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(checkSessionService, 'isCheckSessionConfigured').and.returnValue(
+      vi.spyOn(checkSessionService, 'isCheckSessionConfigured').mockReturnValue(
         true
       );
-      spyOn(silentRenewService, 'isSilentRenewConfigured').and.returnValue(
+      vi.spyOn(silentRenewService, 'isSilentRenewConfigured').mockReturnValue(
         true
       );
 
-      const checkSessionServiceStartSpy = spyOn(checkSessionService, 'start');
-      const periodicallyTokenCheckServiceSpy = spyOn(
+      const checkSessionServiceStartSpy = vi.spyOn(
+        checkSessionService,
+        'start'
+      );
+      const periodicallyTokenCheckServiceSpy = vi.spyOn(
         periodicallyTokenCheckService,
         'startTokenValidationPeriodically'
       );
-      const getOrCreateIframeSpy = spyOn(
+      const getOrCreateIframeSpy = vi.spyOn(
         silentRenewService,
         'getOrCreateIframe'
       );
 
-      spyOn(refreshSessionService, 'forceRefreshSession').and.returnValue(
+      vi.spyOn(refreshSessionService, 'forceRefreshSession').mockReturnValue(
         of({
           idToken: 'idToken',
           accessToken: 'access_token',
@@ -730,46 +737,51 @@ describe('CheckAuthService', () => {
       );
 
       checkAuthService
-        .checkAuthIncludingServer(allConfigs[0], allConfigs)
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
         .subscribe(() => {
-          expect(checkSessionServiceStartSpy).toHaveBeenCalledOnceWith(
+          expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
             allConfigs[0]
           );
           expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);
-          expect(getOrCreateIframeSpy).toHaveBeenCalledOnceWith(allConfigs[0]);
+          expect(getOrCreateIframeSpy).toHaveBeenCalledExactlyOnceWith(
+            allConfigs[0]
+          );
         });
-    }));
+    });
 
-    it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing without silentrenew', waitForAsync(() => {
+    it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing without silentrenew', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority' },
       ];
 
-      spyOn(callBackService, 'isCallback').and.returnValue(false);
-      spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      vi.spyOn(callBackService, 'isCallback').mockReturnValue(false);
+      vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      spyOn(callBackService, 'handleCallbackAndFireEvents').and.returnValue(
+      vi.spyOn(callBackService, 'handleCallbackAndFireEvents').mockReturnValue(
         of({} as CallbackContext)
       );
-      spyOn(checkSessionService, 'isCheckSessionConfigured').and.returnValue(
+      vi.spyOn(checkSessionService, 'isCheckSessionConfigured').mockReturnValue(
         true
       );
-      spyOn(silentRenewService, 'isSilentRenewConfigured').and.returnValue(
+      vi.spyOn(silentRenewService, 'isSilentRenewConfigured').mockReturnValue(
         false
       );
 
-      const checkSessionServiceStartSpy = spyOn(checkSessionService, 'start');
-      const periodicallyTokenCheckServiceSpy = spyOn(
+      const checkSessionServiceStartSpy = vi.spyOn(
+        checkSessionService,
+        'start'
+      );
+      const periodicallyTokenCheckServiceSpy = vi.spyOn(
         periodicallyTokenCheckService,
         'startTokenValidationPeriodically'
       );
-      const getOrCreateIframeSpy = spyOn(
+      const getOrCreateIframeSpy = vi.spyOn(
         silentRenewService,
         'getOrCreateIframe'
       );
 
-      spyOn(refreshSessionService, 'forceRefreshSession').and.returnValue(
+      vi.spyOn(refreshSessionService, 'forceRefreshSession').mockReturnValue(
         of({
           idToken: 'idToken',
           accessToken: 'access_token',
@@ -780,69 +792,67 @@ describe('CheckAuthService', () => {
       );
 
       checkAuthService
-        .checkAuthIncludingServer(allConfigs[0], allConfigs)
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
         .subscribe(() => {
-          expect(checkSessionServiceStartSpy).toHaveBeenCalledOnceWith(
+          expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
             allConfigs[0]
           );
           expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);
           expect(getOrCreateIframeSpy).not.toHaveBeenCalled();
         });
-    }));
+    });
   });
 
   describe('checkAuthMultiple', () => {
-    it('uses config with matching state when url has state param and config with state param is stored', waitForAsync(() => {
+    it('uses config with matching state when url has state param and config with state param is stored', async () => {
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority1' },
         { configId: 'configId2', authority: 'some-authority2' },
       ];
 
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        'the-state-param'
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue('the-state-param');
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['authStateControl', allConfigs[0]!],
+        () => 'the-state-param'
       );
-      spyOn(storagePersistenceService, 'read')
-        .withArgs('authStateControl', allConfigs[0])
-        .and.returnValue('the-state-param');
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
       checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
         expect(Array.isArray(result)).toBe(true);
         expect(spy).toHaveBeenCalledTimes(2);
-        expect(spy.calls.argsFor(0)).toEqual([
-          allConfigs[0],
+        expect(vi.mocked(spy).mock.calls[0]).toEqual([
+          allConfigs[0]!,
           allConfigs,
           undefined,
         ]);
-        expect(spy.calls.argsFor(1)).toEqual([
+        expect(vi.mocked(spy).mock.calls[1]).toEqual([
           allConfigs[1],
           allConfigs,
           undefined,
         ]);
       });
-    }));
+    });
 
-    it('uses config from passed configId if configId was passed and returns all results', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        null
-      );
+    it('uses config from passed configId if configId was passed and returns all results', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue(null);
 
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority1' },
         { configId: 'configId2', authority: 'some-authority2' },
       ];
 
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
       checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
         expect(Array.isArray(result)).toBe(true);
-        expect(spy.calls.allArgs()).toEqual([
+        expect(spy).toBeCalledWith([
           [
             { configId: 'configId1', authority: 'some-authority1' },
             allConfigs,
@@ -855,43 +865,42 @@ describe('CheckAuthService', () => {
           ],
         ]);
       });
-    }));
+    });
 
-    it('runs through all configs if no parameter is passed and has no state in url', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        null
-      );
+    it('runs through all configs if no parameter is passed and has no state in url', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue(null);
 
       const allConfigs = [
         { configId: 'configId1', authority: 'some-authority1' },
         { configId: 'configId2', authority: 'some-authority2' },
       ];
 
-      const spy = spyOn(
-        checkAuthService as any,
-        'checkAuthWithConfig'
-      ).and.callThrough();
+      const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
       checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
         expect(Array.isArray(result)).toBe(true);
         expect(spy).toHaveBeenCalledTimes(2);
-        expect(spy.calls.argsFor(0)).toEqual([
+        expect(vi.mocked(spy).mock.calls[0]).toEqual([
           { configId: 'configId1', authority: 'some-authority1' },
           allConfigs,
           undefined,
         ]);
-        expect(spy.calls.argsFor(1)).toEqual([
+        expect(vi.mocked(spy).mock.calls[1]).toEqual([
           { configId: 'configId2', authority: 'some-authority2' },
           allConfigs,
           undefined,
         ]);
       });
-    }));
+    });
 
-    it('throws error if url has state param but no config could be found', waitForAsync(() => {
-      spyOn(currentUrlService, 'getStateParamFromCurrentUrl').and.returnValue(
-        'the-state-param'
-      );
+    it('throws error if url has state param but no config could be found', async () => {
+      vi.spyOn(
+        currentUrlService,
+        'getStateParamFromCurrentUrl'
+      ).mockReturnValue('the-state-param');
 
       const allConfigs: OpenIdConfiguration[] = [];
 
@@ -902,6 +911,6 @@ describe('CheckAuthService', () => {
           );
         },
       });
-    }));
+    });
   });
 });

@@ -1,8 +1,8 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import type { Observable } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from './callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from './callback-context';
 import { CodeFlowCallbackHandlerService } from './callback-handling/code-flow-callback-handler.service';
 import { HistoryJwtKeysCallbackHandlerService } from './callback-handling/history-jwt-keys-callback-handler.service';
 import { ImplicitFlowCallbackHandlerService } from './callback-handling/implicit-flow-callback-handler.service';

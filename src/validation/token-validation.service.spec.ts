@@ -1,8 +1,9 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { mockProvider } from '../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { lastValueFrom, of } from 'rxjs';
+import { vi } from 'vitest';
 import { JwkExtractor } from '../extractors/jwk.extractor';
 import { LoggerService } from '../logging/logger.service';
+import { mockProvider } from '../testing/mock';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import { TokenHelperService } from '../utils/tokenHelper/token-helper.service';
 import { JwkWindowCryptoService } from './jwk-window-crypto.service';
@@ -498,7 +499,7 @@ describe('TokenValidationService', () => {
   });
 
   describe('validateSignatureIdToken', () => {
-    it('returns false if no kwtKeys are passed', waitForAsync(() => {
+    it('returns false if no kwtKeys are passed', async () => {
       const valueFalse$ = tokenValidationService.validateSignatureIdToken(
         'some-id-token',
         null,
@@ -508,9 +509,9 @@ describe('TokenValidationService', () => {
       valueFalse$.subscribe((valueFalse) => {
         expect(valueFalse).toEqual(false);
       });
-    }));
+    });
 
-    it('returns true if no idToken is passed', waitForAsync(() => {
+    it('returns true if no idToken is passed', async () => {
       const valueFalse$ = tokenValidationService.validateSignatureIdToken(
         null as any,
         'some-jwt-keys',
@@ -520,9 +521,9 @@ describe('TokenValidationService', () => {
       valueFalse$.subscribe((valueFalse) => {
         expect(valueFalse).toEqual(true);
       });
-    }));
+    });
 
-    it('returns false if jwtkeys has no keys-property', waitForAsync(() => {
+    it('returns false if jwtkeys has no keys-property', async () => {
       const valueFalse$ = tokenValidationService.validateSignatureIdToken(
         'some-id-token',
         { notKeys: '' },
@@ -532,10 +533,10 @@ describe('TokenValidationService', () => {
       valueFalse$.subscribe((valueFalse) => {
         expect(valueFalse).toEqual(false);
       });
-    }));
+    });
 
-    it('returns false if header data has no header data', waitForAsync(() => {
-      spyOn(tokenHelperService, 'getHeaderFromToken').and.returnValue({});
+    it('returns false if header data has no header data', async () => {
+      vi.spyOn(tokenHelperService, 'getHeaderFromToken').mockReturnValue({});
 
       const jwtKeys = {
         keys: 'someThing',
@@ -550,10 +551,10 @@ describe('TokenValidationService', () => {
       valueFalse$.subscribe((valueFalse) => {
         expect(valueFalse).toEqual(false);
       });
-    }));
+    });
 
-    it('returns false if header data alg property does not exist in keyalgorithms', waitForAsync(() => {
-      spyOn(tokenHelperService, 'getHeaderFromToken').and.returnValue({
+    it('returns false if header data alg property does not exist in keyalgorithms', async () => {
+      vi.spyOn(tokenHelperService, 'getHeaderFromToken').mockReturnValue({
         alg: 'NOT SUPPORTED ALG',
       });
 
@@ -570,16 +571,16 @@ describe('TokenValidationService', () => {
       valueFalse$.subscribe((valueFalse) => {
         expect(valueFalse).toEqual(false);
       });
-    }));
+    });
 
     it('returns false if header data has kid property and jwtKeys has same kid property but they are not valid with the token', (done) => {
       const kid = '5626CE6A8F4F5FCD79C6642345282CA76D337548';
 
-      spyOn(tokenHelperService, 'getHeaderFromToken').and.returnValue({
+      vi.spyOn(tokenHelperService, 'getHeaderFromToken').mockReturnValue({
         alg: 'RS256',
         kid,
       });
-      spyOn(tokenHelperService, 'getSignatureFromToken').and.returnValue('');
+      vi.spyOn(tokenHelperService, 'getSignatureFromToken').mockReturnValue('');
 
       const jwtKeys = {
         keys: [
@@ -626,14 +627,14 @@ describe('TokenValidationService', () => {
         keys: [key],
       };
 
-      spyOn(tokenHelperService, 'getHeaderFromToken').and.returnValue({
+      vi.spyOn(tokenHelperService, 'getHeaderFromToken').mockReturnValue({
         alg: 'RS256',
         typ: 'JWT',
       });
-      spyOn(tokenHelperService, 'getSigningInputFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getSigningInputFromToken').mockReturnValue(
         [idTokenParts[0], idTokenParts[1]].join('.')
       );
-      spyOn(tokenHelperService, 'getSignatureFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getSignatureFromToken').mockReturnValue(
         idTokenParts[2]
       );
 
@@ -668,22 +669,21 @@ describe('TokenValidationService', () => {
       });
     });
 
-    it('returns false if sha is sha256 and generated hash does not equal atHash param', (done) => {
+    it('returns false if sha is sha256 and generated hash does not equal atHash param', async () => {
       const accessToken =
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ilg1ZVhrNHh5b2pORnVtMWtsMll0djhkbE5QNC1jNTdkTzZRR1RWQndhTmsifQ.eyJleHAiOjE1ODkyMTAwODYsIm5iZiI6MTU4OTIwNjQ4NiwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9kYW1pZW5ib2QuYjJjbG9naW4uY29tL2EwOTU4ZjQ1LTE5NWItNDAzNi05MjU5LWRlMmY3ZTU5NGRiNi92Mi4wLyIsInN1YiI6ImY4MzZmMzgwLTNjNjQtNDgwMi04ZGJjLTAxMTk4MWMwNjhmNSIsImF1ZCI6ImYxOTM0YTZlLTk1OGQtNDE5OC05ZjM2LTYxMjdjZmM0Y2RiMyIsIm5vbmNlIjoiMDA3YzQxNTNiNmEwNTE3YzBlNDk3NDc2ZmIyNDk5NDhlYzVjbE92UVEiLCJpYXQiOjE1ODkyMDY0ODYsImF1dGhfdGltZSI6MTU4OTIwNjQ4NiwibmFtZSI6ImRhbWllbmJvZCIsImVtYWlscyI6WyJkYW1pZW5AZGFtaWVuYm9kLm9ubWljcm9zb2Z0LmNvbSJdLCJ0ZnAiOiJCMkNfMV9iMmNwb2xpY3lkYW1pZW4iLCJhdF9oYXNoIjoiWmswZktKU19wWWhPcE04SUJhMTJmdyJ9.E5Z-0kOzNU7LBkeVHHMyNoER8TUapGzUUfXmW6gVu4v6QMM5fQ4sJ7KC8PHh8lBFYiCnaDiTtpn3QytUwjXEFnLDAX5qcZT1aPoEgL_OmZMC-8y-4GyHp35l7VFD4iNYM9fJmLE8SYHTVl7eWPlXSyz37Ip0ciiV0Fd6eoksD_aVc-hkIqngDfE4fR8ZKfv4yLTNN_SfknFfuJbZ56yN-zIBL4GkuHsbQCBYpjtWQ62v98p1jO7NhHKV5JP2ec_Ge6oYc_bKTrE6OIX38RJ2rIm7zU16mtdjnl_350Nw3ytHcTPnA1VpP_VLElCfe83jr5aDHc_UQRYaAcWlOgvmVg';
       const atHash = 'bad';
 
-      const result$ = tokenValidationService.validateIdTokenAtHash(
-        accessToken,
-        atHash,
-        '256',
-        { configId: 'configId1' }
+      const result = await lastValueFrom(
+        tokenValidationService.validateIdTokenAtHash(
+          accessToken,
+          atHash,
+          '256',
+          { configId: 'configId1' }
+        )
       );
 
-      result$.subscribe((result) => {
-        expect(result).toEqual(false);
-        done();
-      });
+      expect(result).toEqual(false);
     });
 
     it('returns true if sha is sha256 and generated hash does equal atHash param', (done) => {
@@ -691,7 +691,7 @@ describe('TokenValidationService', () => {
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ilg1ZVhrNHh5b2pORnVtMWtsMll0djhkbE5QNC1jNTdkTzZRR1RWQndhTmsifQ.eyJleHAiOjE1ODkyMTAwODYsIm5iZiI6MTU4OTIwNjQ4NiwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9kYW1pZW5ib2QuYjJjbG9naW4uY29tL2EwOTU4ZjQ1LTE5NWItNDAzNi05MjU5LWRlMmY3ZTU5NGRiNi92Mi4wLyIsInN1YiI6ImY4MzZmMzgwLTNjNjQtNDgwMi04ZGJjLTAxMTk4MWMwNjhmNSIsImF1ZCI6ImYxOTM0YTZlLTk1OGQtNDE5OC05ZjM2LTYxMjdjZmM0Y2RiMyIsIm5vbmNlIjoiMDA3YzQxNTNiNmEwNTE3YzBlNDk3NDc2ZmIyNDk5NDhlYzVjbE92UVEiLCJpYXQiOjE1ODkyMDY0ODYsImF1dGhfdGltZSI6MTU4OTIwNjQ4NiwibmFtZSI6ImRhbWllbmJvZCIsImVtYWlscyI6WyJkYW1pZW5AZGFtaWVuYm9kLm9ubWljcm9zb2Z0LmNvbSJdLCJ0ZnAiOiJCMkNfMV9iMmNwb2xpY3lkYW1pZW4iLCJhdF9oYXNoIjoiWmswZktKU19wWWhPcE04SUJhMTJmdyJ9.E5Z-0kOzNU7LBkeVHHMyNoER8TUapGzUUfXmW6gVu4v6QMM5fQ4sJ7KC8PHh8lBFYiCnaDiTtpn3QytUwjXEFnLDAX5qcZT1aPoEgL_OmZMC-8y-4GyHp35l7VFD4iNYM9fJmLE8SYHTVl7eWPlXSyz37Ip0ciiV0Fd6eoksD_aVc-hkIqngDfE4fR8ZKfv4yLTNN_SfknFfuJbZ56yN-zIBL4GkuHsbQCBYpjtWQ62v98p1jO7NhHKV5JP2ec_Ge6oYc_bKTrE6OIX38RJ2rIm7zU16mtdjnl_350Nw3ytHcTPnA1VpP_VLElCfe83jr5aDHc_UQRYaAcWlOgvmVg';
       const atHash = 'good';
 
-      spyOn(jwtWindowCryptoService, 'generateAtHash').and.returnValues(
+      vi.spyOn(jwtWindowCryptoService, 'generateAtHash').mockReturnValues(
         of('notEqualsGood'),
         of('good')
       );
@@ -770,7 +770,7 @@ describe('TokenValidationService', () => {
 
   describe('validateIdTokenExpNotExpired', () => {
     it('returns false when getTokenExpirationDate returns null', () => {
-      spyOn(tokenHelperService, 'getTokenExpirationDate').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getTokenExpirationDate').mockReturnValue(
         null as unknown as Date
       );
       const notExpired = tokenValidationService.validateIdTokenExpNotExpired(
@@ -848,7 +848,7 @@ describe('TokenValidationService', () => {
       const idToken =
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MTMxMTY5NTAsImV4cCI6MjUyODI2NTc1MCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.GHxRo23NghUTTeZx6VIzTSf05JEeEn7z9YYyFLxWv6M';
 
-      spyOn(tokenHelperService, 'getTokenExpirationDate').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getTokenExpirationDate').mockReturnValue(
         tokenExpires
       );
 

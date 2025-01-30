@@ -1,6 +1,7 @@
-import { TestBed } from '@angular/core/testing';
-import { mockProvider } from '../../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { LoggerService } from '../../logging/logger.service';
+import { mockProvider } from '../../testing/mock';
 import { CryptoService } from '../../utils/crypto/crypto.service';
 import { RandomService } from './random.service';
 

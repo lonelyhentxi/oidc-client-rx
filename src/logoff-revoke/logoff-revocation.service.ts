@@ -1,10 +1,10 @@
 import { HttpHeaders } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
-import { Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of, throwError } from 'rxjs';
 import { catchError, concatMap, retry, switchMap } from 'rxjs/operators';
 import { DataService } from '../api/data.service';
-import { LogoutAuthOptions } from '../auth-options';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { LogoutAuthOptions } from '../auth-options';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
 import { CheckSessionService } from '../iframe/check-session.service';
 import { LoggerService } from '../logging/logger.service';

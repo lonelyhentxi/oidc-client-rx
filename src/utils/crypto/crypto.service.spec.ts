@@ -1,5 +1,6 @@
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
-import { TestBed } from '@angular/core/testing';
 import { CryptoService } from './crypto.service';
 
 describe('CryptoService', () => {

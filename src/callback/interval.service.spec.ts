@@ -1,5 +1,6 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@/testing';
 import { Subscription } from 'rxjs';
+import { vi } from 'vitest';
 import { IntervalService } from './interval.service';
 
 describe('IntervalService', () => {
@@ -31,7 +32,7 @@ describe('IntervalService', () => {
   describe('stopPeriodicTokenCheck', () => {
     it('calls unsubscribe and sets to null', () => {
       intervalService.runTokenValidationRunning = new Subscription();
-      const spy = spyOn(
+      const spy = vi.spyOn(
         intervalService.runTokenValidationRunning,
         'unsubscribe'
       );
@@ -44,7 +45,7 @@ describe('IntervalService', () => {
 
     it('does nothing if `runTokenValidationRunning` is null', () => {
       intervalService.runTokenValidationRunning = new Subscription();
-      const spy = spyOn(
+      const spy = vi.spyOn(
         intervalService.runTokenValidationRunning,
         'unsubscribe'
       );
@@ -57,7 +58,7 @@ describe('IntervalService', () => {
   });
 
   describe('startPeriodicTokenCheck', () => {
-    it('starts check after correct milliseconds', fakeAsync(() => {
+    it('starts check after correct milliseconds', async () => {
       const periodicCheck = intervalService.startPeriodicTokenCheck(0.5);
       const spy = jasmine.createSpy();
       const sub = periodicCheck.subscribe(() => {
@@ -71,6 +72,6 @@ describe('IntervalService', () => {
       expect(spy).toHaveBeenCalledTimes(2);
 
       sub.unsubscribe();
-    }));
+    });
   });
 });

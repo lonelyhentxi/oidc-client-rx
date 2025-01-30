@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 // Create retriable observable stream to test retry / retryWhen. Credits to:
@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 export const createRetriableStream = (...resp$: any): Observable<any> => {
   const fetchData: jasmine.Spy = jasmine.createSpy('fetchData');
 
-  fetchData.and.returnValues(...resp$);
+  fetchData.mockReturnValues(...resp$);
 
   return of(null).pipe(switchMap((_) => fetchData()));
 };

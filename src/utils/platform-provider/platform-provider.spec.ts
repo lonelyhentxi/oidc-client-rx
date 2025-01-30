@@ -1,5 +1,6 @@
+import { TestBed } from '@/testing';
 import { PLATFORM_ID } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { PlatformProvider } from './platform.provider';
 
 describe('PlatformProvider Tests', () => {

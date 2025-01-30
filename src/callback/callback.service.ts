@@ -1,8 +1,8 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowHelper } from '../utils/flowHelper/flow-helper.service';
 import { UrlService } from '../utils/url/url.service';
 import { CodeFlowCallbackService } from './code-flow-callback.service';

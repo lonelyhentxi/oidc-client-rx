@@ -1,15 +1,15 @@
-import { inject, Injectable } from 'injection-js';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { BehaviorSubject, type Observable, of, throwError } from 'rxjs';
 import { map, retry, switchMap } from 'rxjs/operators';
 import { DataService } from '../api/data.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { FlowHelper } from '../utils/flowHelper/flow-helper.service';
 import { TokenHelperService } from '../utils/tokenHelper/token-helper.service';
-import { ConfigUserDataResult, UserDataResult } from './userdata-result';
+import type { ConfigUserDataResult, UserDataResult } from './userdata-result';
 
 const DEFAULT_USERRESULT = { userData: null, allUserData: [] };
 
@@ -44,13 +44,13 @@ export class UserService {
     idToken?: string,
     decodedIdToken?: any
   ): Observable<any> {
-    idToken =
+    const _idToken =
       idToken ||
       this.storagePersistenceService.getIdToken(currentConfiguration);
-    decodedIdToken =
+    const _decodedIdToken =
       decodedIdToken ||
       this.tokenHelperService.getPayloadFromToken(
-        idToken,
+        _idToken,
         false,
         currentConfiguration
       );
@@ -74,16 +74,20 @@ export class UserService {
         `authCallback idToken flow with accessToken ${accessToken}`
       );
 
-      this.setUserDataToStore(decodedIdToken, currentConfiguration, allConfigs);
+      this.setUserDataToStore(
+        _decodedIdToken,
+        currentConfiguration,
+        allConfigs
+      );
 
-      return of(decodedIdToken);
+      return of(_decodedIdToken);
     }
 
     const { renewUserInfoAfterTokenRenew } = currentConfiguration;
 
     if (!isRenewProcess || renewUserInfoAfterTokenRenew || !haveUserData) {
       return this.getUserDataOidcFlowAndSave(
-        decodedIdToken.sub,
+        _decodedIdToken.sub,
         currentConfiguration,
         allConfigs
       ).pipe(
@@ -93,7 +97,7 @@ export class UserService {
             'Received user data: ',
             userData
           );
-          if (!!userData) {
+          if (userData) {
             this.loggerService.logDebug(
               currentConfiguration,
               'accessToken: ',
@@ -101,11 +105,10 @@ export class UserService {
             );
 
             return of(userData);
-          } else {
-            return throwError(
-              () => new Error('Received no user data, request failed')
-            );
           }
+          return throwError(
+            () => new Error('Received no user data, request failed')
+          );
         })
       );
     }
@@ -178,16 +181,15 @@ export class UserService {
           this.setUserDataToStore(data, currentConfiguration, allConfigs);
 
           return data;
-        } else {
-          // something went wrong, user data sub does not match that from id_token
-          this.loggerService.logWarning(
-            currentConfiguration,
-            `User data sub does not match sub in id_token, resetting`
-          );
-          this.resetUserDataInStore(currentConfiguration, allConfigs);
-
-          return null;
         }
+        // something went wrong, user data sub does not match that from id_token
+        this.loggerService.logWarning(
+          currentConfiguration,
+          'User data sub does not match sub in id_token, resetting'
+        );
+        this.resetUserDataInStore(currentConfiguration, allConfigs);
+
+        return null;
       })
     );
   }

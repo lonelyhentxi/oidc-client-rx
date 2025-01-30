@@ -1,17 +1,17 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed, mockRouterProvider } from '@/testing';
 import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+  AbstractRouter,
+  type ActivatedRouteSnapshot,
+  type RouterStateSnapshot,
+} from 'oidc-client-rx';
 import { of } from 'rxjs';
-import { mockProvider } from '../../test/auto-mock';
+import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { CheckAuthService } from '../auth-state/check-auth.service';
 import { ConfigurationService } from '../config/config.service';
 import { LoginService } from '../login/login.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockProvider } from '../testing/mock';
 import {
   AutoLoginPartialRoutesGuard,
   autoLoginPartialRoutesGuard,
@@ -19,11 +19,12 @@ import {
 } from './auto-login-partial-routes.guard';
 import { AutoLoginService } from './auto-login.service';
 
-describe(`AutoLoginPartialRoutesGuard`, () => {
+describe('AutoLoginPartialRoutesGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [],
       providers: [
+        mockRouterProvider(),
         AutoLoginService,
         mockProvider(AuthStateService),
         mockProvider(LoginService),
@@ -41,7 +42,7 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
     let storagePersistenceService: StoragePersistenceService;
     let configurationService: ConfigurationService;
     let autoLoginService: AutoLoginService;
-    let router: Router;
+    let router: AbstractRouter;
 
     beforeEach(() => {
       authStateService = TestBed.inject(AuthStateService);
@@ -49,15 +50,16 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
       storagePersistenceService = TestBed.inject(StoragePersistenceService);
       configurationService = TestBed.inject(ConfigurationService);
 
-      spyOn(configurationService, 'getOpenIDConfiguration').and.returnValue(
+      vi.spyOn(configurationService, 'getOpenIDConfiguration').mockReturnValue(
         of({ configId: 'configId1' })
       );
 
       guard = TestBed.inject(AutoLoginPartialRoutesGuard);
       autoLoginService = TestBed.inject(AutoLoginService);
-      router = TestBed.inject(Router);
+      router = TestBed.inject(AbstractRouter);
     });
 
+    // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
     afterEach(() => {
       storagePersistenceService.clear({});
     });
@@ -67,19 +69,19 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
     });
 
     describe('canActivate', () => {
-      it('should save current route and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivate(
@@ -87,32 +89,32 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             { url: 'some-url1' } as RouterStateSnapshot
           )
           .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
             );
-            expect(loginSpy).toHaveBeenCalledOnceWith({
+            expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
               configId: 'configId1',
             });
             expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
           });
-      }));
+      });
 
-      it('should save current route and call `login` if not authenticated already and add custom params', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route and call `login` if not authenticated already and add custom params', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivate(
@@ -120,11 +122,11 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             { url: 'some-url1' } as RouterStateSnapshot
           )
           .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
             );
-            expect(loginSpy).toHaveBeenCalledOnceWith(
+            expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               { customParams: { custom: 'param' } }
             );
@@ -132,21 +134,21 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
           });
-      }));
+      });
 
-      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           true
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivate(
@@ -158,25 +160,25 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             expect(loginSpy).not.toHaveBeenCalled();
             expect(
               checkSavedRedirectRouteAndNavigateSpy
-            ).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+            ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
           });
-      }));
+      });
     });
 
     describe('canActivateChild', () => {
-      it('should save current route and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivateChild(
@@ -184,32 +186,32 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             { url: 'some-url1' } as RouterStateSnapshot
           )
           .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
             );
-            expect(loginSpy).toHaveBeenCalledOnceWith({
+            expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
               configId: 'configId1',
             });
             expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
           });
-      }));
+      });
 
-      it('should save current route and call `login` if not authenticated already with custom params', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route and call `login` if not authenticated already with custom params', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivateChild(
@@ -217,11 +219,11 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             { url: 'some-url1' } as RouterStateSnapshot
           )
           .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
             );
-            expect(loginSpy).toHaveBeenCalledOnceWith(
+            expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               { customParams: { custom: 'param' } }
             );
@@ -229,21 +231,21 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
           });
-      }));
+      });
 
-      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           true
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard
           .canActivateChild(
@@ -255,51 +257,53 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
             expect(loginSpy).not.toHaveBeenCalled();
             expect(
               checkSavedRedirectRouteAndNavigateSpy
-            ).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+            ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
           });
-      }));
+      });
     });
 
     describe('canLoad', () => {
-      it('should save current route (empty) and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route (empty) and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard.canLoad().subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            configId: 'configId1',
+          });
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
 
-      it('should save current route (with router extractedUrl) and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route (with router extractedUrl) and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
-        spyOn(router, 'getCurrentNavigation').and.returnValue({
+        vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({
           extractedUrl: router.parseUrl(
             'some-url12/with/some-param?queryParam=true'
           ),
@@ -311,37 +315,39 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
         });
 
         guard.canLoad().subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             'some-url12/with/some-param?queryParam=true'
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            configId: 'configId1',
+          });
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
 
-      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           true
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         guard.canLoad().subscribe(() => {
           expect(saveRedirectRouteSpy).not.toHaveBeenCalled();
           expect(loginSpy).not.toHaveBeenCalled();
           expect(
             checkSavedRedirectRouteAndNavigateSpy
-          ).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
         });
-      }));
+      });
     });
   });
 
@@ -352,7 +358,7 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
       let storagePersistenceService: StoragePersistenceService;
       let configurationService: ConfigurationService;
       let autoLoginService: AutoLoginService;
-      let router: Router;
+      let router: AbstractRouter;
 
       beforeEach(() => {
         authStateService = TestBed.inject(AuthStateService);
@@ -360,48 +366,52 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
         storagePersistenceService = TestBed.inject(StoragePersistenceService);
         configurationService = TestBed.inject(ConfigurationService);
 
-        spyOn(configurationService, 'getOpenIDConfiguration').and.returnValue(
-          of({ configId: 'configId1' })
-        );
+        vi.spyOn(
+          configurationService,
+          'getOpenIDConfiguration'
+        ).mockReturnValue(of({ configId: 'configId1' }));
 
         autoLoginService = TestBed.inject(AutoLoginService);
-        router = TestBed.inject(Router);
+        router = TestBed.inject(AbstractRouter);
       });
 
+      // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
       afterEach(() => {
         storagePersistenceService.clear({});
       });
 
-      it('should save current route (empty) and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route (empty) and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         const guard$ = TestBed.runInInjectionContext(
           autoLoginPartialRoutesGuard
         );
 
         guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            configId: 'configId1',
+          });
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
 
-      it('should save current route (with router extractedUrl) and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(router, 'getCurrentNavigation').and.returnValue({
+      it('should save current route (with router extractedUrl) and call `login` if not authenticated already', async () => {
+        vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({
           extractedUrl: router.parseUrl(
             'some-url12/with/some-param?queryParam=true'
           ),
@@ -412,46 +422,48 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
           trigger: 'imperative',
         });
 
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         const guard$ = TestBed.runInInjectionContext(
           autoLoginPartialRoutesGuard
         );
 
         guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             'some-url12/with/some-param?queryParam=true'
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            configId: 'configId1',
+          });
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
 
-      it('should save current route and call `login` if not authenticated already and add custom params', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route and call `login` if not authenticated already and add custom params', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         const guard$ = TestBed.runInInjectionContext(() =>
           autoLoginPartialRoutesGuard({
@@ -460,31 +472,31 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
         );
 
         guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith(
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             { customParams: { custom: 'param' } }
           );
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
 
-      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           true
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         const guard$ = TestBed.runInInjectionContext(
           autoLoginPartialRoutesGuard
@@ -495,9 +507,9 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
           expect(loginSpy).not.toHaveBeenCalled();
           expect(
             checkSavedRedirectRouteAndNavigateSpy
-          ).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
         });
-      }));
+      });
     });
 
     describe('autoLoginPartialRoutesGuardWithConfig', () => {
@@ -513,44 +525,48 @@ describe(`AutoLoginPartialRoutesGuard`, () => {
         storagePersistenceService = TestBed.inject(StoragePersistenceService);
         configurationService = TestBed.inject(ConfigurationService);
 
-        spyOn(configurationService, 'getOpenIDConfiguration').and.callFake(
-          (configId) => of({ configId })
-        );
+        vi.spyOn(
+          configurationService,
+          'getOpenIDConfiguration'
+        ).mockImplementation((configId) => of({ configId }));
 
         autoLoginService = TestBed.inject(AutoLoginService);
       });
 
+      // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
       afterEach(() => {
         storagePersistenceService.clear({});
       });
 
-      it('should save current route (empty) and call `login` if not authenticated already', waitForAsync(() => {
-        spyOn(authStateService, 'areAuthStorageTokensValid').and.returnValue(
+      it('should save current route (empty) and call `login` if not authenticated already', async () => {
+        vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        const checkSavedRedirectRouteAndNavigateSpy = spyOn(
+        const checkSavedRedirectRouteAndNavigateSpy = vi.spyOn(
           autoLoginService,
           'checkSavedRedirectRouteAndNavigate'
         );
-        const saveRedirectRouteSpy = spyOn(
+        const saveRedirectRouteSpy = vi.spyOn(
           autoLoginService,
           'saveRedirectRoute'
         );
-        const loginSpy = spyOn(loginService, 'login');
+        const loginSpy = vi.spyOn(loginService, 'login');
 
         const guard$ = TestBed.runInInjectionContext(
           autoLoginPartialRoutesGuardWithConfig('configId1')
         );
 
         guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledOnceWith(
+          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
           );
-          expect(loginSpy).toHaveBeenCalledOnceWith({ configId: 'configId1' });
+          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            configId: 'configId1',
+          });
           expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
         });
-      }));
+      });
     });
   });
 });

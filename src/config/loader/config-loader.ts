@@ -1,7 +1,7 @@
-import { Provider } from 'injection-js';
-import { forkJoin, Observable, of } from 'rxjs';
+import type { Provider } from 'injection-js';
+import { type Observable, forkJoin, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../openid-configuration';
+import type { OpenIdConfiguration } from '../openid-configuration';
 
 export class OpenIdConfigLoader {
   loader?: Provider;
@@ -13,6 +13,7 @@ export abstract class StsConfigLoader {
 
 export class StsConfigStaticLoader implements StsConfigLoader {
   constructor(
+    // biome-ignore lint/style/noParameterProperties: <explanation>
     private readonly passedConfigs: OpenIdConfiguration | OpenIdConfiguration[]
   ) {}
 
@@ -27,6 +28,7 @@ export class StsConfigStaticLoader implements StsConfigLoader {
 
 export class StsConfigHttpLoader implements StsConfigLoader {
   constructor(
+    // biome-ignore lint/style/noParameterProperties: <explanation>
     private readonly configs$:
       | Observable<OpenIdConfiguration>
       | Observable<OpenIdConfiguration>[]

@@ -1,4 +1,4 @@
-import { PassedInitialConfig, createStaticLoader } from './auth-config';
+import { type PassedInitialConfig, createStaticLoader } from './auth-config';
 
 describe('AuthConfig', () => {
   describe('createStaticLoader', () => {

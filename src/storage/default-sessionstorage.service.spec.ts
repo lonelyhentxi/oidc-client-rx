@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { DefaultSessionStorageService } from './default-sessionstorage.service';
 
 describe('DefaultSessionStorageService', () => {
@@ -20,37 +21,37 @@ describe('DefaultSessionStorageService', () => {
 
   describe('read', () => {
     it('should call sessionstorage.getItem', () => {
-      const spy = spyOn(sessionStorage, 'getItem');
+      const spy = vi.spyOn(sessionStorage, 'getItem');
 
       service.read('henlo');
 
-      expect(spy).toHaveBeenCalledOnceWith('henlo');
+      expect(spy).toHaveBeenCalledExactlyOnceWith('henlo');
     });
   });
 
   describe('write', () => {
     it('should call sessionstorage.setItem', () => {
-      const spy = spyOn(sessionStorage, 'setItem');
+      const spy = vi.spyOn(sessionStorage, 'setItem');
 
       service.write('henlo', 'furiend');
 
-      expect(spy).toHaveBeenCalledOnceWith('henlo', 'furiend');
+      expect(spy).toHaveBeenCalledExactlyOnceWith('henlo', 'furiend');
     });
   });
 
   describe('remove', () => {
     it('should call sessionstorage.removeItem', () => {
-      const spy = spyOn(sessionStorage, 'removeItem');
+      const spy = vi.spyOn(sessionStorage, 'removeItem');
 
       service.remove('henlo');
 
-      expect(spy).toHaveBeenCalledOnceWith('henlo');
+      expect(spy).toHaveBeenCalledExactlyOnceWith('henlo');
     });
   });
 
   describe('clear', () => {
     it('should call sessionstorage.clear', () => {
-      const spy = spyOn(sessionStorage, 'clear');
+      const spy = vi.spyOn(sessionStorage, 'clear');
 
       service.clear();
 

@@ -18,8 +18,14 @@
     }
   },
   "files": {
-    "ignore": [
-      ".vscode/*.json"
-    ]
-  }
+    "ignore": [".vscode/*.json"]
+  },
+  "overrides": [
+    {
+      "include": ["src/**/*.spec.ts", "src/test.ts", "test"],
+      "javascript": {
+        "globals": ["describe", "beforeEach", "it", "expect"]
+      }
+    }
+  ]
 }

@@ -1,5 +1,5 @@
-import { LogLevel } from '../logging/log-level';
-import { AuthWellKnownEndpoints } from './auth-well-known/auth-well-known-endpoints';
+import type { LogLevel } from '../logging/log-level';
+import type { AuthWellKnownEndpoints } from './auth-well-known/auth-well-known-endpoints';
 
 export interface OpenIdConfiguration {
   /**
@@ -207,5 +207,5 @@ export interface OpenIdConfiguration {
   /**
    * Disable cleaning up the popup when receiving invalid messages
    */
-  disableCleaningPopupOnInvalidMessage?: boolean
+  disableCleaningPopupOnInvalidMessage?: boolean;
 }

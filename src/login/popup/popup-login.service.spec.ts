@@ -1,15 +1,16 @@
+import { TestBed } from '@/testing';
 import { CommonModule } from '@angular/common';
-import { TestBed, waitForAsync } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { mockProvider } from '../../../test/auto-mock';
+import { vi } from 'vitest';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
 import { LoggerService } from '../../logging/logger.service';
+import { mockProvider } from '../../testing/mock';
 import { UrlService } from '../../utils/url/url.service';
-import { LoginResponse } from '../login-response';
+import type { LoginResponse } from '../login-response';
 import { ResponseTypeValidationService } from '../response-type-validation/response-type-validation.service';
 import { PopUpLoginService } from './popup-login.service';
-import { PopupResult } from './popup-result';
+import type { PopupResult } from './popup-result';
 import { PopUpService } from './popup.service';
 
 describe('PopUpLoginService', () => {
@@ -53,14 +54,14 @@ describe('PopUpLoginService', () => {
   });
 
   describe('loginWithPopUpStandard', () => {
-    it('does nothing if it has an invalid response type', waitForAsync(() => {
+    it('does nothing if it has an invalid response type', async () => {
       const config = { responseType: 'stubValue' };
 
-      spyOn(
+      vi.spyOn(
         responseTypValidationService,
         'hasConfigValidResponseType'
-      ).and.returnValue(false);
-      const loggerSpy = spyOn(loggerService, 'logError');
+      ).mockReturnValue(false);
+      const loggerSpy = vi.spyOn(loggerService, 'logError');
 
       popUpLoginService.loginWithPopUpStandard(config, [config]).subscribe({
         error: (err) => {
@@ -68,27 +69,27 @@ describe('PopUpLoginService', () => {
           expect(err.message).toBe('Invalid response type!');
         },
       });
-    }));
+    });
 
-    it('calls urlService.getAuthorizeUrl() if everything fits', waitForAsync(() => {
+    it('calls urlService.getAuthorizeUrl() if everything fits', async () => {
       const config = {
         authWellknownEndpointUrl: 'authWellknownEndpoint',
         responseType: 'stubValue',
       };
 
-      spyOn(
+      vi.spyOn(
         responseTypValidationService,
         'hasConfigValidResponseType'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         authWellKnownService,
         'queryAndStoreAuthWellKnownEndPoints'
-      ).and.returnValue(of({}));
-      spyOnProperty(popupService, 'result$').and.returnValue(
+      ).mockReturnValue(of({}));
+      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
         of({} as PopupResult)
       );
-      spyOn(urlService, 'getAuthorizeUrl').and.returnValue(of('someUrl'));
-      spyOn(checkAuthService, 'checkAuth').and.returnValue(
+      vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
+      vi.spyOn(checkAuthService, 'checkAuth').mockReturnValue(
         of({} as LoginResponse)
       );
 
@@ -97,74 +98,78 @@ describe('PopUpLoginService', () => {
         .subscribe(() => {
           expect(urlService.getAuthorizeUrl).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('opens popup if everything fits', waitForAsync(() => {
+    it('opens popup if everything fits', async () => {
       const config = {
         authWellknownEndpointUrl: 'authWellknownEndpoint',
         responseType: 'stubValue',
       };
 
-      spyOn(
+      vi.spyOn(
         responseTypValidationService,
         'hasConfigValidResponseType'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         authWellKnownService,
         'queryAndStoreAuthWellKnownEndPoints'
-      ).and.returnValue(of({}));
-      spyOn(urlService, 'getAuthorizeUrl').and.returnValue(of('someUrl'));
-      spyOnProperty(popupService, 'result$').and.returnValue(
+      ).mockReturnValue(of({}));
+      vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
+      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
         of({} as PopupResult)
       );
-      spyOn(checkAuthService, 'checkAuth').and.returnValue(
+      vi.spyOn(checkAuthService, 'checkAuth').mockReturnValue(
         of({} as LoginResponse)
       );
-      const popupSpy = spyOn(popupService, 'openPopUp');
+      const popupSpy = vi.spyOn(popupService, 'openPopUp');
 
       popUpLoginService
         .loginWithPopUpStandard(config, [config])
         .subscribe(() => {
           expect(popupSpy).toHaveBeenCalled();
         });
-    }));
+    });
 
-    it('returns three properties when popupservice received an url', waitForAsync(() => {
+    it('returns three properties when popupservice received an url', async () => {
       const config = {
         authWellknownEndpointUrl: 'authWellknownEndpoint',
         responseType: 'stubValue',
       };
 
-      spyOn(
+      vi.spyOn(
         responseTypValidationService,
         'hasConfigValidResponseType'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         authWellKnownService,
         'queryAndStoreAuthWellKnownEndPoints'
-      ).and.returnValue(of({}));
-      spyOn(urlService, 'getAuthorizeUrl').and.returnValue(of('someUrl'));
-      spyOn(popupService, 'openPopUp');
-      const checkAuthSpy = spyOn(checkAuthService, 'checkAuth').and.returnValue(
-        of({
-          isAuthenticated: true,
-          configId: 'configId1',
-          idToken: '',
-          userData: { any: 'userData' },
-          accessToken: 'anyAccessToken',
-        })
-      );
+      ).mockReturnValue(of({}));
+      vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
+      vi.spyOn(popupService, 'openPopUp');
+      const checkAuthSpy = vi
+        .spyOn(checkAuthService, 'checkAuth')
+        .mockReturnValue(
+          of({
+            isAuthenticated: true,
+            configId: 'configId1',
+            idToken: '',
+            userData: { any: 'userData' },
+            accessToken: 'anyAccessToken',
+          })
+        );
       const popupResult: PopupResult = {
         userClosed: false,
         receivedUrl: 'someUrl',
       };
 
-      spyOnProperty(popupService, 'result$').and.returnValue(of(popupResult));
+      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
+        of(popupResult)
+      );
 
       popUpLoginService
         .loginWithPopUpStandard(config, [config])
         .subscribe((result) => {
-          expect(checkAuthSpy).toHaveBeenCalledOnceWith(
+          expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
             config,
             [config],
             'someUrl'
@@ -178,31 +183,33 @@ describe('PopUpLoginService', () => {
             accessToken: 'anyAccessToken',
           });
         });
-    }));
+    });
 
-    it('returns two properties if popup was closed by user', waitForAsync(() => {
+    it('returns two properties if popup was closed by user', async () => {
       const config = {
         authWellknownEndpointUrl: 'authWellknownEndpoint',
         responseType: 'stubValue',
         configId: 'configId1',
       };
 
-      spyOn(
+      vi.spyOn(
         responseTypValidationService,
         'hasConfigValidResponseType'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         authWellKnownService,
         'queryAndStoreAuthWellKnownEndPoints'
-      ).and.returnValue(of({}));
-      spyOn(urlService, 'getAuthorizeUrl').and.returnValue(of('someUrl'));
-      spyOn(popupService, 'openPopUp');
-      const checkAuthSpy = spyOn(checkAuthService, 'checkAuth').and.returnValue(
-        of({} as LoginResponse)
-      );
+      ).mockReturnValue(of({}));
+      vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
+      vi.spyOn(popupService, 'openPopUp');
+      const checkAuthSpy = vi
+        .spyOn(checkAuthService, 'checkAuth')
+        .mockReturnValue(of({} as LoginResponse));
       const popupResult = { userClosed: true } as PopupResult;
 
-      spyOnProperty(popupService, 'result$').and.returnValue(of(popupResult));
+      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
+        of(popupResult)
+      );
 
       popUpLoginService
         .loginWithPopUpStandard(config, [config])
@@ -217,6 +224,6 @@ describe('PopUpLoginService', () => {
             accessToken: '',
           });
         });
-    }));
+    });
   });
 });

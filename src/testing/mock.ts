@@ -1,11 +1,11 @@
-import { Provider } from 'injection-js';
+import type { Provider } from 'injection-js';
 
 export function mockClass<T>(obj: new (...args: any[]) => T): any {
   const keys = Object.getOwnPropertyNames(obj.prototype);
   const allMethods = keys.filter((key) => {
     try {
       return typeof obj.prototype[key] === 'function';
-    } catch (error) {
+    } catch {
       return false;
     }
   });
@@ -13,21 +13,20 @@ export function mockClass<T>(obj: new (...args: any[]) => T): any {
 
   const mockedClass = class T {};
 
-  allMethods.forEach(
-    (method: string) =>
-      ((mockedClass.prototype as any)[method] = (): void => {
-        return;
-      })
-  );
+  for (const method of allMethods) {
+    (mockedClass.prototype as any)[method] = (): void => {
+      return;
+    };
+  }
 
-  allProperties.forEach((method) => {
+  for (const method of allProperties) {
     Object.defineProperty(mockedClass.prototype, method, {
       get() {
         return '';
       },
       configurable: true,
     });
-  });
+  }
 
   return mockedClass;
 }

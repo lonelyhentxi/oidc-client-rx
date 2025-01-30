@@ -1,6 +1,7 @@
-import { TestBed } from '@angular/core/testing';
-import { mockClass, mockProvider } from '../../test/auto-mock';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
+import { mockClass, mockProvider } from '../testing/mock';
 import { AbstractSecurityStorage } from './abstract-security-storage';
 import { BrowserStorageService } from './browser-storage.service';
 import { DefaultSessionStorageService } from './default-sessionstorage.service';
@@ -34,7 +35,7 @@ describe('BrowserStorageService', () => {
     it('returns null if there is no storage', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(false);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(false);
 
       expect(service.read('anything', config)).toBeNull();
     });
@@ -42,7 +43,7 @@ describe('BrowserStorageService', () => {
     it('returns null if getItem returns null', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
 
       const result = service.read('anything', config);
 
@@ -52,10 +53,10 @@ describe('BrowserStorageService', () => {
     it('returns the item if getItem returns an item', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
       const returnValue = `{ "name":"John", "age":30, "city":"New York"}`;
 
-      spyOn(abstractSecurityStorage, 'read').and.returnValue(returnValue);
+      vi.spyOn(abstractSecurityStorage, 'read').mockReturnValue(returnValue);
       const result = service.read('anything', config);
 
       expect(result).toEqual(JSON.parse(returnValue));
@@ -66,24 +67,21 @@ describe('BrowserStorageService', () => {
     it('returns false if there is no storage', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(false);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(false);
 
-      expect(service.write('anyvalue', config)).toBeFalse();
+      expect(service.write('anyvalue', config)).toBeFalsy();
     });
 
     it('writes object correctly with configId', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
-      const writeSpy = spyOn(
-        abstractSecurityStorage,
-        'write'
-      ).and.callThrough();
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
+      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write')();
 
       const result = service.write({ anyKey: 'anyvalue' }, config);
 
       expect(result).toBe(true);
-      expect(writeSpy).toHaveBeenCalledOnceWith(
+      expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
         'configId1',
         JSON.stringify({ anyKey: 'anyvalue' })
       );
@@ -92,18 +90,15 @@ describe('BrowserStorageService', () => {
     it('writes null if item is falsy', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
 
-      const writeSpy = spyOn(
-        abstractSecurityStorage,
-        'write'
-      ).and.callThrough();
+      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write')();
       const somethingFalsy = '';
 
       const result = service.write(somethingFalsy, config);
 
       expect(result).toBe(true);
-      expect(writeSpy).toHaveBeenCalledOnceWith(
+      expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
         'configId1',
         JSON.stringify(null)
       );
@@ -114,41 +109,35 @@ describe('BrowserStorageService', () => {
     it('returns false if there is no storage', () => {
       const config = { configId: 'configId1' };
 
-      spyOn(service as any, 'hasStorage').and.returnValue(false);
-      expect(service.remove('anything', config)).toBeFalse();
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(false);
+      expect(service.remove('anything', config)).toBeFalsy();
     });
 
     it('returns true if removeItem is called', () => {
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
       const config = { configId: 'configId1' };
 
-      const setItemSpy = spyOn(
-        abstractSecurityStorage,
-        'remove'
-      ).and.callThrough();
+      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'remove')();
 
       const result = service.remove('anyKey', config);
 
       expect(result).toBe(true);
-      expect(setItemSpy).toHaveBeenCalledOnceWith('anyKey');
+      expect(setItemSpy).toHaveBeenCalledExactlyOnceWith('anyKey');
     });
   });
 
   describe('clear', () => {
     it('returns false if there is no storage', () => {
-      spyOn(service as any, 'hasStorage').and.returnValue(false);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(false);
       const config = { configId: 'configId1' };
 
-      expect(service.clear(config)).toBeFalse();
+      expect(service.clear(config)).toBeFalsy();
     });
 
     it('returns true if clear is called', () => {
-      spyOn(service as any, 'hasStorage').and.returnValue(true);
+      vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
 
-      const setItemSpy = spyOn(
-        abstractSecurityStorage,
-        'clear'
-      ).and.callThrough();
+      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'clear')();
       const config = { configId: 'configId1' };
 
       const result = service.clear(config);
@@ -161,7 +150,7 @@ describe('BrowserStorageService', () => {
   describe('hasStorage', () => {
     it('returns false if there is no storage', () => {
       (Storage as any) = undefined;
-      expect((service as any).hasStorage()).toBeFalse();
+      expect((service as any).hasStorage()).toBeFalsy();
       Storage = Storage;
     });
   });

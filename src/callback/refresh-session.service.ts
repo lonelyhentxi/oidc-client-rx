@@ -1,10 +1,10 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import {
+  type Observable,
+  TimeoutError,
   forkJoin,
-  Observable,
   of,
   throwError,
-  TimeoutError,
   timer,
 } from 'rxjs';
 import {
@@ -18,13 +18,13 @@ import {
 } from 'rxjs/operators';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { AuthWellKnownService } from '../config/auth-well-known/auth-well-known.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { RefreshSessionIframeService } from '../iframe/refresh-session-iframe.service';
 import { SilentRenewService } from '../iframe/silent-renew.service';
 import { LoggerService } from '../logging/logger.service';
-import { LoginResponse } from '../login/login-response';
+import type { LoginResponse } from '../login/login-response';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { UserService } from '../user-data/user.service';
 import { FlowHelper } from '../utils/flowHelper/flow-helper.service';

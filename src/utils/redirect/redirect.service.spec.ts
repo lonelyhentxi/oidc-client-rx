@@ -1,5 +1,6 @@
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
-import { TestBed } from '@angular/core/testing';
 import { RedirectService } from './redirect.service';
 
 describe('Redirect Service Tests', () => {
@@ -38,9 +39,9 @@ describe('Redirect Service Tests', () => {
   });
 
   it('redirectTo sets window location href', () => {
-    const spy = spyOnProperty(myDocument.location, 'href', 'set');
+    const spy = vi.spyOnProperty(myDocument.location, 'href', 'set');
 
     service.redirectTo('anyurl');
-    expect(spy).toHaveBeenCalledOnceWith('anyurl');
+    expect(spy).toHaveBeenCalledExactlyOnceWith('anyurl');
   });
 });

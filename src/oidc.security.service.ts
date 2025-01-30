@@ -1,28 +1,28 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
-import { AuthOptions, LogoutAuthOptions } from './auth-options';
-import { AuthenticatedResult } from './auth-state/auth-result';
+import { Injectable, inject } from 'injection-js';
+import { toSignal } from 'injection-js/rxjs-interop';
+import type { Observable } from 'rxjs';
+import { concatMap, map, shareReplay } from 'rxjs/operators';
+import type { AuthOptions, LogoutAuthOptions } from './auth-options';
+import type { AuthenticatedResult } from './auth-state/auth-result';
 import { AuthStateService } from './auth-state/auth-state.service';
 import { CheckAuthService } from './auth-state/check-auth.service';
 import { CallbackService } from './callback/callback.service';
 import { RefreshSessionService } from './callback/refresh-session.service';
-import { AuthWellKnownEndpoints } from './config/auth-well-known/auth-well-known-endpoints';
+import type { AuthWellKnownEndpoints } from './config/auth-well-known/auth-well-known-endpoints';
 import { AuthWellKnownService } from './config/auth-well-known/auth-well-known.service';
 import { ConfigurationService } from './config/config.service';
-import { OpenIdConfiguration } from './config/openid-configuration';
-import { AuthResult } from './flows/callback-context';
+import type { OpenIdConfiguration } from './config/openid-configuration';
+import type { AuthResult } from './flows/callback-context';
 import { FlowsDataService } from './flows/flows-data.service';
 import { CheckSessionService } from './iframe/check-session.service';
-import { LoginResponse } from './login/login-response';
+import type { LoginResponse } from './login/login-response';
 import { LoginService } from './login/login.service';
-import { PopupOptions } from './login/popup/popup-options';
+import type { PopupOptions } from './login/popup/popup-options';
 import { LogoffRevocationService } from './logoff-revoke/logoff-revocation.service';
 import { UserService } from './user-data/user.service';
-import { UserDataResult } from './user-data/userdata-result';
+import type { UserDataResult } from './user-data/userdata-result';
 import { TokenHelperService } from './utils/tokenHelper/token-helper.service';
 import { UrlService } from './utils/url/url.service';
-import { toSignal } from 'injection-js/rxjs-interop';
 
 @Injectable()
 export class OidcSecurityService {
@@ -355,10 +355,17 @@ export class OidcSecurityService {
    * @param configId The configId to perform the action in behalf of. If not passed, the first configs will be taken
    * @param authOptions The custom options for the the authentication request.
    */
-  authorize(configId?: string, authOptions?: AuthOptions): void {
-    this.configurationService
+  authorize(configId?: string, authOptions?: AuthOptions): Observable<void> {
+    const result$ = this.configurationService
       .getOpenIDConfiguration(configId)
-      .subscribe((config) => this.loginService.login(config, authOptions));
+      .pipe(
+        map((config) => this.loginService.login(config, authOptions)),
+        shareReplay(1)
+      );
+
+    result$.subscribe();
+
+    return result$;
   }
 
   /**
@@ -471,24 +478,34 @@ export class OidcSecurityService {
    *
    * @param configId The configId to perform the action in behalf of. If not passed, the first configs will be taken
    */
-  logoffLocal(configId?: string): void {
-    this.configurationService
+  logoffLocal(configId?: string): Observable<void> {
+    const result$ = this.configurationService
       .getOpenIDConfigurations(configId)
-      .subscribe(({ allConfigs, currentConfig }) =>
-        this.logoffRevocationService.logoffLocal(currentConfig, allConfigs)
+      .pipe(
+        map(({ allConfigs, currentConfig }) =>
+          this.logoffRevocationService.logoffLocal(currentConfig, allConfigs)
+        ),
+        shareReplay(1)
       );
+    result$.subscribe();
+    return result$;
   }
 
   /**
    * Logs the user out of the application for all configs without logging them out of the server.
    * Use this method if you have _multiple_ configs enabled.
    */
-  logoffLocalMultiple(): void {
-    this.configurationService
-      .getOpenIDConfigurations()
-      .subscribe(({ allConfigs }) =>
+  logoffLocalMultiple(): Observable<void> {
+    const result$ = this.configurationService.getOpenIDConfigurations().pipe(
+      map(({ allConfigs }) =>
         this.logoffRevocationService.logoffLocalMultiple(allConfigs)
-      );
+      ),
+      shareReplay(1)
+    );
+
+    result$.subscribe();
+
+    return result$;
   }
 
   /**

@@ -1,5 +1,7 @@
 # Angular Lib for OpenID Connect & OAuth2
 
+TODO
+
 ![Build Status](https://github.com/damienbod/oidc-client-rx/actions/workflows/build.yml/badge.svg?branch=main) [![npm](https://img.shields.io/npm/v/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![npm](https://img.shields.io/npm/dm/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![npm](https://img.shields.io/npm/l/oidc-client-rx.svg)](https://www.npmjs.com/package/oidc-client-rx) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Coverage Status](https://coveralls.io/repos/github/damienbod/oidc-client-rx/badge.svg?branch=main)](https://coveralls.io/github/damienbod/oidc-client-rx?branch=main)
 
 <p align="center">
@@ -155,7 +157,7 @@ const token = this.oidcSecurityService.getAccessToken().subscribe(...);
 And then you can use it in the HttpHeaders
 
 ```ts
-import { HttpHeaders } from '@angular/common/http';
+import { HttpHeaders } from '@ngify/http';
 
 const token = this.oidcSecurityServices.getAccessToken().subscribe((token) => {
   const httpOptions = {

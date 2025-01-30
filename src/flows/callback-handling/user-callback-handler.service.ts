@@ -1,12 +1,12 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthStateService } from '../../auth-state/auth-state.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { UserService } from '../../user-data/user.service';
-import { StateValidationResult } from '../../validation/state-validation-result';
-import { CallbackContext } from '../callback-context';
+import type { StateValidationResult } from '../../validation/state-validation-result';
+import type { CallbackContext } from '../callback-context';
 import { FlowsDataService } from '../flows-data.service';
 import { ResetAuthDataService } from '../reset-auth-data.service';
 

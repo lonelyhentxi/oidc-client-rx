@@ -1,13 +1,14 @@
-import { DOCUMENT } from '../../dom';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { of } from 'rxjs';
-import { mockProvider } from '../../../test/auto-mock';
+import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
+import { DOCUMENT } from '../../dom';
 import { LoggerService } from '../../logging/logger.service';
-import { StateValidationResult } from '../../validation/state-validation-result';
+import { mockProvider } from '../../testing/mock';
+import type { StateValidationResult } from '../../validation/state-validation-result';
 import { StateValidationService } from '../../validation/state-validation.service';
 import { ValidationResult } from '../../validation/validation-result';
-import { CallbackContext } from '../callback-context';
+import type { CallbackContext } from '../callback-context';
 import { ResetAuthDataService } from '../reset-auth-data.service';
 import { StateValidationCallbackHandlerService } from './state-validation-callback-handler.service';
 
@@ -56,8 +57,11 @@ describe('StateValidationCallbackHandlerService', () => {
   });
 
   describe('callbackStateValidation', () => {
-    it('returns callbackContext with validationResult if validationResult is valid', waitForAsync(() => {
-      spyOn(stateValidationService, 'getValidatedStateResult').and.returnValue(
+    it('returns callbackContext with validationResult if validationResult is valid', async () => {
+      vi.spyOn(
+        stateValidationService,
+        'getValidatedStateResult'
+      ).mockReturnValue(
         of({
           idToken: 'idTokenJustForTesting',
           authResponseIsValid: true,
@@ -68,7 +72,7 @@ describe('StateValidationCallbackHandlerService', () => {
       service
         .callbackStateValidation(
           {} as CallbackContext,
-          allConfigs[0],
+          allConfigs[0]!,
           allConfigs
         )
         .subscribe((newCallbackContext) => {
@@ -79,47 +83,53 @@ describe('StateValidationCallbackHandlerService', () => {
             },
           } as CallbackContext);
         });
-    }));
+    });
 
-    it('logs error in case of an error', waitForAsync(() => {
-      spyOn(stateValidationService, 'getValidatedStateResult').and.returnValue(
+    it('logs error in case of an error', async () => {
+      vi.spyOn(
+        stateValidationService,
+        'getValidatedStateResult'
+      ).mockReturnValue(
         of({
           authResponseIsValid: false,
         } as StateValidationResult)
       );
 
-      const loggerSpy = spyOn(loggerService, 'logWarning');
+      const loggerSpy = vi.spyOn(loggerService, 'logWarning');
       const allConfigs = [{ configId: 'configId1' }];
 
       service
         .callbackStateValidation(
           {} as CallbackContext,
-          allConfigs[0],
+          allConfigs[0]!,
           allConfigs
         )
         .subscribe({
           error: () => {
-            expect(loggerSpy).toHaveBeenCalledOnceWith(
-              allConfigs[0],
+            expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
+              allConfigs[0]!,
               'authorizedCallback, token(s) validation failed, resetting. Hash: &anyFakeHash'
             );
           },
         });
-    }));
+    });
 
-    it('calls resetAuthDataService.resetAuthorizationData and authStateService.updateAndPublishAuthState in case of an error', waitForAsync(() => {
-      spyOn(stateValidationService, 'getValidatedStateResult').and.returnValue(
+    it('calls resetAuthDataService.resetAuthorizationData and authStateService.updateAndPublishAuthState in case of an error', async () => {
+      vi.spyOn(
+        stateValidationService,
+        'getValidatedStateResult'
+      ).mockReturnValue(
         of({
           authResponseIsValid: false,
           state: ValidationResult.LoginRequired,
         } as StateValidationResult)
       );
 
-      const resetAuthorizationDataSpy = spyOn(
+      const resetAuthorizationDataSpy = vi.spyOn(
         resetAuthDataService,
         'resetAuthorizationData'
       );
-      const updateAndPublishAuthStateSpy = spyOn(
+      const updateAndPublishAuthStateSpy = vi.spyOn(
         authStateService,
         'updateAndPublishAuthState'
       );
@@ -128,19 +138,21 @@ describe('StateValidationCallbackHandlerService', () => {
       service
         .callbackStateValidation(
           { isRenewProcess: true } as CallbackContext,
-          allConfigs[0],
+          allConfigs[0]!,
           allConfigs
         )
         .subscribe({
           error: () => {
             expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
-            expect(updateAndPublishAuthStateSpy).toHaveBeenCalledOnceWith({
+            expect(
+              updateAndPublishAuthStateSpy
+            ).toHaveBeenCalledExactlyOnceWith({
               isAuthenticated: false,
               validationResult: ValidationResult.LoginRequired,
               isRenewProcess: true,
             });
           },
         });
-    }));
+    });
   });
 });

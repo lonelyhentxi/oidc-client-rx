@@ -1,12 +1,13 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@/testing';
 import { of } from 'rxjs';
-import { mockProvider } from '../../test/auto-mock';
-import { AuthWellKnownEndpoints } from '../config/auth-well-known/auth-well-known-endpoints';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import { vi } from 'vitest';
+import type { AuthWellKnownEndpoints } from '../config/auth-well-known/auth-well-known-endpoints';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { LogLevel } from '../logging/log-level';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
+import { mockProvider } from '../testing/mock';
 import { EqualityService } from '../utils/equality/equality.service';
 import { FlowHelper } from '../utils/flowHelper/flow-helper.service';
 import { TokenHelperService } from '../utils/tokenHelper/token-helper.service';
@@ -112,10 +113,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -187,10 +188,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -262,10 +263,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -337,10 +338,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -412,10 +413,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -487,10 +488,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -562,10 +563,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -637,10 +638,10 @@ describe('State Validation Service', () => {
         triggerRefreshWhenIdTokenExpired: true,
       };
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -686,7 +687,7 @@ describe('State Validation Service', () => {
   });
 
   describe('getValidatedStateResult', () => {
-    it('should return authResponseIsValid false when null is passed', waitForAsync(() => {
+    it('should return authResponseIsValid false when null is passed', async () => {
       const isValidObs$ = stateValidationService.getValidatedStateResult(
         {} as CallbackContext,
         config
@@ -695,18 +696,18 @@ describe('State Validation Service', () => {
       isValidObs$.subscribe((isValid) => {
         expect(isValid.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid context error', waitForAsync(() => {
-      spyOn(
+    it('should return invalid context error', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'id_token token';
 
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
         false
       );
 
@@ -732,70 +733,79 @@ describe('State Validation Service', () => {
       isValidObs$.subscribe((isValid) => {
         expect(isValid.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenExpNotExpired is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenExpNotExpired is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'id_token token';
 
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
 
-      spyOn(tokenValidationService, 'hasIdTokenExpired').and.returnValue(false);
-      spyOn(
+      vi.spyOn(tokenValidationService, 'hasIdTokenExpired').mockReturnValue(
+        false
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateAccessTokenNotExpired'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        true
-      );
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(true)
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
 
       config.clientId = '';
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(false);
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      ).mockReturnValue(false);
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -817,7 +827,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback id token expired'
         );
@@ -826,25 +836,25 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateStateFromHashCallback is false', waitForAsync(() => {
-      const readSpy = spyOn(storagePersistenceService, 'read');
+    it('should return invalid result if validateStateFromHashCallback is false', async () => {
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      spyOn(
+        .mockReturnValue('authStateControl');
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -870,7 +880,7 @@ describe('State Validation Service', () => {
       ).toHaveBeenCalled();
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect state'
         );
@@ -879,48 +889,57 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBeDefined();
         expect(state.idToken).toBe('');
       });
-    }));
+    });
 
-    it('access_token should equal result.access_token and is valid if response_type is "id_token token"', waitForAsync(() => {
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+    it('access_token should equal result.access_token and is valid if response_type is "id_token token"', async () => {
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'hasIdTokenExpired').mockReturnValue(
+        false
       );
-      spyOn(tokenValidationService, 'hasIdTokenExpired').and.returnValue(false);
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateAccessTokenNotExpired'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        true
-      );
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(true)
       );
 
@@ -929,15 +948,15 @@ describe('State Validation Service', () => {
       config.autoCleanStateAfterAuthentication = false;
       config.responseType = 'id_token token';
 
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -964,32 +983,33 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(true);
       });
-    }));
+    });
 
-    it('should return invalid result if validateSignatureIdToken is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateSignatureIdToken is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(false)
-      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(false));
 
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      const logDebugSpy = spyOn(loggerService, 'logDebug').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      const logDebugSpy = vi
+        .spyOn(loggerService, 'logDebug')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1012,7 +1032,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logDebugSpy.calls.allArgs()).toEqual([
+        expect(logDebugSpy).toBeCalledWith([
           [config, 'authCallback Signature validation failed id_token'],
           [config, 'authCallback token(s) invalid'],
         ]);
@@ -1022,36 +1042,37 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenNonce is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenNonce is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         false
       );
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1073,7 +1094,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect nonce, did you call the checkAuth() method multiple times?'
         );
@@ -1082,43 +1103,45 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateRequiredIdToken is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateRequiredIdToken is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'id_token token';
 
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
 
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
 
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
 
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        false
-      );
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(false);
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logDebugSpy = spyOn(loggerService, 'logDebug').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logDebugSpy = vi
+        .spyOn(loggerService, 'logDebug')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1153,46 +1176,48 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenIatMaxOffset is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenIatMaxOffset is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'id_token token';
 
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1214,7 +1239,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback Validation, iat rejected id_token was issued too far away from the current time'
         );
@@ -1223,53 +1248,55 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenIss is false and has authWellKnownEndPoints', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenIss is false and has authWellKnownEndPoints', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'id_token token';
 
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
 
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
 
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
 
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
         false
       );
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1291,7 +1318,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect iss does not match authWellKnownEndpoints issuer'
         );
@@ -1300,41 +1327,43 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenIss is false and has no authWellKnownEndPoints', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenIss is false and has no authWellKnownEndPoints', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy.withArgs('authWellKnownEndPoints', config).and.returnValue(null);
+      readSpy.withArgs('authWellKnownEndPoints', config).mockReturnValue(null);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1356,7 +1385,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authWellKnownEndpoints is undefined'
         );
@@ -1367,49 +1396,53 @@ describe('State Validation Service', () => {
         expect(state.authResponseIsValid).toBe(false);
         expect(state.state).toBe(ValidationResult.NoAuthWellKnownEndPoints);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenAud is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenAud is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
         false
       );
 
       config.clientId = '';
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1431,7 +1464,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect aud'
         );
@@ -1440,51 +1473,57 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenAzpExistsIfMoreThanOneAud is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenAzpExistsIfMoreThanOneAud is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       config.clientId = '';
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1506,7 +1545,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback missing azp'
         );
@@ -1516,54 +1555,61 @@ describe('State Validation Service', () => {
         expect(state.authResponseIsValid).toBe(false);
         expect(state.state).toBe(ValidationResult.IncorrectAzp);
       });
-    }));
+    });
 
-    it('should return invalid result if validateIdTokenAzpValid is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if validateIdTokenAzpValid is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        false
-      );
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(false);
 
       config.clientId = '';
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1585,7 +1631,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect azp'
         );
@@ -1595,58 +1641,65 @@ describe('State Validation Service', () => {
         expect(state.authResponseIsValid).toBe(false);
         expect(state.state).toBe(ValidationResult.IncorrectAzp);
       });
-    }));
+    });
 
-    it('should return invalid result if isIdTokenAfterRefreshTokenRequestValid is false', waitForAsync(() => {
-      spyOn(
+    it('should return invalid result if isIdTokenAfterRefreshTokenRequestValid is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
-        tokenValidationService,
-        'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
         true
       );
-      spyOn(
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpExistsIfMoreThanOneAud'
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
+      vi.spyOn(
         stateValidationService as any,
         'isIdTokenAfterRefreshTokenRequestValid'
-      ).and.returnValue(false);
+      ).mockReturnValue(false);
 
       config.clientId = '';
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1668,7 +1721,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback pre, post id_token claims do not match in refresh'
         );
@@ -1680,67 +1733,76 @@ describe('State Validation Service', () => {
           ValidationResult.IncorrectIdTokenClaimsAfterRefresh
         );
       });
-    }));
+    });
 
-    it('Reponse is valid if authConfiguration.response_type does not equal "id_token token"', waitForAsync(() => {
-      spyOn(tokenValidationService, 'hasIdTokenExpired').and.returnValue(false);
-      spyOn(
+    it('Reponse is valid if authConfiguration.response_type does not equal "id_token token"', async () => {
+      vi.spyOn(tokenValidationService, 'hasIdTokenExpired').mockReturnValue(
+        false
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateAccessTokenNotExpired'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        true
-      );
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(true)
       );
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
       config.clientId = '';
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'NOT id_token token';
       config.autoCleanStateAfterAuthentication = false;
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
-      const logDebugSpy = spyOn(loggerService, 'logDebug').and.callFake(
-        () => undefined
-      );
+      const logDebugSpy = vi
+        .spyOn(loggerService, 'logDebug')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1776,69 +1838,78 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(true);
       });
-    }));
+    });
 
-    it('Response is invalid if validateIdTokenAtHash is false', waitForAsync(() => {
-      spyOn(
+    it('Response is invalid if validateIdTokenAtHash is false', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
       config.clientId = '';
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
       config.responseType = 'id_token token';
       config.autoCleanStateAfterAuthentication = false;
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(false)
       );
 
-      spyOn(tokenValidationService, 'hasIdTokenExpired').and.returnValue(false);
-      spyOn(
+      vi.spyOn(tokenValidationService, 'hasIdTokenExpired').mockReturnValue(
+        false
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateAccessTokenNotExpired'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        true
-      );
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
 
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
-      const logWarningSpy = spyOn(loggerService, 'logWarning').and.callFake(
-        () => undefined
-      );
+      const logWarningSpy = vi
+        .spyOn(loggerService, 'logWarning')
+        .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1860,7 +1931,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logWarningSpy).toHaveBeenCalledOnceWith(
+        expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           'authCallback incorrect at_hash'
         );
@@ -1869,67 +1940,74 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBe('decoded_id_token');
         expect(state.authResponseIsValid).toBe(false);
       });
-    }));
+    });
 
-    it('should return valid result if validateIdTokenIss is false and iss_validation_off is true', waitForAsync(() => {
+    it('should return valid result if validateIdTokenIss is false and iss_validation_off is true', async () => {
       config.issValidationOff = true;
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
         false
       );
 
-      spyOn(tokenValidationService, 'hasIdTokenExpired').and.returnValue(false);
-      spyOn(
+      vi.spyOn(tokenValidationService, 'hasIdTokenExpired').mockReturnValue(
+        false
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateAccessTokenNotExpired'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenAzpExistsIfMoreThanOneAud'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAzpValid').and.returnValue(
-        true
-      );
+      ).mockReturnValue(true);
+      vi.spyOn(
+        tokenValidationService,
+        'validateIdTokenAzpValid'
+      ).mockReturnValue(true);
 
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
-      spyOn(
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(true)
       );
       config.responseType = 'id_token token';
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
-      const logDebugSpy = spyOn(loggerService, 'logDebug'); // .and.callFake(() => undefined);
+      const logDebugSpy = vi.spyOn(loggerService, 'logDebug'); // .mockImplementation(() => undefined);
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -1951,7 +2029,7 @@ describe('State Validation Service', () => {
       );
 
       stateObs$.subscribe((state) => {
-        expect(logDebugSpy.calls.allArgs()).toEqual([
+        expect(logDebugSpy).toBeCalledWith([
           [config, 'iss validation is turned off, this is not recommended!'],
           [config, 'authCallback token(s) validated, continue'],
         ]);
@@ -1961,54 +2039,60 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBeDefined();
         expect(state.idToken).toBe('id_tokenTEST');
       });
-    }));
+    });
 
-    it('should return valid if there is no id_token', waitForAsync(() => {
-      spyOn(
+    it('should return valid if there is no id_token', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
+      ).mockReturnValue(true);
 
       config.responseType = 'code';
-      spyOn(tokenHelperService, 'getPayloadFromToken').and.returnValue(
+      vi.spyOn(tokenHelperService, 'getPayloadFromToken').mockReturnValue(
         'decoded_id_token'
       );
-      spyOn(tokenValidationService, 'validateSignatureIdToken').and.returnValue(
-        of(true)
-      );
-      spyOn(tokenValidationService, 'validateIdTokenNonce').and.returnValue(
+      vi.spyOn(
+        tokenValidationService,
+        'validateSignatureIdToken'
+      ).mockReturnValue(of(true));
+      vi.spyOn(tokenValidationService, 'validateIdTokenNonce').mockReturnValue(
         true
       );
-      spyOn(tokenValidationService, 'validateRequiredIdToken').and.returnValue(
-        true
-      );
+      vi.spyOn(
+        tokenValidationService,
+        'validateRequiredIdToken'
+      ).mockReturnValue(true);
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
       config.clientId = '';
-      spyOn(
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenIatMaxOffset'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAud').and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenAud').mockReturnValue(
+        true
+      );
+      vi.spyOn(
         tokenValidationService,
         'validateIdTokenExpNotExpired'
-      ).and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenIss').and.returnValue(true);
-      spyOn(tokenValidationService, 'validateIdTokenAtHash').and.returnValue(
+      ).mockReturnValue(true);
+      vi.spyOn(tokenValidationService, 'validateIdTokenIss').mockReturnValue(
+        true
+      );
+      vi.spyOn(tokenValidationService, 'validateIdTokenAtHash').mockReturnValue(
         of(true)
       );
 
       config.autoCleanStateAfterAuthentication = false;
 
-      const readSpy = spyOn(storagePersistenceService, 'read');
+      const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
       readSpy
         .withArgs('authWellKnownEndPoints', config)
-        .and.returnValue(authWellKnownEndpoints);
+        .mockReturnValue(authWellKnownEndpoints);
       readSpy
         .withArgs('authStateControl', config)
-        .and.returnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).and.returnValue('authNonce');
+        .mockReturnValue('authStateControl');
+      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -2036,18 +2120,18 @@ describe('State Validation Service', () => {
         expect(state.decodedIdToken).toBeDefined();
         expect(state.authResponseIsValid).toBe(true);
       });
-    }));
+    });
 
-    it('should return OK if disableIdTokenValidation is true', waitForAsync(() => {
-      spyOn(
+    it('should return OK if disableIdTokenValidation is true', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         flowHelper,
         'isCurrentFlowImplicitFlowWithAccessToken'
-      ).and.returnValue(false);
-      spyOn(flowHelper, 'isCurrentFlowCodeFlow').and.returnValue(false);
+      ).mockReturnValue(false);
+      vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(false);
 
       config.responseType = 'id_token token';
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
@@ -2074,18 +2158,18 @@ describe('State Validation Service', () => {
         expect(isValid.state).toBe(ValidationResult.Ok);
         expect(isValid.authResponseIsValid).toBe(true);
       });
-    }));
+    });
 
-    it('should return OK if disableIdTokenValidation is true', waitForAsync(() => {
-      spyOn(
+    it('should return OK if disableIdTokenValidation is true', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         flowHelper,
         'isCurrentFlowImplicitFlowWithAccessToken'
-      ).and.returnValue(false);
-      spyOn(flowHelper, 'isCurrentFlowCodeFlow').and.returnValue(false);
+      ).mockReturnValue(false);
+      vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(false);
 
       config.responseType = 'id_token token';
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
@@ -2112,18 +2196,18 @@ describe('State Validation Service', () => {
         expect(isValid.state).toBe(ValidationResult.Ok);
         expect(isValid.authResponseIsValid).toBe(true);
       });
-    }));
+    });
 
-    it('should return OK if disableIdTokenValidation is false but inrefreshtokenflow and no id token is returned', waitForAsync(() => {
-      spyOn(
+    it('should return OK if disableIdTokenValidation is false but inrefreshtokenflow and no id token is returned', async () => {
+      vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
-      ).and.returnValue(true);
-      spyOn(
+      ).mockReturnValue(true);
+      vi.spyOn(
         flowHelper,
         'isCurrentFlowImplicitFlowWithAccessToken'
-      ).and.returnValue(false);
-      spyOn(flowHelper, 'isCurrentFlowCodeFlow').and.returnValue(false);
+      ).mockReturnValue(false);
+      vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(false);
 
       config.responseType = 'id_token token';
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
@@ -2150,6 +2234,6 @@ describe('State Validation Service', () => {
         expect(isValid.state).toBe(ValidationResult.Ok);
         expect(isValid.authResponseIsValid).toBe(true);
       });
-    }));
+    });
   });
 });

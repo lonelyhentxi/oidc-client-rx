@@ -1,13 +1,13 @@
-import { DOCUMENT } from '../../dom';
-import { inject, Injectable } from 'injection-js';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthStateService } from '../../auth-state/auth-state.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
+import { DOCUMENT } from '../../dom';
 import { LoggerService } from '../../logging/logger.service';
-import { StateValidationResult } from '../../validation/state-validation-result';
+import type { StateValidationResult } from '../../validation/state-validation-result';
 import { StateValidationService } from '../../validation/state-validation.service';
-import { CallbackContext } from '../callback-context';
+import type { CallbackContext } from '../callback-context';
 import { ResetAuthDataService } from '../reset-auth-data.service';
 
 @Injectable()

@@ -1,12 +1,12 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, of } from 'rxjs';
-import { AuthOptions } from '../auth-options';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of } from 'rxjs';
+import type { AuthOptions } from '../auth-options';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
-import { LoginResponse } from './login-response';
+import type { LoginResponse } from './login-response';
 import { ParLoginService } from './par/par-login.service';
 import { PopUpLoginService } from './popup/popup-login.service';
-import { PopupOptions } from './popup/popup-options';
+import type { PopupOptions } from './popup/popup-options';
 import { PopUpService } from './popup/popup.service';
 import { StandardLoginService } from './standard/standard-login.service';
 
@@ -45,12 +45,9 @@ export class LoginService {
     }
 
     if (usePushedAuthorisationRequests) {
-      return this.parLoginService.loginPar(configuration, authOptions);
+      this.parLoginService.loginPar(configuration, authOptions);
     } else {
-      return this.standardLoginService.loginStandard(
-        configuration,
-        authOptions
-      );
+      this.standardLoginService.loginStandard(configuration, authOptions);
     }
   }
 

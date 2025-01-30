@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@/testing';
+import { vi } from 'vitest';
 import { IFrameService } from '../../iframe/existing-iframe.service';
 import { EqualityService } from './equality.service';
 

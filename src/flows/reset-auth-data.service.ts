@@ -1,6 +1,6 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import { AuthStateService } from '../auth-state/auth-state.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 import { UserService } from '../user-data/user.service';
 import { FlowsDataService } from './flows-data.service';

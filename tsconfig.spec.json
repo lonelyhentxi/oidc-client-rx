@@ -1,10 +1,24 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/spec",
-    "types": ["jasmine", "node"]
+    "rootDir": ".",
+    "composite": true,
+    "noUncheckedIndexedAccess": true,
+    "outDir": "./dist/tsc-test",
+    "types": ["vitest/globals", "node"],
+    "paths": {
+      "@/testing": ["./src/testing"],
+      "@/testing/*": ["./src/testing/*"],
+      "injection-js": ["./node_modules/injection-js/lib/index.ts"],
+      "oidc-client-rx": ["./src"],
+      "oidc-client-rx/*": ["./src/*"]
+    }
   },
-  "files": ["src/test.ts"],
-  "include": ["**/*.spec.ts", "**/*.d.ts"]
+  "files": [],
+  "include": ["src/**/*.spec.ts", "src/testing"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
 }

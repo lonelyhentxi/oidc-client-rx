@@ -1,9 +1,9 @@
-import { InjectionToken, Provider } from 'injection-js';
+import { InjectionToken, type Provider } from 'injection-js';
 import {
-  StsConfigLoader,
+  type StsConfigLoader,
   StsConfigStaticLoader,
 } from './config/loader/config-loader';
-import { OpenIdConfiguration } from './config/openid-configuration';
+import type { OpenIdConfiguration } from './config/openid-configuration';
 
 export interface PassedInitialConfig {
   config?: OpenIdConfiguration | OpenIdConfiguration[];
