@@ -28,9 +28,8 @@ describe('JwtWindowCryptoService', () => {
         '44445543344242132145455aaabbdc3b4'
       );
 
-      observable.subscribe((value) => {
-        expect(value).toBe(outcome);
-      });
+      const value = await lastValueFrom(observable);
+expect(value).toBe(outcome);
     });
   });
 });

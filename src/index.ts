@@ -30,3 +30,4 @@ export * from './validation/state-validation-result';
 export * from './validation/validation-result';
 export * from './injection';
 export * from './router';
+export * from './http';

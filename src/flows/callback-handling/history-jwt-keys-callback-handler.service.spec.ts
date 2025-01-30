@@ -83,20 +83,17 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      service
+      await lastValueFrom(service
         .callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe(() => {
-          expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ));
+expect(storagePersistenceServiceSpy).toBeCalledWith([
             ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
             ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);
-          // write authnResult & jwtKeys
-          expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
-        });
+          ]);;
+expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
     });
 
     it('writes refresh_token into the storage without reuse (refresh token rotation)', async () => {
@@ -123,20 +120,17 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
         of({ keys: [] } as JwtKeys)
       );
 
-      service
+      await lastValueFrom(service
         .callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe(() => {
-          expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ));
+expect(storagePersistenceServiceSpy).toBeCalledWith([
             ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
             ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);
-          // write authnResult & refresh_token & jwtKeys
-          expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
-        });
+          ]);;
+expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
     });
 
     it('writes refresh_token into the storage with reuse (without refresh token rotation)', async () => {
@@ -163,21 +157,18 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      service
+      await lastValueFrom(service
         .callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe(() => {
-          expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ));
+expect(storagePersistenceServiceSpy).toBeCalledWith([
             ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
             ['reusable_refresh_token', 'dummy_refresh_token', allConfigs[0]],
             ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);
-          // write authnResult & refresh_token & jwtKeys
-          expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(3);
-        });
+          ]);;
+expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(3);
     });
 
     it('resetBrowserHistory if historyCleanup is turned on and is not in a renewProcess', async () => {
@@ -200,15 +191,13 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      service
+      await lastValueFrom(service
         .callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe(() => {
-          expect(windowSpy).toHaveBeenCalledTimes(1);
-        });
+        ));
+expect(windowSpy).toHaveBeenCalledTimes(1);
     });
 
     it('returns callbackContext with jwtkeys filled if everything works fine', async () => {
@@ -230,19 +219,17 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [{ kty: 'henlo' } as JwtKey] } as JwtKeys)
       );
-      service
+      const result = await lastValueFrom(service
         .callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe((result) => {
-          expect(result).toEqual({
+        ));
+expect(result).toEqual({
             isRenewProcess: false,
             authResult: DUMMY_AUTH_RESULT,
             jwtKeys: { keys: [{ kty: 'henlo' }] },
           } as CallbackContext);
-        });
     });
 
     it('returns error if no jwtKeys have been in the call --> keys are null', async () => {

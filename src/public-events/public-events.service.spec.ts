@@ -22,23 +22,21 @@ describe('Events Service', () => {
   });
 
   it('registering to single event with one event emit works', async () => {
-    eventsService.registerForEvents().subscribe((firedEvent) => {
-      expect(firedEvent).toBeTruthy();
-      expect(firedEvent).toEqual({
+    const firedEvent = await lastValueFrom(eventsService.registerForEvents());
+expect(firedEvent).toBeTruthy();;
+expect(firedEvent).toEqual({
         type: EventTypes.ConfigLoaded,
         value: { myKey: 'myValue' },
       });
-    });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
   });
 
   it('registering to single event with multiple same event emit works', async () => {
     const spy = jasmine.createSpy('spy');
 
-    eventsService.registerForEvents().subscribe((firedEvent) => {
-      spy(firedEvent);
-      expect(firedEvent).toBeTruthy();
-    });
+    const firedEvent = await lastValueFrom(eventsService.registerForEvents());
+spy(firedEvent);;
+expect(firedEvent).toBeTruthy();
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue2' });
 
@@ -54,16 +52,14 @@ describe('Events Service', () => {
   });
 
   it('registering to single event with multiple emit works', async () => {
-    eventsService
+    const firedEvent = await lastValueFrom(eventsService
       .registerForEvents()
-      .pipe(filter((x) => x.type === EventTypes.ConfigLoaded))
-      .subscribe((firedEvent) => {
-        expect(firedEvent).toBeTruthy();
-        expect(firedEvent).toEqual({
+      .pipe(filter((x) => x.type === EventTypes.ConfigLoaded)));
+expect(firedEvent).toBeTruthy();;
+expect(firedEvent).toEqual({
           type: EventTypes.ConfigLoaded,
           value: { myKey: 'myValue' },
         });
-      });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
     eventsService.fireEvent(EventTypes.NewAuthenticationResult, true);
   });

@@ -91,14 +91,13 @@ describe('ParService', () => {
         .spyOn(dataService, 'post')
         .mockReturnValue(of({}));
 
-      service.postParRequest({ configId: 'configId1' }).subscribe(() => {
-        expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
           'parEndpoint',
           'some-url123',
           { configId: 'configId1' },
           expect.any(HttpHeaders)
         );
-      });
     });
 
     it('Gives back correct object properties', async () => {
@@ -113,9 +112,8 @@ describe('ParService', () => {
       vi.spyOn(dataService, 'post').mockReturnValue(
         of({ expires_in: 123, request_uri: 'request_uri' })
       );
-      service.postParRequest({ configId: 'configId1' }).subscribe((result) => {
-        expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
-      });
+      const result = await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
     });
 
     it('throws error if data service has got an error', async () => {

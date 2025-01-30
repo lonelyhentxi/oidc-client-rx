@@ -320,9 +320,8 @@ describe('CheckSessionService', () => {
       serviceAsAny.lastIFrameRefresh = lastRefresh;
       serviceAsAny.iframeRefreshInterval = lastRefresh;
 
-      serviceAsAny.init().subscribe((result: any) => {
-        expect(result).toBeUndefined();
-      });
+      const result = await lastValueFrom(serviceAsAny.init());
+expect(result).toBeUndefined();
     });
   });
 
@@ -364,10 +363,9 @@ expect(result).toBe(false);
       const expectedResultsInOrder = [false, true];
       let counter = 0;
 
-      checkSessionService.checkSessionChanged$.subscribe((result) => {
-        expect(result).toBe(expectedResultsInOrder[counter]);
-        counter++;
-      });
+      const result = await lastValueFrom(checkSessionService.checkSessionChanged$);
+expect(result).toBe(expectedResultsInOrder[counter]);;
+counter++;
 
       (checkSessionService as any).checkSessionChangedInternal$.next(true);
     });

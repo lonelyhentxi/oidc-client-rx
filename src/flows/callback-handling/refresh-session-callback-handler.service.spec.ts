@@ -56,11 +56,9 @@ describe('RefreshSessionCallbackHandlerService', () => {
         existingIdToken: 'henlo-legger',
       } as CallbackContext;
 
-      service
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' })
-        .subscribe((callbackContext) => {
-          expect(callbackContext).toEqual(expectedCallbackContext);
-        });
+      const callbackContext = await lastValueFrom(service
+        .refreshSessionWithRefreshTokens({ configId: 'configId1' }));
+expect(callbackContext).toEqual(expectedCallbackContext);
     });
 
     it('throws error if no refresh token is given', async () => {

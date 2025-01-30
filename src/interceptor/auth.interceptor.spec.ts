@@ -103,9 +103,8 @@ describe(`AuthHttpInterceptor`, () => {
         true
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -130,9 +129,8 @@ describe(`AuthHttpInterceptor`, () => {
         true
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -159,9 +157,8 @@ describe(`AuthHttpInterceptor`, () => {
         'thisIsAToken'
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -185,9 +182,8 @@ describe(`AuthHttpInterceptor`, () => {
         true
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -212,9 +208,8 @@ describe(`AuthHttpInterceptor`, () => {
       );
       vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('');
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -231,9 +226,8 @@ describe(`AuthHttpInterceptor`, () => {
         false
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -263,9 +257,8 @@ describe(`AuthHttpInterceptor`, () => {
         matchingConfig: null,
       });
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -290,13 +283,11 @@ describe(`AuthHttpInterceptor`, () => {
         true
       );
 
-      httpClient.get(actionUrl).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl));
+expect(response).toBeTruthy();
 
-      httpClient.get(actionUrl2).subscribe((response) => {
-        expect(response).toBeTruthy();
-      });
+      const response = await lastValueFrom(httpClient.get(actionUrl2));
+expect(response).toBeTruthy();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 

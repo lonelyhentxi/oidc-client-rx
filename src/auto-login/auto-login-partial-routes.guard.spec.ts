@@ -83,23 +83,21 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivate(
             {} as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+          ));
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
-            );
-            expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
               configId: 'configId1',
-            });
-            expect(
+            });;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
-          });
       });
 
       it('should save current route and call `login` if not authenticated already and add custom params', async () => {
@@ -116,24 +114,22 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivate(
             { data: { custom: 'param' } } as unknown as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+          ));
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
-            );
-            expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
+            );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               { customParams: { custom: 'param' } }
-            );
-            expect(
+            );;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
-          });
       });
 
       it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
@@ -150,18 +146,16 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivate(
             {} as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).not.toHaveBeenCalled();
-            expect(loginSpy).not.toHaveBeenCalled();
-            expect(
+          ));
+expect(saveRedirectRouteSpy).not.toHaveBeenCalled();;
+expect(loginSpy).not.toHaveBeenCalled();;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
-          });
       });
     });
 
@@ -180,23 +174,21 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivateChild(
             {} as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+          ));
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
-            );
-            expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+            );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
               configId: 'configId1',
-            });
-            expect(
+            });;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
-          });
       });
 
       it('should save current route and call `login` if not authenticated already with custom params', async () => {
@@ -213,24 +205,22 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivateChild(
             { data: { custom: 'param' } } as unknown as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+          ));
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               'some-url1'
-            );
-            expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
+            );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
               { configId: 'configId1' },
               { customParams: { custom: 'param' } }
-            );
-            expect(
+            );;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).not.toHaveBeenCalled();
-          });
       });
 
       it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
@@ -247,18 +237,16 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard
+        await lastValueFrom(guard
           .canActivateChild(
             {} as ActivatedRouteSnapshot,
             { url: 'some-url1' } as RouterStateSnapshot
-          )
-          .subscribe(() => {
-            expect(saveRedirectRouteSpy).not.toHaveBeenCalled();
-            expect(loginSpy).not.toHaveBeenCalled();
-            expect(
+          ));
+expect(saveRedirectRouteSpy).not.toHaveBeenCalled();;
+expect(loginSpy).not.toHaveBeenCalled();;
+expect(
               checkSavedRedirectRouteAndNavigateSpy
             ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
-          });
       });
     });
 
@@ -277,16 +265,15 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard.canLoad().subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard.canLoad());
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
             configId: 'configId1',
-          });
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
 
       it('should save current route (with router extractedUrl) and call `login` if not authenticated already', async () => {
@@ -314,16 +301,15 @@ describe('AutoLoginPartialRoutesGuard', () => {
           trigger: 'imperative',
         });
 
-        guard.canLoad().subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard.canLoad());
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             'some-url12/with/some-param?queryParam=true'
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
             configId: 'configId1',
-          });
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
 
       it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
@@ -340,13 +326,12 @@ describe('AutoLoginPartialRoutesGuard', () => {
         );
         const loginSpy = vi.spyOn(loginService, 'login');
 
-        guard.canLoad().subscribe(() => {
-          expect(saveRedirectRouteSpy).not.toHaveBeenCalled();
-          expect(loginSpy).not.toHaveBeenCalled();
-          expect(
+        await lastValueFrom(guard.canLoad());
+expect(saveRedirectRouteSpy).not.toHaveBeenCalled();;
+expect(loginSpy).not.toHaveBeenCalled();;
+expect(
             checkSavedRedirectRouteAndNavigateSpy
           ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
-        });
       });
     });
   });
@@ -398,16 +383,15 @@ describe('AutoLoginPartialRoutesGuard', () => {
           autoLoginPartialRoutesGuard
         );
 
-        guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard$);
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
             configId: 'configId1',
-          });
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
 
       it('should save current route (with router extractedUrl) and call `login` if not authenticated already', async () => {
@@ -439,16 +423,15 @@ describe('AutoLoginPartialRoutesGuard', () => {
           autoLoginPartialRoutesGuard
         );
 
-        guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard$);
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             'some-url12/with/some-param?queryParam=true'
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
             configId: 'configId1',
-          });
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
 
       it('should save current route and call `login` if not authenticated already and add custom params', async () => {
@@ -471,17 +454,16 @@ describe('AutoLoginPartialRoutesGuard', () => {
           } as unknown as ActivatedRouteSnapshot)
         );
 
-        guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard$);
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             { customParams: { custom: 'param' } }
-          );
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          );;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
 
       it('should call `checkSavedRedirectRouteAndNavigate` if authenticated already', async () => {
@@ -502,13 +484,12 @@ describe('AutoLoginPartialRoutesGuard', () => {
           autoLoginPartialRoutesGuard
         );
 
-        guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).not.toHaveBeenCalled();
-          expect(loginSpy).not.toHaveBeenCalled();
-          expect(
+        await lastValueFrom(guard$);
+expect(saveRedirectRouteSpy).not.toHaveBeenCalled();;
+expect(loginSpy).not.toHaveBeenCalled();;
+expect(
             checkSavedRedirectRouteAndNavigateSpy
           ).toHaveBeenCalledExactlyOnceWith({ configId: 'configId1' });
-        });
       });
     });
 
@@ -556,16 +537,15 @@ describe('AutoLoginPartialRoutesGuard', () => {
           autoLoginPartialRoutesGuardWithConfig('configId1')
         );
 
-        guard$.subscribe(() => {
-          expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
+        await lastValueFrom(guard$);
+expect(saveRedirectRouteSpy).toHaveBeenCalledExactlyOnceWith(
             { configId: 'configId1' },
             ''
-          );
-          expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
+          );;
+expect(loginSpy).toHaveBeenCalledExactlyOnceWith({
             configId: 'configId1',
-          });
-          expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(checkSavedRedirectRouteAndNavigateSpy).not.toHaveBeenCalled();
       });
     });
   });

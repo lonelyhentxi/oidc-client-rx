@@ -1,15 +1,9 @@
-import { TestBed } from '@/testing/testbed';
-import {
-  HttpHeaders,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@ngify/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@ngify/http/testing';
+import { TestBed } from '@/testing';
+import { provideHttpClientTesting } from '@/testing/http';
+import { HttpHeaders } from '@ngify/http';
+import { HttpTestingController } from '@ngify/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from 'oidc-client-rx';
 import { lastValueFrom } from 'rxjs';
-import { vi } from 'vitest';
 import { DataService } from './data.service';
 import { HttpBaseService } from './http-base.service';
 
@@ -39,11 +33,10 @@ describe('Data Service', () => {
     it('get call sets the accept header', async () => {
       const url = 'testurl';
 
-      dataService
-        .get(url, { configId: 'configId1' })
-        .subscribe((data: unknown) => {
-          expect(data).toBe('bodyData');
-        });
+      const data = await lastValueFrom(
+        dataService.get(url, { configId: 'configId1' })
+      );
+      expect(data).toBe('bodyData');
       const req = httpMock.expectOne(url);
 
       expect(req.request.method).toBe('GET');
@@ -58,11 +51,10 @@ describe('Data Service', () => {
       const url = 'testurl';
       const token = 'token';
 
-      dataService
-        .get(url, { configId: 'configId1' }, token)
-        .subscribe((data: unknown) => {
-          expect(data).toBe('bodyData');
-        });
+      const data = await lastValueFrom(
+        dataService.get(url, { configId: 'configId1' }, token)
+      );
+      expect(data).toBe('bodyData');
       const req = httpMock.expectOne(url);
 
       expect(req.request.method).toBe('GET');
@@ -77,11 +69,10 @@ describe('Data Service', () => {
     it('call without ngsw-bypass param by default', async () => {
       const url = 'testurl';
 
-      dataService
-        .get(url, { configId: 'configId1' })
-        .subscribe((data: unknown) => {
-          expect(data).toBe('bodyData');
-        });
+      const data = await lastValueFrom(
+        dataService.get(url, { configId: 'configId1' })
+      );
+      expect(data).toBe('bodyData');
       const req = httpMock.expectOne(url);
 
       expect(req.request.method).toBe('GET');
@@ -96,11 +87,10 @@ describe('Data Service', () => {
     it('call with ngsw-bypass param', async () => {
       const url = 'testurl';
 
-      dataService
-        .get(url, { configId: 'configId1', ngswBypass: true })
-        .subscribe((data: unknown) => {
-          expect(data).toBe('bodyData');
-        });
+      const data = await lastValueFrom(
+        dataService.get(url, { configId: 'configId1', ngswBypass: true })
+      );
+      expect(data).toBe('bodyData');
       const req = httpMock.expectOne(`${url}?ngsw-bypass=`);
 
       expect(req.request.method).toBe('GET');
@@ -117,9 +107,8 @@ describe('Data Service', () => {
     it('call sets the accept header when no other params given', async () => {
       const url = 'testurl';
 
-      dataService
-        .post(url, { some: 'thing' }, { configId: 'configId1' })
-        .subscribe();
+      await lastValueFrom(dataService
+        .post(url, { some: 'thing' }, { configId: 'configId1' }));
       const req = httpMock.expectOne(url);
 
       expect(req.request.method).toBe('POST');

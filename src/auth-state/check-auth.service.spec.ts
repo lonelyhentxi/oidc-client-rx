@@ -153,13 +153,12 @@ describe('CheckAuthService', () => {
       ];
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalledExactlyOnceWith(
           { configId: 'configId1', authority: 'some-authority' },
           allConfigs,
           undefined
         );
-      });
     });
 
     it('returns null and sendMessageToMainWindow if currently in a popup', async () => {
@@ -181,19 +180,17 @@ describe('CheckAuthService', () => {
       vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
       const popupSpy = vi.spyOn(popUpService, 'sendMessageToMainWindow');
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: false,
             errorMessage: '',
             userData: null,
             idToken: '',
             accessToken: '',
             configId: '',
-          });
-          expect(popupSpy).toHaveBeenCalled();
-        });
+          });;
+expect(popupSpy).toHaveBeenCalled();
     });
 
     it('returns isAuthenticated: false with error message in case handleCallbackAndFireEvents throws an error', async () => {
@@ -214,19 +211,17 @@ describe('CheckAuthService', () => {
         'http://localhost:4200'
       );
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: false,
             errorMessage: 'ERROR',
             configId: 'configId1',
             idToken: '',
             userData: null,
             accessToken: '',
-          });
-          expect(spy).toHaveBeenCalled();
-        });
+          });;
+expect(spy).toHaveBeenCalled();
     });
 
     it('calls callbackService.handlePossibleStsCallback with current url when callback is true', async () => {
@@ -248,18 +243,16 @@ describe('CheckAuthService', () => {
         .spyOn(callBackService, 'handleCallbackAndFireEvents')
         .mockReturnValue(of({} as CallbackContext));
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: true,
             userData: undefined,
             accessToken: 'at',
             configId: 'configId1',
             idToken: 'idt',
-          });
-          expect(spy).toHaveBeenCalled();
-        });
+          });;
+expect(spy).toHaveBeenCalled();
     });
 
     it('does NOT call handleCallbackAndFireEvents with current url when callback is false', async () => {
@@ -282,18 +275,16 @@ describe('CheckAuthService', () => {
       vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
       vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: true,
             userData: undefined,
             accessToken: 'at',
             configId: 'configId1',
             idToken: 'idt',
-          });
-          expect(spy).not.toHaveBeenCalled();
-        });
+          });;
+expect(spy).not.toHaveBeenCalled();
     });
 
     it('does fire the auth and user data events when it is not a callback from the security token service and is authenticated', async () => {
@@ -323,10 +314,9 @@ describe('CheckAuthService', () => {
       );
       const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: true,
             userData: {
               some: 'user-data',
@@ -334,10 +324,9 @@ describe('CheckAuthService', () => {
             accessToken: 'at',
             configId: 'configId1',
             idToken: 'idt',
-          });
-          expect(setAuthorizedAndFireEventSpy).toHaveBeenCalled();
-          expect(userServiceSpy).toHaveBeenCalled();
-        });
+          });;
+expect(setAuthorizedAndFireEventSpy).toHaveBeenCalled();;
+expect(userServiceSpy).toHaveBeenCalled();
     });
 
     it('does NOT fire the auth and user data events when it is not a callback from the security token service and is NOT authenticated', async () => {
@@ -364,19 +353,17 @@ describe('CheckAuthService', () => {
       );
       const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: false,
             userData: undefined,
             accessToken: 'at',
             configId: 'configId1',
             idToken: 'it',
-          });
-          expect(setAuthorizedAndFireEventSpy).not.toHaveBeenCalled();
-          expect(userServiceSpy).not.toHaveBeenCalled();
-        });
+          });;
+expect(setAuthorizedAndFireEventSpy).not.toHaveBeenCalled();;
+expect(userServiceSpy).not.toHaveBeenCalled();
     });
 
     it('if authenticated return true', async () => {
@@ -396,17 +383,15 @@ describe('CheckAuthService', () => {
         true
       );
 
-      checkAuthService
-        .checkAuth(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(checkAuthService
+        .checkAuth(allConfigs[0]!, allConfigs));
+expect(result).toEqual({
             isAuthenticated: true,
             userData: undefined,
             accessToken: 'at',
             configId: 'configId1',
             idToken: 'idt',
           });
-        });
     });
 
     it('if authenticated set auth and fires event ', async () => {
@@ -424,9 +409,8 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(authStateService, 'setAuthenticatedAndFireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('if authenticated publishUserdataIfExists', async () => {
@@ -446,9 +430,8 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('if authenticated callbackService startTokenValidationPeriodically', async () => {
@@ -472,9 +455,8 @@ describe('CheckAuthService', () => {
         'startTokenValidationPeriodically'
       );
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('if isCheckSessionConfigured call checkSessionService.start()', async () => {
@@ -496,9 +478,8 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkSessionService, 'start');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('if isSilentRenewConfigured call getOrCreateIframe()', async () => {
@@ -520,9 +501,8 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('calls checkSavedRedirectRouteAndNavigate if authenticated', async () => {
@@ -544,10 +524,9 @@ describe('CheckAuthService', () => {
         'checkSavedRedirectRouteAndNavigate'
       );
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalledTimes(1);;
+expect(spy).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
     });
 
     it('does not call checkSavedRedirectRouteAndNavigate if not authenticated', async () => {
@@ -566,9 +545,8 @@ describe('CheckAuthService', () => {
         'checkSavedRedirectRouteAndNavigate'
       );
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledTimes(0);
-      });
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalledTimes(0);
     });
 
     it('fires CheckingAuth-Event on start and finished event on end', async () => {
@@ -585,12 +563,11 @@ describe('CheckAuthService', () => {
 
       const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(fireEventSpy).toHaveBeenCalledWith([
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(fireEventSpy).toHaveBeenCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinished],
         ]);
-      });
     });
 
     it('fires CheckingAuth-Event on start and CheckingAuthFinishedWithError event on end if exception occurs', async () => {
@@ -607,12 +584,11 @@ describe('CheckAuthService', () => {
         'http://localhost:4200'
       );
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(fireEventSpy).toHaveBeenCalledWith([
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(fireEventSpy).toHaveBeenCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinishedWithError, 'ERROR'],
         ]);
-      });
     });
 
     it('fires CheckingAuth-Event on start and finished event on end if not authenticated', async () => {
@@ -629,12 +605,11 @@ describe('CheckAuthService', () => {
 
       const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(fireEventSpy).toBeCalledWith([
+      await lastValueFrom(checkAuthService.checkAuth(allConfigs[0]!, allConfigs));
+expect(fireEventSpy).toBeCalledWith([
           [EventTypes.CheckingAuth],
           [EventTypes.CheckingAuthFinished],
         ]);
-      });
     });
   });
 
@@ -659,11 +634,9 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
-      checkAuthService
-        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalled();
-        });
+      await lastValueFrom(checkAuthService
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs));
+expect(spy).toHaveBeenCalled();
     });
 
     it('does forceRefreshSession get called and is NOT authenticated', async () => {
@@ -689,11 +662,9 @@ describe('CheckAuthService', () => {
         })
       );
 
-      checkAuthService
-        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toBeTruthy();
-        });
+      const result = await lastValueFrom(checkAuthService
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs));
+expect(result).toBeTruthy();
     });
 
     it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing with silentrenew', async () => {
@@ -738,17 +709,15 @@ describe('CheckAuthService', () => {
         })
       );
 
-      checkAuthService
-        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(checkAuthService
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs));
+expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
+            allConfigs[0]
+          );;
+expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);;
+expect(getOrCreateIframeSpy).toHaveBeenCalledExactlyOnceWith(
             allConfigs[0]
           );
-          expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);
-          expect(getOrCreateIframeSpy).toHaveBeenCalledExactlyOnceWith(
-            allConfigs[0]
-          );
-        });
     });
 
     it('should start check session and validation after forceRefreshSession has been called and is authenticated after forcing without silentrenew', async () => {
@@ -793,15 +762,13 @@ describe('CheckAuthService', () => {
         })
       );
 
-      checkAuthService
-        .checkAuthIncludingServer(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(checkAuthService
+        .checkAuthIncludingServer(allConfigs[0]!, allConfigs));
+expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
             allConfigs[0]
-          );
-          expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);
-          expect(getOrCreateIframeSpy).not.toHaveBeenCalled();
-        });
+          );;
+expect(periodicallyTokenCheckServiceSpy).toHaveBeenCalledTimes(1);;
+expect(getOrCreateIframeSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -823,20 +790,19 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
-        expect(Array.isArray(result)).toBe(true);
-        expect(spy).toHaveBeenCalledTimes(2);
-        expect(vi.mocked(spy).mock.calls[0]).toEqual([
+      const result = await lastValueFrom(checkAuthService.checkAuthMultiple(allConfigs));
+expect(Array.isArray(result)).toBe(true);;
+expect(spy).toHaveBeenCalledTimes(2);;
+expect(vi.mocked(spy).mock.calls[0]).toEqual([
           allConfigs[0]!,
           allConfigs,
           undefined,
-        ]);
-        expect(vi.mocked(spy).mock.calls[1]).toEqual([
+        ]);;
+expect(vi.mocked(spy).mock.calls[1]).toEqual([
           allConfigs[1],
           allConfigs,
           undefined,
         ]);
-      });
     });
 
     it('uses config from passed configId if configId was passed and returns all results', async () => {
@@ -852,9 +818,9 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
-        expect(Array.isArray(result)).toBe(true);
-        expect(spy).toBeCalledWith([
+      const result = await lastValueFrom(checkAuthService.checkAuthMultiple(allConfigs));
+expect(Array.isArray(result)).toBe(true);;
+expect(spy).toBeCalledWith([
           [
             { configId: 'configId1', authority: 'some-authority1' },
             allConfigs,
@@ -866,7 +832,6 @@ describe('CheckAuthService', () => {
             undefined,
           ],
         ]);
-      });
     });
 
     it('runs through all configs if no parameter is passed and has no state in url', async () => {
@@ -882,20 +847,19 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuthMultiple(allConfigs).subscribe((result) => {
-        expect(Array.isArray(result)).toBe(true);
-        expect(spy).toHaveBeenCalledTimes(2);
-        expect(vi.mocked(spy).mock.calls[0]).toEqual([
+      const result = await lastValueFrom(checkAuthService.checkAuthMultiple(allConfigs));
+expect(Array.isArray(result)).toBe(true);;
+expect(spy).toHaveBeenCalledTimes(2);;
+expect(vi.mocked(spy).mock.calls[0]).toEqual([
           { configId: 'configId1', authority: 'some-authority1' },
           allConfigs,
           undefined,
-        ]);
-        expect(vi.mocked(spy).mock.calls[1]).toEqual([
+        ]);;
+expect(vi.mocked(spy).mock.calls[1]).toEqual([
           { configId: 'configId2', authority: 'some-authority2' },
           allConfigs,
           undefined,
         ]);
-      });
     });
 
     it('throws error if url has state param but no config could be found', async () => {

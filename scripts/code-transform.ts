@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import fsp from 'node:fs/promises';
-import {
-  type ClassElement,
-  type MagicString,
-  type Statement,
-  parseSync,
-} from 'oxc-parser';
+import { type MagicString, type Statement, parseSync } from 'oxc-parser';
 import { type Node, walk } from 'oxc-walker';
 
 function sourceTextFromNode(
@@ -35,6 +30,22 @@ export async function rewriteObservableSubscribeToLastValueFrom(
         const newChildren: T = [] as any as T;
         for (const child of children) {
           if (
+            child.type === 'ExpressionStatement' &&
+            child.expression.type === 'CallExpression' &&
+            child.expression.callee.type === 'StaticMemberExpression' &&
+            child.expression.callee.property.name === 'subscribe' &&
+            child.expression.arguments.length === 0
+          ) {
+            const newContent = `await lastValueFrom(${sourceTextFromNode(context, child.expression.callee.object)});`;
+
+            const newStatements = parseSync('index.ts', newContent).program
+              .body as any[];
+
+            magicString.remove(child.start, child.end);
+            magicString.appendRight(child.start, newContent);
+
+            newChildren.push(...newStatements);
+          } else if (
             child.type === 'ExpressionStatement' &&
             child.expression.type === 'CallExpression' &&
             child.expression.callee.type === 'StaticMemberExpression' &&
@@ -72,7 +83,6 @@ export async function rewriteObservableSubscribeToLastValueFrom(
           } else {
             newChildren.push(child as any);
           }
-          return newChildren;
         }
         return newChildren;
       };
@@ -85,7 +95,6 @@ export async function rewriteObservableSubscribeToLastValueFrom(
         'type' in node.body &&
         node.body.type === 'FunctionBody'
       ) {
-        console.error('xxx', node.body.type);
         const children = node.body.statements;
         node.body.statements = transformExprs(children)!;
       }
@@ -102,11 +111,7 @@ export async function rewriteAllObservableSubscribeToLastValueFrom(
 ) {
   const files = fsp.glob(pattern);
   for await (const file of files) {
-    const source = await fsp.readFile(file, 'utf-8');
     const result = await rewriteObservableSubscribeToLastValueFrom(file);
-    if (source !== result) {
-      console.error('not equal');
-    }
 
     await fsp.writeFile(file, result, 'utf-8');
   }

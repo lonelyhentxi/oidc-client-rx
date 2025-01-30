@@ -1,5 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { EventTypes } from '../../public-events/event-types';
 import { PublicEventsService } from '../../public-events/public-events.service';
@@ -57,13 +57,12 @@ describe('AuthWellKnownService', () => {
         () => ({ issuer: 'anything' })
       );
 
-      service
-        .queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
-        .subscribe((result) => {
-          expect(storagePersistenceService.read).not.toHaveBeenCalled();
-          expect(dataServiceSpy).toHaveBeenCalled();
-          expect(result).toEqual({ issuer: 'anything' });
-        });
+      const result = await lastValueFrom(
+        service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
+      );
+      expect(storagePersistenceService.read).not.toHaveBeenCalled();
+      expect(dataServiceSpy).toHaveBeenCalled();
+      expect(result).toEqual({ issuer: 'anything' });
     });
 
     it('getAuthWellKnownEndPoints stored the result if http call is made', async () => {
@@ -78,13 +77,12 @@ describe('AuthWellKnownService', () => {
       );
       const storeSpy = vi.spyOn(service, 'storeWellKnownEndpoints');
 
-      service
-        .queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
-        .subscribe((result) => {
-          expect(dataServiceSpy).toHaveBeenCalled();
-          expect(storeSpy).toHaveBeenCalled();
-          expect(result).toEqual({ issuer: 'anything' });
-        });
+      const result = await lastValueFrom(
+        service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
+      );
+      expect(dataServiceSpy).toHaveBeenCalled();
+      expect(storeSpy).toHaveBeenCalled();
+      expect(result).toEqual({ issuer: 'anything' });
     });
 
     it('throws `ConfigLoadingFailed` event when error happens from http', async () => {

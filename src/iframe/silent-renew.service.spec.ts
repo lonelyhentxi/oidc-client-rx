@@ -152,15 +152,13 @@ describe('SilentRenewService  ', () => {
       const urlParts =
         'code=some-code&state=some-state&session_state=some-session-state';
 
-      silentRenewService
-        .codeFlowCallbackSilentRenewIframe([url, urlParts], config, allConfigs)
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(silentRenewService
+        .codeFlowCallbackSilentRenewIframe([url, urlParts], config, allConfigs));
+expect(spy).toHaveBeenCalledExactlyOnceWith(
             expectedContext,
             config,
             allConfigs
           );
-        });
     });
 
     it('throws error if url has error param and resets everything on error', async () => {
@@ -308,13 +306,10 @@ describe('SilentRenewService  ', () => {
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      silentRenewService.refreshSessionWithIFrameCompleted$.subscribe(
-        (result) => {
-          expect(result).toEqual({
+      const result = await lastValueFrom(silentRenewService.refreshSessionWithIFrameCompleted$);
+expect(result).toEqual({
             refreshToken: 'callbackContext',
           } as CallbackContext);
-        }
-      );
 
       silentRenewService.silentRenewEventHandler(
         eventData,
@@ -357,11 +352,8 @@ describe('SilentRenewService  ', () => {
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      silentRenewService.refreshSessionWithIFrameCompleted$.subscribe(
-        (result) => {
-          expect(result).toBeNull();
-        }
-      );
+      const result = await lastValueFrom(silentRenewService.refreshSessionWithIFrameCompleted$);
+expect(result).toBeNull();
 
       silentRenewService.silentRenewEventHandler(
         eventData,

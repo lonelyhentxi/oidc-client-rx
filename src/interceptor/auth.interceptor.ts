@@ -1,4 +1,4 @@
-import {
+import type {
   HttpEvent,
   HttpHandler,
   HttpHandlerFn,
@@ -6,8 +6,8 @@ import {
   HttpInterceptorFn,
   HttpRequest,
 } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import type { Observable } from 'rxjs';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
 import { LoggerService } from '../logging/logger.service';

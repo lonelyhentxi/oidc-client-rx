@@ -98,11 +98,9 @@ describe('CodeFlowCallbackHandlerService', () => {
         existingIdToken: null,
       } as CallbackContext;
 
-      service
-        .codeFlowCallback('test-url', { configId: 'configId1' })
-        .subscribe((callbackContext) => {
-          expect(callbackContext).toEqual(expectedCallbackContext);
-        });
+      const callbackContext = await lastValueFrom(service
+        .codeFlowCallback('test-url', { configId: 'configId1' }));
+expect(callbackContext).toEqual(expectedCallbackContext);
     });
   });
 
@@ -184,16 +182,14 @@ describe('CodeFlowCallbackHandlerService', () => {
         'validateStateFromHashCallback'
       ).mockReturnValue(true);
 
-      service
-        .codeFlowCodeRequest({} as CallbackContext, { configId: 'configId1' })
-        .subscribe(() => {
-          expect(postSpy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(service
+        .codeFlowCodeRequest({} as CallbackContext, { configId: 'configId1' }));
+expect(postSpy).toHaveBeenCalledExactlyOnceWith(
             'tokenEndpoint',
             undefined,
             { configId: 'configId1' },
             expect.any(HttpHeaders)
           );
-        });
     });
 
     it('calls url service with custom token params', async () => {
@@ -219,14 +215,12 @@ describe('CodeFlowCallbackHandlerService', () => {
 
       const postSpy = vi.spyOn(dataService, 'post').mockReturnValue(of({}));
 
-      service
-        .codeFlowCodeRequest({ code: 'foo' } as CallbackContext, config)
-        .subscribe(() => {
-          expect(urlServiceSpy).toHaveBeenCalledExactlyOnceWith('foo', config, {
+      await lastValueFrom(service
+        .codeFlowCodeRequest({ code: 'foo' } as CallbackContext, config));
+expect(urlServiceSpy).toHaveBeenCalledExactlyOnceWith('foo', config, {
             foo: 'bar',
-          });
-          expect(postSpy).toHaveBeenCalledTimes(1);
-        });
+          });;
+expect(postSpy).toHaveBeenCalledTimes(1);
     });
 
     it('calls dataService with correct headers if all params are good', async () => {
@@ -247,16 +241,13 @@ describe('CodeFlowCallbackHandlerService', () => {
         'validateStateFromHashCallback'
       ).mockReturnValue(true);
 
-      service
-        .codeFlowCodeRequest({} as CallbackContext, config)
-        .subscribe(() => {
-          const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;
-
-          expect(httpHeaders.has('Content-Type')).toBeTruthy();
-          expect(httpHeaders.get('Content-Type')).toBe(
+      await lastValueFrom(service
+        .codeFlowCodeRequest({} as CallbackContext, config));
+const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;;
+expect(httpHeaders.has('Content-Type')).toBeTruthy();;
+expect(httpHeaders.get('Content-Type')).toBe(
             'application/x-www-form-urlencoded'
           );
-        });
     });
 
     it('returns error in case of http error', async () => {

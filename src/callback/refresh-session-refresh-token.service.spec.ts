@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { FlowsService } from '../flows/flows.service';
@@ -44,13 +44,13 @@ describe('RefreshSessionRefreshTokenService', () => {
         .spyOn(flowsService, 'processRefreshToken')
         .mockReturnValue(of({} as CallbackContext));
 
-      refreshSessionRefreshTokenService
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' }, [
+      await lastValueFrom(
+        refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
           { configId: 'configId1' },
-        ])
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalled();
-        });
+          [{ configId: 'configId1' }]
+        )
+      );
+      expect(spy).toHaveBeenCalled();
     });
 
     it('resetAuthorizationData in case of error', async () => {

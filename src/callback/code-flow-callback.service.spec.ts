@@ -85,15 +85,13 @@ describe('CodeFlowCallbackService ', () => {
         triggerAuthorizationResultEvent: true,
       };
 
-      codeFlowCallbackService
-        .authenticatedCallbackWithCode('some-url2', config, [config])
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalledExactlyOnceWith('some-url2', config, [
+      await lastValueFrom(codeFlowCallbackService
+        .authenticatedCallbackWithCode('some-url2', config, [config]));
+expect(spy).toHaveBeenCalledExactlyOnceWith('some-url2', config, [
             config,
-          ]);
-          expect(routerSpy).not.toHaveBeenCalled();
-          expect(flowsDataSpy).toHaveBeenCalled();
-        });
+          ]);;
+expect(routerSpy).not.toHaveBeenCalled();;
+expect(flowsDataSpy).toHaveBeenCalled();
     });
 
     it('calls router and resetCodeFlowInProgress if triggerAuthorizationResultEvent is false and isRenewProcess is false', async () => {
@@ -122,15 +120,13 @@ describe('CodeFlowCallbackService ', () => {
         postLoginRoute: 'postLoginRoute',
       };
 
-      codeFlowCallbackService
-        .authenticatedCallbackWithCode('some-url3', config, [config])
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalledExactlyOnceWith('some-url3', config, [
+      await lastValueFrom(codeFlowCallbackService
+        .authenticatedCallbackWithCode('some-url3', config, [config]));
+expect(spy).toHaveBeenCalledExactlyOnceWith('some-url3', config, [
             config,
-          ]);
-          expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
-          expect(flowsDataSpy).toHaveBeenCalled();
-        });
+          ]);;
+expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');;
+expect(flowsDataSpy).toHaveBeenCalled();
     });
 
     it('resetSilentRenewRunning, resetCodeFlowInProgress and stopPeriodicallTokenCheck in case of error', async () => {

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -59,16 +59,14 @@ describe('AuthWellKnownDataService', () => {
       const urlWithoutSuffix = 'myUrl';
       const urlWithSuffix = `${urlWithoutSuffix}/.well-known/openid-configuration`;
 
-      (service as any)
-        .getWellKnownDocument(urlWithoutSuffix, { configId: 'configId1' })
-        .subscribe(() => {
-          expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
-            urlWithSuffix,
-            {
-              configId: 'configId1',
-            }
-          );
-        });
+      await lastValueFrom(
+        (service as any).getWellKnownDocument(urlWithoutSuffix, {
+          configId: 'configId1',
+        })
+      );
+      expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(urlWithSuffix, {
+        configId: 'configId1',
+      });
     });
 
     it('should not add suffix if it does exist on current url', async () => {
@@ -77,16 +75,14 @@ describe('AuthWellKnownDataService', () => {
         .mockReturnValue(of(null));
       const urlWithSuffix = `myUrl/.well-known/openid-configuration`;
 
-      (service as any)
-        .getWellKnownDocument(urlWithSuffix, { configId: 'configId1' })
-        .subscribe(() => {
-          expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
-            urlWithSuffix,
-            {
-              configId: 'configId1',
-            }
-          );
-        });
+      await lastValueFrom(
+        (service as any).getWellKnownDocument(urlWithSuffix, {
+          configId: 'configId1',
+        })
+      );
+      expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(urlWithSuffix, {
+        configId: 'configId1',
+      });
     });
 
     it('should not add suffix if it does exist in the middle of current url', async () => {
@@ -95,16 +91,14 @@ describe('AuthWellKnownDataService', () => {
         .mockReturnValue(of(null));
       const urlWithSuffix = `myUrl/.well-known/openid-configuration/and/some/more/stuff`;
 
-      (service as any)
-        .getWellKnownDocument(urlWithSuffix, { configId: 'configId1' })
-        .subscribe(() => {
-          expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
-            urlWithSuffix,
-            {
-              configId: 'configId1',
-            }
-          );
-        });
+      await lastValueFrom(
+        (service as any).getWellKnownDocument(urlWithSuffix, {
+          configId: 'configId1',
+        })
+      );
+      expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(urlWithSuffix, {
+        configId: 'configId1',
+      });
     });
 
     it('should use the custom suffix provided in the config', async () => {
@@ -114,20 +108,16 @@ describe('AuthWellKnownDataService', () => {
       const urlWithoutSuffix = `myUrl`;
       const urlWithSuffix = `${urlWithoutSuffix}/.well-known/test-openid-configuration`;
 
-      (service as any)
-        .getWellKnownDocument(urlWithoutSuffix, {
+      await lastValueFrom(
+        (service as any).getWellKnownDocument(urlWithoutSuffix, {
           configId: 'configId1',
           authWellknownUrlSuffix: '/.well-known/test-openid-configuration',
         })
-        .subscribe(() => {
-          expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
-            urlWithSuffix,
-            {
-              configId: 'configId1',
-              authWellknownUrlSuffix: '/.well-known/test-openid-configuration',
-            }
-          );
-        });
+      );
+      expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(urlWithSuffix, {
+        configId: 'configId1',
+        authWellknownUrlSuffix: '/.well-known/test-openid-configuration',
+      });
     });
 
     it('should retry once', async () => {
@@ -193,16 +183,15 @@ describe('AuthWellKnownDataService', () => {
 
       const spy = vi.spyOn(service as any, 'getWellKnownDocument')();
 
-      service
-        .getWellKnownEndPointsForConfig({
+      const result = await lastValueFrom(
+        service.getWellKnownEndPointsForConfig({
           configId: 'configId1',
           authWellknownEndpointUrl: 'any-url',
         })
-        .subscribe((result) => {
-          expect(spy).toHaveBeenCalled();
-          expect((result as any).jwks_uri).toBeUndefined();
-          expect(result.jwksUri).toBe('jwks_uri');
-        });
+      );
+      expect(spy).toHaveBeenCalled();
+      expect((result as any).jwks_uri).toBeUndefined();
+      expect(result.jwksUri).toBe('jwks_uri');
     });
 
     it('throws error and logs if no authwellknownUrl is given', async () => {
@@ -234,8 +223,8 @@ describe('AuthWellKnownDataService', () => {
         jwksUri: DUMMY_WELL_KNOWN_DOCUMENT.jwks_uri,
       };
 
-      service
-        .getWellKnownEndPointsForConfig({
+      const result = await lastValueFrom(
+        service.getWellKnownEndPointsForConfig({
           configId: 'configId1',
           authWellknownEndpointUrl: 'any-url',
           authWellknownEndpoints: {
@@ -243,9 +232,8 @@ describe('AuthWellKnownDataService', () => {
             revocationEndpoint: 'config-revocationEndpoint',
           },
         })
-        .subscribe((result) => {
-          expect(result).toEqual(jasmine.objectContaining(expected));
-        });
+      );
+      expect(result).toEqual(jasmine.objectContaining(expected));
     });
   });
 });

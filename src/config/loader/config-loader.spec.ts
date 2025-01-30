@@ -1,5 +1,5 @@
 import { waitForAsync } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import type { OpenIdConfiguration } from '../openid-configuration';
 import { StsConfigHttpLoader, StsConfigStaticLoader } from './config-loader';
 
@@ -16,9 +16,8 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        result$.subscribe((result) => {
-          expect(Array.isArray(result)).toBeTruthy();
-        });
+        const result = await lastValueFrom(result$);
+        expect(Array.isArray(result)).toBeTruthy();
       });
 
       it('returns an array if only one config is passed', async () => {
@@ -28,9 +27,8 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        result$.subscribe((result) => {
-          expect(Array.isArray(result)).toBeTruthy();
-        });
+        const result = await lastValueFrom(result$);
+        expect(Array.isArray(result)).toBeTruthy();
       });
     });
   });
@@ -46,11 +44,10 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        result$.subscribe((result) => {
-          expect(Array.isArray(result)).toBeTruthy();
-          expect(result[0].configId).toBe('configId1');
-          expect(result[1].configId).toBe('configId2');
-        });
+        const result = await lastValueFrom(result$);
+        expect(Array.isArray(result)).toBeTruthy();
+        expect(result[0].configId).toBe('configId1');
+        expect(result[1].configId).toBe('configId2');
       });
 
       it('returns an array if an observable with a config array is passed', async () => {
@@ -62,11 +59,10 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        result$.subscribe((result) => {
-          expect(Array.isArray(result)).toBeTruthy();
-          expect(result[0].configId).toBe('configId1');
-          expect(result[1].configId).toBe('configId2');
-        });
+        const result = await lastValueFrom(result$);
+        expect(Array.isArray(result)).toBeTruthy();
+        expect(result[0].configId).toBe('configId1');
+        expect(result[1].configId).toBe('configId2');
       });
 
       it('returns an array if only one config is passed', async () => {
@@ -76,10 +72,9 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        result$.subscribe((result) => {
-          expect(Array.isArray(result)).toBeTruthy();
-          expect(result[0].configId).toBe('configId1');
-        });
+        const result = await lastValueFrom(result$);
+        expect(Array.isArray(result)).toBeTruthy();
+        expect(result[0].configId).toBe('configId1');
       });
     });
   });

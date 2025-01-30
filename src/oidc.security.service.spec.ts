@@ -225,9 +225,8 @@ describe('OidcSecurityService', () => {
         some: 'thing',
       });
 
-      oidcSecurityService.getUserData('configId').subscribe((result) => {
-        expect(result).toEqual({ some: 'thing' });
-      });
+      const result = await lastValueFrom(oidcSecurityService.getUserData('configId'));
+expect(result).toEqual({ some: 'thing' });
     });
   });
 

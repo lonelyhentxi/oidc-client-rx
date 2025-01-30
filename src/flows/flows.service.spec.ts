@@ -90,19 +90,17 @@ describe('Flows Service', () => {
         },
       ];
 
-      service
-        .processCodeFlowCallback('some-url1234', allConfigs[0]!, allConfigs)
-        .subscribe((value) => {
-          expect(value).toEqual({} as CallbackContext);
-          expect(codeFlowCallbackSpy).toHaveBeenCalledExactlyOnceWith(
+      const value = await lastValueFrom(service
+        .processCodeFlowCallback('some-url1234', allConfigs[0]!, allConfigs));
+expect(value).toEqual({} as CallbackContext);;
+expect(codeFlowCallbackSpy).toHaveBeenCalledExactlyOnceWith(
             'some-url1234',
             allConfigs[0]
-          );
-          expect(codeFlowCodeRequestSpy).toHaveBeenCalledTimes(1);
-          expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalledTimes(1);
-          expect(callbackStateValidationSpy).toHaveBeenCalledTimes(1);
-          expect(callbackUserSpy).toHaveBeenCalledTimes(1);
-        });
+          );;
+expect(codeFlowCodeRequestSpy).toHaveBeenCalledTimes(1);;
+expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalledTimes(1);;
+expect(callbackStateValidationSpy).toHaveBeenCalledTimes(1);;
+expect(callbackUserSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -129,19 +127,17 @@ describe('Flows Service', () => {
         },
       ];
 
-      service
+      const value = await lastValueFrom(service
         .processSilentRenewCodeFlowCallback(
           {} as CallbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe((value) => {
-          expect(value).toEqual({} as CallbackContext);
-          expect(codeFlowCodeRequestSpy).toHaveBeenCalled();
-          expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();
-          expect(callbackStateValidationSpy).toHaveBeenCalled();
-          expect(callbackUserSpy).toHaveBeenCalled();
-        });
+        ));
+expect(value).toEqual({} as CallbackContext);;
+expect(codeFlowCodeRequestSpy).toHaveBeenCalled();;
+expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();;
+expect(callbackStateValidationSpy).toHaveBeenCalled();;
+expect(callbackUserSpy).toHaveBeenCalled();
     });
   });
 
@@ -168,15 +164,13 @@ describe('Flows Service', () => {
         },
       ];
 
-      service
-        .processImplicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
-        .subscribe((value) => {
-          expect(value).toEqual({} as CallbackContext);
-          expect(implicitFlowCallbackSpy).toHaveBeenCalled();
-          expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();
-          expect(callbackStateValidationSpy).toHaveBeenCalled();
-          expect(callbackUserSpy).toHaveBeenCalled();
-        });
+      const value = await lastValueFrom(service
+        .processImplicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash'));
+expect(value).toEqual({} as CallbackContext);;
+expect(implicitFlowCallbackSpy).toHaveBeenCalled();;
+expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();;
+expect(callbackStateValidationSpy).toHaveBeenCalled();;
+expect(callbackUserSpy).toHaveBeenCalled();
     });
   });
 
@@ -209,16 +203,14 @@ describe('Flows Service', () => {
         },
       ];
 
-      service
-        .processRefreshToken(allConfigs[0]!, allConfigs)
-        .subscribe((value) => {
-          expect(value).toEqual({} as CallbackContext);
-          expect(refreshSessionWithRefreshTokensSpy).toHaveBeenCalled();
-          expect(refreshTokensRequestTokensSpy).toHaveBeenCalled();
-          expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();
-          expect(callbackStateValidationSpy).toHaveBeenCalled();
-          expect(callbackUserSpy).toHaveBeenCalled();
-        });
+      const value = await lastValueFrom(service
+        .processRefreshToken(allConfigs[0]!, allConfigs));
+expect(value).toEqual({} as CallbackContext);;
+expect(refreshSessionWithRefreshTokensSpy).toHaveBeenCalled();;
+expect(refreshTokensRequestTokensSpy).toHaveBeenCalled();;
+expect(callbackHistoryAndResetJwtKeysSpy).toHaveBeenCalled();;
+expect(callbackStateValidationSpy).toHaveBeenCalled();;
+expect(callbackUserSpy).toHaveBeenCalled();
     });
   });
 });

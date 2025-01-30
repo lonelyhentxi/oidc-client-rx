@@ -81,16 +81,14 @@ describe('ImplicitFlowCallbackService ', () => {
         triggerAuthorizationResultEvent: true,
       };
 
-      implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash')
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(implicitFlowCallbackService
+        .authenticatedImplicitFlowCallback(config, [config], 'some-hash'));
+expect(spy).toHaveBeenCalledExactlyOnceWith(
             config,
             [config],
             'some-hash'
-          );
-          expect(routerSpy).not.toHaveBeenCalled();
-        });
+          );;
+expect(routerSpy).not.toHaveBeenCalled();
     });
 
     it('calls router if triggerAuthorizationResultEvent is false and isRenewProcess is false', async () => {
@@ -115,16 +113,14 @@ describe('ImplicitFlowCallbackService ', () => {
         postLoginRoute: 'postLoginRoute',
       };
 
-      implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash')
-        .subscribe(() => {
-          expect(spy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(implicitFlowCallbackService
+        .authenticatedImplicitFlowCallback(config, [config], 'some-hash'));
+expect(spy).toHaveBeenCalledExactlyOnceWith(
             config,
             [config],
             'some-hash'
-          );
-          expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
-        });
+          );;
+expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
     });
 
     it('resetSilentRenewRunning and stopPeriodicallyTokenCheck in case of error', async () => {

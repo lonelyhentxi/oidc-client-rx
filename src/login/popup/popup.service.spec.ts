@@ -112,9 +112,8 @@ describe('PopUpService', () => {
         receivedUrl: 'some-url1111',
       };
 
-      popUpService.result$.subscribe((result) => {
-        expect(result).toBe(popupResult);
-      });
+      const result = await lastValueFrom(popUpService.result$);
+expect(result).toBe(popupResult);
 
       (popUpService as any).resultInternal$.next(popupResult);
     });
@@ -195,7 +194,8 @@ describe('PopUpService', () => {
 
         popupResult = {} as PopupResult;
 
-        popUpService.result$.subscribe((result) => (popupResult = result));
+        const result = await lastValueFrom(popUpService.result$);
+(popupResult = result)
       });
 
       it('message received with data', async () => {

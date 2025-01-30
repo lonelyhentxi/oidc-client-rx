@@ -368,13 +368,12 @@ describe('ParLoginService', () => {
       );
       const spy = vi.spyOn(popupService, 'openPopUp');
 
-      service.loginWithPopUpPar(config, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+expect(spy).toHaveBeenCalledExactlyOnceWith(
           'some-par-url',
           undefined,
           config
         );
-      });
     });
 
     it('returns correct properties if URL is received', async () => {
@@ -419,21 +418,19 @@ describe('ParLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      service.loginWithPopUpPar(config, allConfigs).subscribe((result) => {
-        expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
+      const result = await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
           config,
           allConfigs,
           'someUrl'
-        );
-
-        expect(result).toEqual({
+        );;
+expect(result).toEqual({
           isAuthenticated: true,
           configId: 'configId1',
           idToken: '',
           userData: { any: 'userData' },
           accessToken: 'anyAccessToken',
         });
-      });
     });
 
     it('returns correct properties if popup was closed by user', async () => {
@@ -465,9 +462,9 @@ describe('ParLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      service.loginWithPopUpPar(config, allConfigs).subscribe((result) => {
-        expect(checkAuthSpy).not.toHaveBeenCalled();
-        expect(result).toEqual({
+      const result = await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+expect(checkAuthSpy).not.toHaveBeenCalled();;
+expect(result).toEqual({
           isAuthenticated: false,
           errorMessage: 'User closed popup',
           configId: 'configId1',
@@ -475,7 +472,6 @@ describe('ParLoginService', () => {
           userData: null,
           accessToken: '',
         });
-      });
     });
   });
 });

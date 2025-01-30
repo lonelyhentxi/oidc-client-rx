@@ -118,11 +118,9 @@ describe('LoginService', () => {
         .mockReturnValue(of({} as LoginResponse));
 
       // act
-      service.loginWithPopUp(config, [config]).subscribe(() => {
-        // assert
-        expect(loginWithPopUpPar).toHaveBeenCalledTimes(1);
-        expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
-      });
+      await lastValueFrom(service.loginWithPopUp(config, [config]));
+expect(loginWithPopUpPar).toHaveBeenCalledTimes(1);;
+expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
     });
 
     it('calls standardLoginService loginstandard if usePushedAuthorisationRequests is false', async () => {
@@ -136,11 +134,9 @@ describe('LoginService', () => {
         .mockReturnValue(of({} as LoginResponse));
 
       // act
-      service.loginWithPopUp(config, [config]).subscribe(() => {
-        // assert
-        expect(loginWithPopUpPar).not.toHaveBeenCalled();
-        expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
-      });
+      await lastValueFrom(service.loginWithPopUp(config, [config]));
+expect(loginWithPopUpPar).not.toHaveBeenCalled();;
+expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
     });
 
     it('stores the customParams to the storage if customParams are given', async () => {
@@ -157,14 +153,12 @@ describe('LoginService', () => {
       );
 
       // act
-      service.loginWithPopUp(config, [config], authOptions).subscribe(() => {
-        // assert
-        expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
+      await lastValueFrom(service.loginWithPopUp(config, [config], authOptions));
+expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
           'storageCustomParamsAuthRequest',
           { custom: 'params' },
           config
         );
-      });
     });
 
     it('returns error if there is already a popup open', () => {
@@ -181,16 +175,13 @@ describe('LoginService', () => {
       vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
 
       // act
-      service
-        .loginWithPopUp(config, [config], authOptions)
-        .subscribe((result) => {
-          // assert
-          expect(result).toEqual({
+      const result = await lastValueFrom(service
+        .loginWithPopUp(config, [config], authOptions));
+expect(result).toEqual({
             errorMessage: 'There is already a popup open.',
-          } as LoginResponse);
-          expect(loginWithPopUpPar).not.toHaveBeenCalled();
-          expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
-        });
+          } as LoginResponse);;
+expect(loginWithPopUpPar).not.toHaveBeenCalled();;
+expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
     });
   });
 });

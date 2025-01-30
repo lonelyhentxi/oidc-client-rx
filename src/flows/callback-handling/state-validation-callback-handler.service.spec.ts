@@ -69,20 +69,18 @@ describe('StateValidationCallbackHandlerService', () => {
       );
       const allConfigs = [{ configId: 'configId1' }];
 
-      service
+      const newCallbackContext = await lastValueFrom(service
         .callbackStateValidation(
           {} as CallbackContext,
           allConfigs[0]!,
           allConfigs
-        )
-        .subscribe((newCallbackContext) => {
-          expect(newCallbackContext).toEqual({
+        ));
+expect(newCallbackContext).toEqual({
             validationResult: {
               idToken: 'idTokenJustForTesting',
               authResponseIsValid: true,
             },
           } as CallbackContext);
-        });
     });
 
     it('logs error in case of an error', async () => {

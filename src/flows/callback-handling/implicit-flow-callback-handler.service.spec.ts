@@ -57,11 +57,9 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
-        .subscribe(() => {
-          expect(resetAuthorizationDataSpy).toHaveBeenCalled();
-        });
+      await lastValueFrom(service
+        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash'));
+expect(resetAuthorizationDataSpy).toHaveBeenCalled();
     });
 
     it('does NOT calls "resetAuthorizationData" if silent renew is running', async () => {
@@ -76,11 +74,9 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
-        .subscribe(() => {
-          expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
-        });
+      await lastValueFrom(service
+        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash'));
+expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
     });
 
     it('returns callbackContext if all params are good', async () => {
@@ -103,11 +99,9 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'anyHash')
-        .subscribe((callbackContext) => {
-          expect(callbackContext).toEqual(expectedCallbackContext);
-        });
+      const callbackContext = await lastValueFrom(service
+        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'anyHash'));
+expect(callbackContext).toEqual(expectedCallbackContext);
     });
 
     it('uses window location hash if no hash is passed', async () => {
@@ -130,11 +124,9 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs)
-        .subscribe((callbackContext) => {
-          expect(callbackContext).toEqual(expectedCallbackContext);
-        });
+      const callbackContext = await lastValueFrom(service
+        .implicitFlowCallback(allConfigs[0]!, allConfigs));
+expect(callbackContext).toEqual(expectedCallbackContext);
     });
   });
 });

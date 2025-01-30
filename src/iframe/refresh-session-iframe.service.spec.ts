@@ -41,17 +41,15 @@ describe('RefreshSessionIframeService ', () => {
         .mockReturnValue(of(null));
       const allConfigs = [{ configId: 'configId1' }];
 
-      refreshSessionIframeService
-        .refreshSessionWithIframe(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(
+      await lastValueFrom(refreshSessionIframeService
+        .refreshSessionWithIframe(allConfigs[0]!, allConfigs));
+expect(
             sendAuthorizeRequestUsingSilentRenewSpy
           ).toHaveBeenCalledExactlyOnceWith(
             'a-url',
             allConfigs[0]!,
             allConfigs
           );
-        });
     });
   });
 

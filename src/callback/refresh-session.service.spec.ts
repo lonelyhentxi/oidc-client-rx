@@ -91,15 +91,18 @@ describe('RefreshSessionService ', () => {
 
       const extraCustomParams = { extra: 'custom' };
 
-      refreshSessionService
-        .userForceRefreshSession(allConfigs[0]!, allConfigs, extraCustomParams)
-        .subscribe(() => {
-          expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
-            'storageCustomParamsRefresh',
-            extraCustomParams,
-            allConfigs[0]
-          );
-        });
+      await lastValueFrom(
+        refreshSessionService.userForceRefreshSession(
+          allConfigs[0]!,
+          allConfigs,
+          extraCustomParams
+        )
+      );
+      expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
+        'storageCustomParamsRefresh',
+        extraCustomParams,
+        allConfigs[0]
+      );
     });
 
     it('should persist storageCustomParamsAuthRequest when extra custom params given and useRefreshToken is false', async () => {
@@ -125,15 +128,18 @@ describe('RefreshSessionService ', () => {
 
       const extraCustomParams = { extra: 'custom' };
 
-      refreshSessionService
-        .userForceRefreshSession(allConfigs[0]!, allConfigs, extraCustomParams)
-        .subscribe(() => {
-          expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
-            'storageCustomParamsAuthRequest',
-            extraCustomParams,
-            allConfigs[0]
-          );
-        });
+      await lastValueFrom(
+        refreshSessionService.userForceRefreshSession(
+          allConfigs[0]!,
+          allConfigs,
+          extraCustomParams
+        )
+      );
+      expect(writeSpy).toHaveBeenCalledExactlyOnceWith(
+        'storageCustomParamsAuthRequest',
+        extraCustomParams,
+        allConfigs[0]
+      );
     });
 
     it('should NOT persist customparams if no customparams are given', async () => {
@@ -157,11 +163,13 @@ describe('RefreshSessionService ', () => {
       ];
       const writeSpy = vi.spyOn(storagePersistenceService, 'write');
 
-      refreshSessionService
-        .userForceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(writeSpy).not.toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        refreshSessionService.userForceRefreshSession(
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      expect(writeSpy).not.toHaveBeenCalled();
     });
 
     it('should call resetSilentRenewRunning in case of an error', async () => {
@@ -247,12 +255,11 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result.idToken).toEqual('id-token');
-          expect(result.accessToken).toEqual('access-token');
-        });
+      const result = await lastValueFrom(
+        refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+      );
+      expect(result.idToken).toEqual('id-token');
+      expect(result.accessToken).toEqual('access-token');
     });
 
     it('only calls start refresh session and returns null if auth is false', async () => {
@@ -274,18 +281,17 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
-            isAuthenticated: false,
-            errorMessage: '',
-            userData: null,
-            idToken: '',
-            accessToken: '',
-            configId: 'configId1',
-          });
-        });
+      const result = await lastValueFrom(
+        refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+      );
+      expect(result).toEqual({
+        isAuthenticated: false,
+        errorMessage: '',
+        userData: null,
+        idToken: '',
+        accessToken: '',
+        configId: 'configId1',
+      });
     });
 
     it('calls start refresh session and waits for completed, returns idtoken and accesstoken if auth is true', async () => {
@@ -318,12 +324,11 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result.idToken).toBeDefined();
-          expect(result.accessToken).toBeDefined();
-        });
+      const result = await lastValueFrom(
+        refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+      );
+      expect(result.idToken).toBeDefined();
+      expect(result.accessToken).toBeDefined();
     });
 
     it('calls start refresh session and waits for completed, returns LoginResponse if auth is false', async () => {
@@ -349,18 +354,17 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe((result) => {
-          expect(result).toEqual({
-            isAuthenticated: false,
-            errorMessage: '',
-            userData: null,
-            idToken: '',
-            accessToken: '',
-            configId: 'configId1',
-          });
-        });
+      const result = await lastValueFrom(
+        refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+      );
+      expect(result).toEqual({
+        isAuthenticated: false,
+        errorMessage: '',
+        userData: null,
+        idToken: '',
+        accessToken: '',
+        configId: 'configId1',
+      });
     });
 
     it('occurs timeout error and retry mechanism exhausted max retry count throws error', async () => {
@@ -483,18 +487,17 @@ describe('RefreshSessionService ', () => {
           'refreshSessionWithIFrameCompleted$'
         ).mockReturnValue(of(null));
 
-        refreshSessionService
-          .forceRefreshSession(allConfigs[0]!, allConfigs)
-          .subscribe((result) => {
-            expect(result).toEqual({
-              isAuthenticated: false,
-              errorMessage: '',
-              userData: null,
-              idToken: '',
-              accessToken: '',
-              configId: 'configId1',
-            });
-          });
+        const result = await lastValueFrom(
+          refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+        );
+        expect(result).toEqual({
+          isAuthenticated: false,
+          errorMessage: '',
+          userData: null,
+          idToken: '',
+          accessToken: '',
+          configId: 'configId1',
+        });
       });
 
       it('return value only returns once', async () => {
@@ -528,18 +531,17 @@ describe('RefreshSessionService ', () => {
           .spyOn(authStateService, 'areAuthStorageTokensValid')
           .mockReturnValue(true);
 
-        refreshSessionService
-          .forceRefreshSession(allConfigs[0]!, allConfigs)
-          .subscribe((result) => {
-            expect(result).toEqual({
-              idToken: 'some-id_token',
-              accessToken: 'some-access_token',
-              isAuthenticated: true,
-              userData: undefined,
-              configId: 'configId1',
-            });
-            expect(spyInsideMap).toHaveBeenCalledTimes(1);
-          });
+        const result = await lastValueFrom(
+          refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+        );
+        expect(result).toEqual({
+          idToken: 'some-id_token',
+          accessToken: 'some-access_token',
+          isAuthenticated: true,
+          userData: undefined,
+          configId: 'configId1',
+        });
+        expect(spyInsideMap).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -548,21 +550,19 @@ describe('RefreshSessionService ', () => {
     it('returns null if no auth well known endpoint defined', async () => {
       vi.spyOn(flowsDataService, 'isSilentRenewRunning').mockReturnValue(true);
 
-      (refreshSessionService as any)
-        .startRefreshSession()
-        .subscribe((result: any) => {
-          expect(result).toBe(null);
-        });
+      const result = await lastValueFrom(
+        (refreshSessionService as any).startRefreshSession()
+      );
+      expect(result).toBe(null);
     });
 
     it('returns null if silent renew Is running', async () => {
       vi.spyOn(flowsDataService, 'isSilentRenewRunning').mockReturnValue(true);
 
-      (refreshSessionService as any)
-        .startRefreshSession()
-        .subscribe((result: any) => {
-          expect(result).toBe(null);
-        });
+      const result = await lastValueFrom(
+        (refreshSessionService as any).startRefreshSession()
+      );
+      expect(result).toBe(null);
     });
 
     it('calls `setSilentRenewRunning` when should be executed', async () => {
@@ -592,11 +592,13 @@ describe('RefreshSessionService ', () => {
         'refreshSessionWithRefreshTokens'
       ).mockReturnValue(of({} as CallbackContext));
 
-      (refreshSessionService as any)
-        .startRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(setSilentRenewRunningSpy).toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        (refreshSessionService as any).startRefreshSession(
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      expect(setSilentRenewRunningSpy).toHaveBeenCalled();
     });
 
     it('calls refreshSessionWithRefreshTokens when current flow is codeflow with refresh tokens', async () => {
@@ -625,11 +627,13 @@ describe('RefreshSessionService ', () => {
         )
         .mockReturnValue(of({} as CallbackContext));
 
-      (refreshSessionService as any)
-        .startRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(refreshSessionWithRefreshTokensSpy).toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        (refreshSessionService as any).startRefreshSession(
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      expect(refreshSessionWithRefreshTokensSpy).toHaveBeenCalled();
     });
 
     it('calls refreshSessionWithIframe when current flow is NOT codeflow with refresh tokens', async () => {
@@ -662,12 +666,14 @@ describe('RefreshSessionService ', () => {
         .spyOn(refreshSessionIframeService, 'refreshSessionWithIframe')
         .mockReturnValue(of(false));
 
-      (refreshSessionService as any)
-        .startRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe(() => {
-          expect(refreshSessionWithRefreshTokensSpy).not.toHaveBeenCalled();
-          expect(refreshSessionWithIframeSpy).toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        (refreshSessionService as any).startRefreshSession(
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      expect(refreshSessionWithRefreshTokensSpy).not.toHaveBeenCalled();
+      expect(refreshSessionWithIframeSpy).toHaveBeenCalled();
     });
   });
 });

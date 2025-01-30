@@ -9,6 +9,9 @@
       "suspicious": {
         "noExplicitAny": "off"
       },
+      "complexity": {
+        "noForEach": "info"
+      },
       "correctness": {
         "noUnusedImports": {
           "fix": "none",

@@ -29,9 +29,6 @@ describe('UrlService Tests', () => {
         mockProvider(JwtWindowCryptoService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(UrlService);
     loggerService = TestBed.inject(LoggerService);
     flowHelper = TestBed.inject(FlowHelper);
@@ -53,15 +50,15 @@ describe('UrlService Tests', () => {
         { key: 'blep', value: 'blep' },
       ];
 
-      params.forEach((p) => {
+      for (const p of params) {
         url.searchParams.set(p.key, p.value);
-      });
+      }
 
       const sut = service.getUrlWithoutQueryParameters(url);
 
-      params.forEach((p) => {
+      for (const p of params) {
         expect(sut.searchParams.has(p.key)).toBeFalsy();
-      });
+      }
     });
   });
 
@@ -73,9 +70,9 @@ describe('UrlService Tests', () => {
       { key: 'blep', value: 'blep' },
     ];
 
-    params.forEach((p) => {
+    for (const p of params) {
       expected.set(p.key, p.value);
-    });
+    }
 
     const matchingUrls = [
       new URL('https://any.url?doot=boop&blep=blep'),
@@ -87,21 +84,21 @@ describe('UrlService Tests', () => {
       new URL('https://any.url?blep=blep&woop=doot'),
     ];
 
-    matchingUrls.forEach((mu) => {
+    for (const mu of matchingUrls) {
       it(`should return true for ${mu.toString()}`, () => {
         expect(
           service.queryParametersExist(expected, mu.searchParams)
         ).toBeTruthy();
       });
-    });
+    }
 
-    nonMatchingUrls.forEach((nmu) => {
+    for (const nmu of nonMatchingUrls) {
       it(`should return false for ${nmu.toString()}`, () => {
         expect(
           service.queryParametersExist(expected, nmu.searchParams)
         ).toBeFalsy();
       });
-    });
+    }
   });
 
   describe('isCallbackFromSts', () => {
@@ -130,9 +127,9 @@ describe('UrlService Tests', () => {
         },
       ];
 
-      nonMatchingUrls.forEach((nmu) => {
+      for (const nmu of nonMatchingUrls) {
         expect(service.isCallbackFromSts(nmu.url, nmu.config)).toBeFalsy();
-      });
+      }
     });
 
     const testingValues = [
@@ -143,7 +140,7 @@ describe('UrlService Tests', () => {
       { param: 'some_param', isCallbackFromSts: false },
     ];
 
-    testingValues.forEach(({ param, isCallbackFromSts }) => {
+    for (const { param, isCallbackFromSts } of testingValues) {
       it(`should return ${isCallbackFromSts} when param is ${param}`, () => {
         const result = service.isCallbackFromSts(
           `https://any.url/?${param}=anyvalue`
@@ -151,7 +148,7 @@ describe('UrlService Tests', () => {
 
         expect(result).toBe(isCallbackFromSts);
       });
-    });
+    }
   });
 
   describe('getUrlParameter', () => {
@@ -1051,9 +1048,10 @@ describe('UrlService Tests', () => {
     it('returns null if current flow is code flow and no redirect url is defined', async () => {
       vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(true);
 
-      service.getAuthorizeUrl({ configId: 'configId1' }).subscribe((result) => {
-        expect(result).toBeNull();
-      });
+      const result = await lastValueFrom(
+        service.getAuthorizeUrl({ configId: 'configId1' })
+      );
+      expect(result).toBeNull();
     });
 
     it('returns empty string if current flow is code flow, config disabled pkce and there is a redirecturl', async () => {
@@ -1064,9 +1062,8 @@ describe('UrlService Tests', () => {
         redirectUrl: 'some-redirectUrl',
       } as OpenIdConfiguration;
 
-      service.getAuthorizeUrl(config).subscribe((result) => {
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(service.getAuthorizeUrl(config));
+      expect(result).toBe('');
     });
 
     it('returns url if current flow is code flow, config disabled pkce, there is a redirecturl and awkep are given', async () => {
@@ -1093,11 +1090,10 @@ describe('UrlService Tests', () => {
         () => ({ authorizationEndpoint })
       );
 
-      service.getAuthorizeUrl(config).subscribe((result) => {
-        expect(result).toBe(
-          'authorizationEndpoint?client_id=some-clientId&redirect_uri=some-redirectUrl&response_type=testResponseType&scope=testScope&nonce=undefined&state=undefined&code_challenge=some-code-challenge&code_challenge_method=S256'
-        );
-      });
+      const result = await lastValueFrom(service.getAuthorizeUrl(config));
+      expect(result).toBe(
+        'authorizationEndpoint?client_id=some-clientId&redirect_uri=some-redirectUrl&response_type=testResponseType&scope=testScope&nonce=undefined&state=undefined&code_challenge=some-code-challenge&code_challenge_method=S256'
+      );
     });
 
     it('calls createUrlImplicitFlowAuthorize if current flow is NOT code flow', async () => {
@@ -1111,10 +1107,9 @@ describe('UrlService Tests', () => {
         'createUrlImplicitFlowAuthorize'
       );
 
-      service.getAuthorizeUrl({ configId: 'configId1' }).subscribe(() => {
-        expect(spyCreateUrlCodeFlowAuthorize).not.toHaveBeenCalled();
-        expect(spyCreateUrlImplicitFlowAuthorize).toHaveBeenCalled();
-      });
+      await lastValueFrom(service.getAuthorizeUrl({ configId: 'configId1' }));
+      expect(spyCreateUrlCodeFlowAuthorize).not.toHaveBeenCalled();
+      expect(spyCreateUrlImplicitFlowAuthorize).toHaveBeenCalled();
     });
 
     it('return empty string if flow is not code flow and createUrlImplicitFlowAuthorize returns falsy', async () => {
@@ -1124,10 +1119,9 @@ describe('UrlService Tests', () => {
         .mockReturnValue('');
       const resultObs$ = service.getAuthorizeUrl({ configId: 'configId1' });
 
-      resultObs$.subscribe((result) => {
-        expect(spy).toHaveBeenCalled();
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBe('');
     });
   });
 
@@ -1165,10 +1159,9 @@ describe('UrlService Tests', () => {
         configId: 'configId1',
       });
 
-      resultObs$.subscribe((result) => {
-        expect(spy).toHaveBeenCalled();
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBe('');
     });
   });
 
@@ -1351,9 +1344,8 @@ describe('UrlService Tests', () => {
         redirectUrl: '',
       });
 
-      resultObs$.subscribe((result) => {
-        expect(result).toBe(null);
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(null);
     });
 
     it('returns basic URL with no extras if properties are given', async () => {
@@ -1380,11 +1372,10 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      resultObs$.subscribe((result) => {
-        expect(result).toBe(
-          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256'
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256'
+      );
     });
 
     it('returns basic URL with hdParam if properties are given', async () => {
@@ -1411,11 +1402,10 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      resultObs$.subscribe((result) => {
-        expect(result).toBe(
-          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam'
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam'
+      );
     });
 
     it('returns basic URL with hdParam and custom params if properties are given', async () => {
@@ -1442,11 +1432,10 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      resultObs$.subscribe((result) => {
-        expect(result).toBe(
-          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing'
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing'
+      );
     });
 
     it('returns basic URL with hdParam and custom params and passed cutom params if properties are given', async () => {
@@ -1477,11 +1466,10 @@ describe('UrlService Tests', () => {
         },
       });
 
-      resultObs$.subscribe((result) => {
-        expect(result).toBe(
-          'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing&any=otherThing'
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing&any=otherThing'
+      );
     });
   });
 
@@ -1489,6 +1477,7 @@ describe('UrlService Tests', () => {
     it('returns null if silentrenewUrl is falsy', () => {
       const state = 'testState';
       const nonce = 'testNonce';
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const silentRenewUrl = null;
 
       vi.spyOn(
@@ -1582,6 +1571,7 @@ describe('UrlService Tests', () => {
     it('returns empty string if silentrenewUrl is falsy', async () => {
       const state = 'testState';
       const nonce = 'testNonce';
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const silentRenewUrl = null;
       const codeVerifier = 'codeVerifier';
       const codeChallenge = 'codeChallenge ';
@@ -1606,9 +1596,8 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe('');
     });
 
     it('returns correct URL if wellknownendpoints are given', async () => {
@@ -1650,11 +1639,10 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe(
-          `authorizationEndpoint?client_id=${clientId}&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&prompt=none`
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        `authorizationEndpoint?client_id=${clientId}&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&prompt=none`
+      );
     });
 
     it('returns empty string if no wellknownendpoints are given', async () => {
@@ -1692,9 +1680,8 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe('');
     });
   });
 
@@ -1793,6 +1780,7 @@ describe('UrlService Tests', () => {
     it('returns null if redirectUrl is falsy', async () => {
       const state = 'testState';
       const nonce = 'testNonce';
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const redirectUrl = null;
       const config = {
         redirectUrl,
@@ -1808,9 +1796,8 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBeNull();
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBeNull();
     });
 
     it('returns correct URL if wellknownendpoints are given', async () => {
@@ -1851,11 +1838,10 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe(
-          `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}`
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}`
+      );
     });
 
     it('returns correct URL if wellknownendpoints and custom params are given', async () => {
@@ -1901,11 +1887,10 @@ describe('UrlService Tests', () => {
         customParams: { to: 'add', as: 'well' },
       });
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe(
-          `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&to=add&as=well`
-        );
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe(
+        `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&to=add&as=well`
+      );
     });
 
     it('returns empty string if no wellknownendpoints are given', async () => {
@@ -1939,9 +1924,8 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      resultObs$.subscribe((result: any) => {
-        expect(result).toBe('');
-      });
+      const result = await lastValueFrom(resultObs$);
+      expect(result).toBe('');
     });
   });
 

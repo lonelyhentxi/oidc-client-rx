@@ -66,24 +66,21 @@ describe('RefreshTokenCallbackHandlerService', () => {
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      service
+      await lastValueFrom(service
         .refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
-        })
-        .subscribe(() => {
-          expect(postSpy).toHaveBeenCalledExactlyOnceWith(
+        }));
+expect(postSpy).toHaveBeenCalledExactlyOnceWith(
             'tokenEndpoint',
             undefined,
             { configId: 'configId1' },
             expect.any(HttpHeaders)
-          );
-          const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;
-
-          expect(httpHeaders.has('Content-Type')).toBeTruthy();
-          expect(httpHeaders.get('Content-Type')).toBe(
+          );;
+const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;;
+expect(httpHeaders.has('Content-Type')).toBeTruthy();;
+expect(httpHeaders.get('Content-Type')).toBe(
             'application/x-www-form-urlencoded'
           );
-        });
     });
 
     it('calls data service with correct headers if all params are good', async () => {
@@ -95,18 +92,15 @@ describe('RefreshTokenCallbackHandlerService', () => {
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      service
+      await lastValueFrom(service
         .refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
-        })
-        .subscribe(() => {
-          const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;
-
-          expect(httpHeaders.has('Content-Type')).toBeTruthy();
-          expect(httpHeaders.get('Content-Type')).toBe(
+        }));
+const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;;
+expect(httpHeaders.has('Content-Type')).toBeTruthy();;
+expect(httpHeaders.get('Content-Type')).toBe(
             'application/x-www-form-urlencoded'
           );
-        });
     });
 
     it('returns error in case of http error', async () => {

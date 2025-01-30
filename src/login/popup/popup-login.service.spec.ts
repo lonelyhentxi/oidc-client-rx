@@ -1,6 +1,5 @@
-import { TestBed } from '@/testing';
-import { CommonModule } from '@angular/common';
-import { of } from 'rxjs';
+import { TestBed, spyOnProperty } from '@/testing';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
@@ -24,7 +23,7 @@ describe('PopUpLoginService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [CommonModule],
+      imports: [],
       providers: [
         PopUpLoginService,
         mockProvider(LoggerService),
@@ -35,9 +34,6 @@ describe('PopUpLoginService', () => {
         mockProvider(CheckAuthService),
       ],
     });
-  });
-
-  beforeEach(() => {
     popUpLoginService = TestBed.inject(PopUpLoginService);
     urlService = TestBed.inject(UrlService);
     loggerService = TestBed.inject(LoggerService);
@@ -93,11 +89,10 @@ describe('PopUpLoginService', () => {
         of({} as LoginResponse)
       );
 
-      popUpLoginService
-        .loginWithPopUpStandard(config, [config])
-        .subscribe(() => {
-          expect(urlService.getAuthorizeUrl).toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        popUpLoginService.loginWithPopUpStandard(config, [config])
+      );
+      expect(urlService.getAuthorizeUrl).toHaveBeenCalled();
     });
 
     it('opens popup if everything fits', async () => {
@@ -123,11 +118,10 @@ describe('PopUpLoginService', () => {
       );
       const popupSpy = vi.spyOn(popupService, 'openPopUp');
 
-      popUpLoginService
-        .loginWithPopUpStandard(config, [config])
-        .subscribe(() => {
-          expect(popupSpy).toHaveBeenCalled();
-        });
+      await lastValueFrom(
+        popUpLoginService.loginWithPopUpStandard(config, [config])
+      );
+      expect(popupSpy).toHaveBeenCalled();
     });
 
     it('returns three properties when popupservice received an url', async () => {
@@ -164,23 +158,21 @@ describe('PopUpLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      popUpLoginService
-        .loginWithPopUpStandard(config, [config])
-        .subscribe((result) => {
-          expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
-            config,
-            [config],
-            'someUrl'
-          );
-
-          expect(result).toEqual({
-            isAuthenticated: true,
-            configId: 'configId1',
-            idToken: '',
-            userData: { any: 'userData' },
-            accessToken: 'anyAccessToken',
-          });
-        });
+      const result = await lastValueFrom(
+        popUpLoginService.loginWithPopUpStandard(config, [config])
+      );
+      expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        [config],
+        'someUrl'
+      );
+      expect(result).toEqual({
+        isAuthenticated: true,
+        configId: 'configId1',
+        idToken: '',
+        userData: { any: 'userData' },
+        accessToken: 'anyAccessToken',
+      });
     });
 
     it('returns two properties if popup was closed by user', async () => {
@@ -207,19 +199,18 @@ describe('PopUpLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      popUpLoginService
-        .loginWithPopUpStandard(config, [config])
-        .subscribe((result) => {
-          expect(checkAuthSpy).not.toHaveBeenCalled();
-          expect(result).toEqual({
-            isAuthenticated: false,
-            errorMessage: 'User closed popup',
-            configId: 'configId1',
-            idToken: '',
-            userData: null,
-            accessToken: '',
-          });
-        });
+      const result = await lastValueFrom(
+        popUpLoginService.loginWithPopUpStandard(config, [config])
+      );
+      expect(checkAuthSpy).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        isAuthenticated: false,
+        errorMessage: 'User closed popup',
+        configId: 'configId1',
+        idToken: '',
+        userData: null,
+        accessToken: '',
+      });
     });
   });
 });
