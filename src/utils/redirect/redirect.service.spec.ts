@@ -1,5 +1,4 @@
-import { TestBed } from '@/testing';
-import { vi } from 'vitest';
+import { TestBed, spyOnProperty } from '@/testing';
 import { DOCUMENT } from '../../dom';
 import { RedirectService } from './redirect.service';
 
@@ -26,9 +25,6 @@ describe('Redirect Service Tests', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(RedirectService);
     myDocument = TestBed.inject(DOCUMENT);
   });

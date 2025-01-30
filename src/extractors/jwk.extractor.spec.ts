@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import {
   JwkExtractor,
@@ -94,9 +93,6 @@ describe('JwkExtractor', () => {
       imports: [],
       providers: [JwkExtractor, CryptoService],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(JwkExtractor);
   });
 

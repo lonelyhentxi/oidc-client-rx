@@ -1,10 +1,10 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of, throwError } from 'rxjs';
 import { AuthStateService } from '../../auth-state/auth-state.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { TokenValidationService } from '../../validation/token-validation.service';
-import { CallbackContext } from '../callback-context';
+import type { CallbackContext } from '../callback-context';
 import { FlowsDataService } from '../flows-data.service';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class RefreshSessionCallbackHandlerService {
 
     this.loggerService.logDebug(
       config,
-      'RefreshSession created. Adding myautostate: ' + stateData
+      `RefreshSession created. Adding myautostate: ${stateData}`
     );
     const refreshToken = this.authStateService.getRefreshToken(config);
     const idToken = this.authStateService.getIdToken(config);
@@ -53,12 +53,11 @@ export class RefreshSessionCallbackHandlerService {
       );
 
       return of(callbackContext);
-    } else {
-      const errorMessage = 'no refresh token found, please login';
-
-      this.loggerService.logError(config, errorMessage);
-
-      return throwError(() => new Error(errorMessage));
     }
+    const errorMessage = 'no refresh token found, please login';
+
+    this.loggerService.logError(config, errorMessage);
+
+    return throwError(() => new Error(errorMessage));
   }
 }

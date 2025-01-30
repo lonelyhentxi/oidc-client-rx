@@ -7,20 +7,20 @@ export class JwkExtractor {
     spec?: { kid?: string; use?: string; kty?: string },
     throwOnEmpty = true
   ): JsonWebKey[] {
-    if (0 === keys.length) {
+    if (keys.length === 0) {
       throw JwkExtractorInvalidArgumentError;
     }
 
     const foundKeys = keys
-      .filter((k) => (spec?.kid ? (k as any)['kid'] === spec.kid : true))
-      .filter((k) => (spec?.use ? k['use'] === spec.use : true))
-      .filter((k) => (spec?.kty ? k['kty'] === spec.kty : true));
+      .filter((k) => (spec?.kid ? (k as any).kid === spec.kid : true))
+      .filter((k) => (spec?.use ? k.use === spec.use : true))
+      .filter((k) => (spec?.kty ? k.kty === spec.kty : true));
 
     if (foundKeys.length === 0 && throwOnEmpty) {
       throw JwkExtractorNoMatchingKeysError;
     }
 
-    if (foundKeys.length > 1 && (null === spec || undefined === spec)) {
+    if (foundKeys.length > 1 && (spec === null || undefined === spec)) {
       throw JwkExtractorSeveralMatchingKeysError;
     }
 
@@ -29,7 +29,7 @@ export class JwkExtractor {
 }
 
 function buildErrorName(name: string): string {
-  return JwkExtractor.name + ': ' + name;
+  return `${JwkExtractor.name}: ${name}`;
 }
 
 export const JwkExtractorInvalidArgumentError = {

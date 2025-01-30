@@ -1,8 +1,8 @@
-﻿import { inject, Injectable } from 'injection-js';
+﻿import { Injectable, inject } from 'injection-js';
 import { base64url } from 'rfc4648';
-import { from, Observable, of } from 'rxjs';
+import { type Observable, from, of } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { JwkExtractor } from '../extractors/jwk.extractor';
 import { LoggerService } from '../logging/logger.service';
 import { TokenHelperService } from '../utils/tokenHelper/token-helper.service';
@@ -257,6 +257,7 @@ export class TokenValidationService {
     const dateTimeIatIdToken = new Date(0); // The 0 here is the key, which sets the date to the epoch
 
     dateTimeIatIdToken.setUTCSeconds(dataIdToken.iat);
+
     maxOffsetAllowedInSeconds = maxOffsetAllowedInSeconds || 0;
 
     const nowInUtc = new Date(new Date().toUTCString());
@@ -295,10 +296,7 @@ export class TokenValidationService {
     if (!isFromRefreshToken && dataIdToken.nonce !== localNonce) {
       this.loggerService.logDebug(
         configuration,
-        'Validate_id_token_nonce failed, dataIdToken.nonce: ' +
-          dataIdToken.nonce +
-          ' local_nonce:' +
-          localNonce
+        `Validate_id_token_nonce failed, dataIdToken.nonce: ${dataIdToken.nonce} local_nonce:${localNonce}`
       );
 
       return false;
@@ -319,10 +317,7 @@ export class TokenValidationService {
     ) {
       this.loggerService.logDebug(
         configuration,
-        'Validate_id_token_iss failed, dataIdToken.iss: ' +
-          dataIdToken.iss +
-          ' authWellKnownEndpoints issuer:' +
-          authWellKnownEndpointsIssuer
+        `Validate_id_token_iss failed, dataIdToken.iss: ${dataIdToken.iss} authWellKnownEndpoints issuer:${authWellKnownEndpointsIssuer}`
       );
 
       return false;
@@ -346,23 +341,18 @@ export class TokenValidationService {
       if (!result) {
         this.loggerService.logDebug(
           configuration,
-          'Validate_id_token_aud array failed, dataIdToken.aud: ' +
-            dataIdToken.aud +
-            ' client_id:' +
-            aud
+          `Validate_id_token_aud array failed, dataIdToken.aud: ${dataIdToken.aud} client_id:${aud}`
         );
 
         return false;
       }
 
       return true;
-    } else if (dataIdToken.aud !== aud) {
+    }
+    if (dataIdToken.aud !== aud) {
       this.loggerService.logDebug(
         configuration,
-        'Validate_id_token_aud failed, dataIdToken.aud: ' +
-          dataIdToken.aud +
-          ' client_id:' +
-          aud
+        `Validate_id_token_aud failed, dataIdToken.aud: ${dataIdToken.aud} client_id:${aud}`
       );
 
       return false;
@@ -403,10 +393,7 @@ export class TokenValidationService {
     if ((state as string) !== (localState as string)) {
       this.loggerService.logDebug(
         configuration,
-        'ValidateStateFromHashCallback failed, state: ' +
-          state +
-          ' local_state:' +
-          localState
+        `ValidateStateFromHashCallback failed, state: ${state} local_state:${localState}`
       );
 
       return false;
@@ -555,7 +542,7 @@ export class TokenValidationService {
   ): Observable<boolean> {
     this.loggerService.logDebug(
       configuration,
-      'at_hash from the server:' + atHash
+      `at_hash from the server:${atHash}`
     );
 
     // 'sha256' 'sha384' 'sha512'
@@ -568,29 +555,28 @@ export class TokenValidationService {
     }
 
     return this.jwtWindowCryptoService
-      .generateAtHash('' + accessToken, sha)
+      .generateAtHash(`${accessToken}`, sha)
       .pipe(
         mergeMap((hash: string) => {
           this.loggerService.logDebug(
             configuration,
-            'at_hash client validation not decoded:' + hash
+            `at_hash client validation not decoded:${hash}`
           );
           if (hash === atHash) {
             return of(true); // isValid;
-          } else {
-            return this.jwtWindowCryptoService
-              .generateAtHash('' + decodeURIComponent(accessToken), sha)
-              .pipe(
-                map((newHash: string) => {
-                  this.loggerService.logDebug(
-                    configuration,
-                    '-gen access--' + hash
-                  );
-
-                  return newHash === atHash;
-                })
-              );
           }
+          return this.jwtWindowCryptoService
+            .generateAtHash(`${decodeURIComponent(accessToken)}`, sha)
+            .pipe(
+              map((newHash: string) => {
+                this.loggerService.logDebug(
+                  configuration,
+                  `-gen access--${hash}`
+                );
+
+                return newHash === atHash;
+              })
+            );
         })
       );
   }
@@ -599,7 +585,7 @@ export class TokenValidationService {
     const minutes = Math.floor(millis / 60000);
     const seconds = ((millis % 60000) / 1000).toFixed(0);
 
-    return minutes + ':' + (+seconds < 10 ? '0' : '') + seconds;
+    return `${minutes}:${+seconds < 10 ? '0' : ''}${seconds}`;
   }
 
   private calculateNowWithOffset(offsetSeconds: number): number {

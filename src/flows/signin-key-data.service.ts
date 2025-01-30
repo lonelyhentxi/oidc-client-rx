@@ -1,12 +1,12 @@
 import { HttpResponse } from '@ngify/http';
 import { inject, Injectable } from 'injection-js';
-import { Observable, throwError } from 'rxjs';
+import { type Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { DataService } from '../api/data.service';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
-import { JwtKeys } from '../validation/jwtkeys';
+import type { JwtKeys } from '../validation/jwtkeys';
 
 @Injectable()
 export class SigninKeyDataService {
@@ -62,7 +62,7 @@ export class SigninKeyDataService {
     } else {
       const { message } = errorResponse;
 
-      errMsg = !!message ? message : `${errorResponse}`;
+      errMsg = message ? message : `${errorResponse}`;
     }
     this.loggerService.logError(currentConfiguration, errMsg);
 

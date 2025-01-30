@@ -1,5 +1,5 @@
 import { Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 
 @Injectable()
 export class ClosestMatchingRouteService {

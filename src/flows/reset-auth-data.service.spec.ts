@@ -23,9 +23,6 @@ describe('ResetAuthDataService', () => {
         mockProvider(LoggerService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(ResetAuthDataService);
     userService = TestBed.inject(UserService);
     flowsDataService = TestBed.inject(FlowsDataService);

@@ -1,5 +1,5 @@
-import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import { Injectable, inject } from 'injection-js';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { CryptoService } from '../../utils/crypto/crypto.service';
 
@@ -37,7 +37,7 @@ export class RandomService {
   }
 
   private toHex(dec: number): string {
-    return ('0' + dec.toString(16)).substr(-2);
+    return `0${dec.toString(16)}`.substr(-2);
   }
 
   private randomString(length: number): string {

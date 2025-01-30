@@ -1,5 +1,5 @@
 import { LogLevel } from '../logging/log-level';
-import { OpenIdConfiguration } from './openid-configuration';
+import type { OpenIdConfiguration } from './openid-configuration';
 
 export const DEFAULT_CONFIG: OpenIdConfiguration = {
   authority: 'https://please_set',

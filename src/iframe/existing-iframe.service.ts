@@ -1,6 +1,6 @@
+import { Injectable, inject } from 'injection-js';
 import { DOCUMENT } from '../../dom';
-import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 
 @Injectable()
@@ -52,7 +52,7 @@ export class IFrameService {
       }
 
       return null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }

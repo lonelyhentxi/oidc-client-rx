@@ -1,8 +1,8 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { OpenIdConfiguration } from '../config/openid-configuration';
-import { CallbackContext } from '../flows/callback-context';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
+import type { CallbackContext } from '../flows/callback-context';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { EqualityService } from '../utils/equality/equality.service';
@@ -122,6 +122,7 @@ export class StateValidationService {
           configuration
         )
         .pipe(
+          // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
           mergeMap((isSignatureIdTokenValid: boolean) => {
             if (!isSignatureIdTokenValid) {
               this.loggerService.logDebug(
@@ -324,12 +325,11 @@ export class StateValidationService {
             );
           })
         );
-    } else {
-      this.loggerService.logDebug(
-        configuration,
-        'No id_token found, skipping id_token validation'
-      );
     }
+    this.loggerService.logDebug(
+      configuration,
+      'No id_token found, skipping id_token validation'
+    );
 
     return this.validateDefault(
       isCurrentFlowImplicitFlowWithAccessToken,
@@ -392,13 +392,12 @@ export class StateValidationService {
                 this.handleUnsuccessfulValidation(configuration);
 
                 return toReturn;
-              } else {
-                toReturn.authResponseIsValid = true;
-                toReturn.state = ValidationResult.Ok;
-                this.handleSuccessfulValidation(configuration);
-
-                return toReturn;
               }
+              toReturn.authResponseIsValid = true;
+              toReturn.state = ValidationResult.Ok;
+              this.handleSuccessfulValidation(configuration);
+
+              return toReturn;
             })
           );
       }

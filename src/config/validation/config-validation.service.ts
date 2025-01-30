@@ -1,7 +1,7 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import { LoggerService } from '../../logging/logger.service';
-import { OpenIdConfiguration } from '../openid-configuration';
-import { Level, RuleValidationResult } from './rule';
+import type { OpenIdConfiguration } from '../openid-configuration';
+import type { Level, RuleValidationResult } from './rule';
 import { allMultipleConfigRules, allRules } from './rules';
 
 @Injectable()
@@ -35,14 +35,14 @@ export class ConfigValidationService {
 
     let overallErrorCount = 0;
 
-    passedConfigs.forEach((passedConfig) => {
+    for (const passedConfig of passedConfigs) {
       const errorCount = this.processValidationResultsAndGetErrorCount(
         allValidationResults,
         passedConfig
       );
 
       overallErrorCount += errorCount;
-    });
+    }
 
     return overallErrorCount === 0;
   }
@@ -75,12 +75,12 @@ export class ConfigValidationService {
     const allErrorMessages = this.getAllMessagesOfType('error', allMessages);
     const allWarnings = this.getAllMessagesOfType('warning', allMessages);
 
-    allErrorMessages.forEach((message) =>
-      this.loggerService.logError(config, message)
-    );
-    allWarnings.forEach((message) =>
-      this.loggerService.logWarning(config, message)
-    );
+    for (const message of allErrorMessages) {
+      this.loggerService.logError(config, message);
+    }
+    for (const message of allWarnings) {
+      this.loggerService.logWarning(config, message);
+    }
 
     return allErrorMessages.length;
   }

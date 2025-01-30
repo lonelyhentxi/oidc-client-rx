@@ -1,9 +1,9 @@
 import { HttpParams } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AuthOptions } from '../../auth-options';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { AuthOptions } from '../../auth-options';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { FlowsDataService } from '../../flows/flows-data.service';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
@@ -37,8 +37,9 @@ export class UrlService {
       return '';
     }
 
+    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-    const regex = new RegExp('[\\?&#]' + name + '=([^&#]*)');
+    const regex = new RegExp(`[\\?&#]${name}=([^&#]*)`);
     const results = regex.exec(urlToCheck);
 
     return results === null ? '' : decodeURIComponent(results[1]);
@@ -47,9 +48,10 @@ export class UrlService {
   getUrlWithoutQueryParameters(url: URL): URL {
     const u = new URL(url.toString());
 
+    // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
     const keys = [];
 
-    for (const key of u.searchParams.keys()) {
+    for (const key of Array.from(u.searchParams.keys())) {
       keys.push(key);
     }
 
@@ -60,10 +62,13 @@ export class UrlService {
     return u;
   }
 
-  queryParametersExist(expected: URLSearchParams, actual: URLSearchParams): boolean {
+  queryParametersExist(
+    expected: URLSearchParams,
+    actual: URLSearchParams
+  ): boolean {
     let r = true;
 
-    expected.forEach((v, k) => {
+    expected.forEach((_v, k) => {
       if (!actual.has(k)) {
         r = false;
       }
@@ -73,7 +78,7 @@ export class UrlService {
   }
 
   isCallbackFromSts(currentUrl: string, config?: OpenIdConfiguration): boolean {
-    if (config && config.checkRedirectUrlWhenCheckingIfIsCallback) {
+    if (config?.checkRedirectUrlWhenCheckingIfIsCallback) {
       const currentUrlInstance = new URL(currentUrl);
 
       const redirectUrl = this.getRedirectUrl(config);
@@ -81,7 +86,7 @@ export class UrlService {
       if (!redirectUrl) {
         this.loggerService.logError(
           config,
-          `UrlService.isCallbackFromSts: could not get redirectUrl from config, was: `,
+          'UrlService.isCallbackFromSts: could not get redirectUrl from config, was: ',
           redirectUrl
         );
 
@@ -164,7 +169,7 @@ export class UrlService {
     if (!clientId) {
       this.loggerService.logError(
         configuration,
-        `getAuthorizeParUrl could not add clientId because it was: `,
+        'getAuthorizeParUrl could not add clientId because it was: ',
         clientId
       );
 
@@ -315,7 +320,7 @@ export class UrlService {
       if (!codeVerifier) {
         this.loggerService.logError(
           configuration,
-          `CodeVerifier is not set `,
+          'CodeVerifier is not set ',
           codeVerifier
         );
 
@@ -393,7 +398,7 @@ export class UrlService {
 
     this.loggerService.logDebug(
       configuration,
-      'Authorize created. adding myautostate: ' + state
+      `Authorize created. adding myautostate: ${state}`
     );
 
     // code_challenge with "S256"
@@ -449,7 +454,7 @@ export class UrlService {
     if (!postLogoutRedirectUri) {
       this.loggerService.logError(
         configuration,
-        `could not get postLogoutRedirectUri, was: `,
+        'could not get postLogoutRedirectUri, was: ',
         postLogoutRedirectUri
       );
 
@@ -479,7 +484,7 @@ export class UrlService {
 
     let params = this.createHttpParams(existingParams);
 
-    if (!!idTokenHint) {
+    if (idTokenHint) {
       params = params.set('id_token_hint', idTokenHint);
     }
 
@@ -526,7 +531,7 @@ export class UrlService {
     if (!clientId) {
       this.loggerService.logError(
         configuration,
-        `createAuthorizeUrl could not add clientId because it was: `,
+        'createAuthorizeUrl could not add clientId because it was: ',
         clientId
       );
 
@@ -536,7 +541,7 @@ export class UrlService {
     if (!responseType) {
       this.loggerService.logError(
         configuration,
-        `createAuthorizeUrl could not add responseType because it was: `,
+        'createAuthorizeUrl could not add responseType because it was: ',
         responseType
       );
 
@@ -546,7 +551,7 @@ export class UrlService {
     if (!scope) {
       this.loggerService.logError(
         configuration,
-        `createAuthorizeUrl could not add scope because it was: `,
+        'createAuthorizeUrl could not add scope because it was: ',
         scope
       );
 
@@ -641,7 +646,7 @@ export class UrlService {
 
     this.loggerService.logDebug(
       configuration,
-      'RefreshSession created. adding myautostate: ' + state
+      `RefreshSession created. adding myautostate: ${state}`
     );
 
     // code_challenge with "S256"
@@ -693,7 +698,7 @@ export class UrlService {
 
     this.loggerService.logDebug(
       configuration,
-      'Authorize created. adding myautostate: ' + state
+      `Authorize created. adding myautostate: ${state}`
     );
 
     const redirectUrl = this.getRedirectUrl(configuration, authOptions);
@@ -739,7 +744,7 @@ export class UrlService {
 
     this.loggerService.logDebug(
       config,
-      'Authorize created. adding myautostate: ' + state
+      `Authorize created. adding myautostate: ${state}`
     );
 
     const redirectUrl = this.getRedirectUrl(config, authOptions);
@@ -804,7 +809,7 @@ export class UrlService {
     if (!redirectUrl) {
       this.loggerService.logError(
         configuration,
-        `could not get redirectUrl, was: `,
+        'could not get redirectUrl, was: ',
         redirectUrl
       );
 
@@ -820,7 +825,7 @@ export class UrlService {
     if (!silentRenewUrl) {
       this.loggerService.logError(
         configuration,
-        `could not get silentRenewUrl, was: `,
+        'could not get silentRenewUrl, was: ',
         silentRenewUrl
       );
 
@@ -836,7 +841,7 @@ export class UrlService {
     if (!clientId) {
       this.loggerService.logError(
         configuration,
-        `could not get clientId, was: `,
+        'could not get clientId, was: ',
         clientId
       );
 

@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@/testing';
+import { TestBed } from '@/testing';
 import { Subscription } from 'rxjs';
 import { vi } from 'vitest';
 import { IntervalService } from './interval.service';
@@ -19,9 +19,6 @@ describe('IntervalService', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     intervalService = TestBed.inject(IntervalService);
   });
 
@@ -60,15 +57,15 @@ describe('IntervalService', () => {
   describe('startPeriodicTokenCheck', () => {
     it('starts check after correct milliseconds', async () => {
       const periodicCheck = intervalService.startPeriodicTokenCheck(0.5);
-      const spy = jasmine.createSpy();
+      const spy = vi.fn();
       const sub = periodicCheck.subscribe(() => {
         spy();
       });
 
-      tick(500);
+      await vi.advanceTimersByTimeAsync(500);
       expect(spy).toHaveBeenCalledTimes(1);
 
-      tick(500);
+      await vi.advanceTimersByTimeAsync(500);
       expect(spy).toHaveBeenCalledTimes(2);
 
       sub.unsubscribe();

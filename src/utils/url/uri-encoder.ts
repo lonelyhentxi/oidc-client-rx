@@ -1,4 +1,4 @@
-import { HttpParameterCodec } from '@ngify/http';
+import type { HttpParameterCodec } from '@ngify/http';
 
 export class UriEncoder implements HttpParameterCodec {
   encodeKey(key: string): string {

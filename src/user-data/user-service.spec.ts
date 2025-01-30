@@ -50,7 +50,7 @@ describe('User Service', () => {
     expect(userService).toBeTruthy();
   });
 
-  it('public authorize$ is observable$', () => {
+  it('authorize$ is observable$', () => {
     expect(userService.userData$).toBeInstanceOf(Observable);
   });
 
@@ -225,6 +225,7 @@ describe('User Service', () => {
       const idToken = '';
       const decodedIdToken = { sub: 'decodedIdToken' };
       const userDataInstore = '';
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const userDataFromSts = null;
 
       const config = {

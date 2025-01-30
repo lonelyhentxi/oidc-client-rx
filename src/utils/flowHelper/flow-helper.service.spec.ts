@@ -9,9 +9,6 @@ describe('Flow Helper Service', () => {
     TestBed.configureTestingModule({
       providers: [FlowHelper],
     });
-  });
-
-  beforeEach(() => {
     flowHelper = TestBed.inject(FlowHelper);
   });
 

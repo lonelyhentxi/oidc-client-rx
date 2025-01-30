@@ -38,7 +38,7 @@ describe('Auth State Service', () => {
     expect(authStateService).toBeTruthy();
   });
 
-  it('public authorize$ is observable$', () => {
+  it('authorize$ is observable$', () => {
     expect(authStateService.authenticated$).toBeInstanceOf(Observable);
   });
 
@@ -269,6 +269,7 @@ describe('Auth State Service', () => {
 
     it('does not crash and store accessToken when authResult is null', () => {
       const spy = vi.spyOn(storagePersistenceService, 'write');
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const authResult = null;
 
       authStateService.setAuthorizationData(

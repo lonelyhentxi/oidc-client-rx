@@ -1,6 +1,5 @@
 import { TestBed } from '@/testing';
 import { of } from 'rxjs';
-import { vi } from 'vitest';
 import { PASSED_CONFIG } from './auth-config';
 import { AuthModule } from './auth.module';
 import { ConfigurationService } from './config/config.service';

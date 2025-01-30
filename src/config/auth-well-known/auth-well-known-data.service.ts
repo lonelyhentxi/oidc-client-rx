@@ -1,12 +1,12 @@
 import { inject, Injectable } from 'injection-js';
-import { Observable, throwError } from 'rxjs';
+import { type Observable, throwError } from 'rxjs';
 import { map, retry } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
-import { OpenIdConfiguration } from '../openid-configuration';
-import { AuthWellKnownEndpoints } from './auth-well-known-endpoints';
+import type { OpenIdConfiguration } from '../openid-configuration';
+import type { AuthWellKnownEndpoints } from './auth-well-known-endpoints';
 
-const WELL_KNOWN_SUFFIX = `/.well-known/openid-configuration`;
+const WELL_KNOWN_SUFFIX = '/.well-known/openid-configuration';
 
 @Injectable()
 export class AuthWellKnownDataService {

@@ -35,15 +35,15 @@ describe('AuthWellKnownService', () => {
 
   describe('getAuthWellKnownEndPoints', () => {
     it('getAuthWellKnownEndPoints throws an error if not config provided', async () => {
-      service.queryAndStoreAuthWellKnownEndPoints(null).subscribe({
-        error: (error) => {
-          expect(error).toEqual(
-            new Error(
-              'Please provide a configuration before setting up the module'
-            )
-          );
-        },
-      });
+      try {
+        await lastValueFrom(service.queryAndStoreAuthWellKnownEndPoints(null));
+      } catch (error) {
+        expect(error).toEqual(
+          new Error(
+            'Please provide a configuration before setting up the module'
+          )
+        );
+      }
     });
 
     it('getAuthWellKnownEndPoints calls always dataservice', async () => {
@@ -91,18 +91,18 @@ describe('AuthWellKnownService', () => {
       );
       const publicEventsServiceSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      service
-        .queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
-        .subscribe({
-          error: (err) => {
-            expect(err).toBeTruthy();
-            expect(publicEventsServiceSpy).toHaveBeenCalledTimes(1);
-            expect(publicEventsServiceSpy).toHaveBeenCalledExactlyOnceWith(
-              EventTypes.ConfigLoadingFailed,
-              null
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
+        );
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+        expect(publicEventsServiceSpy).toHaveBeenCalledTimes(1);
+        expect(publicEventsServiceSpy).toHaveBeenCalledExactlyOnceWith(
+          EventTypes.ConfigLoadingFailed,
+          null
+        );
+      }
     });
   });
 });

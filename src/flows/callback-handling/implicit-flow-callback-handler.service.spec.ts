@@ -1,4 +1,5 @@
 import { TestBed } from '@/testing';
+import { lastValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
 import { LoggerService } from '../../logging/logger.service';
@@ -57,9 +58,10 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      await lastValueFrom(service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash'));
-expect(resetAuthorizationDataSpy).toHaveBeenCalled();
+      await lastValueFrom(
+        service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
+      );
+      expect(resetAuthorizationDataSpy).toHaveBeenCalled();
     });
 
     it('does NOT calls "resetAuthorizationData" if silent renew is running', async () => {
@@ -74,9 +76,10 @@ expect(resetAuthorizationDataSpy).toHaveBeenCalled();
         },
       ];
 
-      await lastValueFrom(service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash'));
-expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
+      await lastValueFrom(
+        service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
+      );
+      expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
     });
 
     it('returns callbackContext if all params are good', async () => {
@@ -99,9 +102,10 @@ expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
         },
       ];
 
-      const callbackContext = await lastValueFrom(service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs, 'anyHash'));
-expect(callbackContext).toEqual(expectedCallbackContext);
+      const callbackContext = await lastValueFrom(
+        service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'anyHash')
+      );
+      expect(callbackContext).toEqual(expectedCallbackContext);
     });
 
     it('uses window location hash if no hash is passed', async () => {
@@ -124,9 +128,10 @@ expect(callbackContext).toEqual(expectedCallbackContext);
         },
       ];
 
-      const callbackContext = await lastValueFrom(service
-        .implicitFlowCallback(allConfigs[0]!, allConfigs));
-expect(callbackContext).toEqual(expectedCallbackContext);
+      const callbackContext = await lastValueFrom(
+        service.implicitFlowCallback(allConfigs[0]!, allConfigs)
+      );
+      expect(callbackContext).toEqual(expectedCallbackContext);
     });
   });
 });

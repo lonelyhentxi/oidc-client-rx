@@ -1,7 +1,7 @@
 import { Injectable } from 'injection-js';
-import { Observable, ReplaySubject } from 'rxjs';
-import { EventTypes } from './event-types';
-import { OidcClientNotification } from './notification';
+import { type Observable, ReplaySubject } from 'rxjs';
+import type { EventTypes } from './event-types';
+import type { OidcClientNotification } from './notification';
 
 @Injectable()
 export class PublicEventsService {

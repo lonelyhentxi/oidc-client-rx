@@ -7,20 +7,21 @@ export function getVerifyAlg(
         name: 'RSASSA-PKCS1-v1_5',
         hash: 'SHA-256',
       };
-    case 'E':
+    case 'E': {
       if (alg.includes('256')) {
         return {
           name: 'ECDSA',
           hash: 'SHA-256',
         };
-      } else if (alg.includes('384')) {
+      }
+      if (alg.includes('384')) {
         return {
           name: 'ECDSA',
           hash: 'SHA-384',
         };
-      } else {
-        return null;
       }
+      return null;
+    }
     default:
       return null;
   }
@@ -35,7 +36,7 @@ export function alg2kty(alg: string): string {
       return 'EC';
 
     default:
-      throw new Error('Cannot infer kty from alg: ' + alg);
+      throw new Error(`Cannot infer kty from alg: ${alg}`);
   }
 }
 
@@ -43,39 +44,42 @@ export function getImportAlg(
   alg: string
 ): RsaHashedImportParams | EcKeyImportParams | null {
   switch (alg.charAt(0)) {
-    case 'R':
+    case 'R': {
       if (alg.includes('256')) {
         return {
           name: 'RSASSA-PKCS1-v1_5',
           hash: 'SHA-256',
         };
-      } else if (alg.includes('384')) {
+      }
+      if (alg.includes('384')) {
         return {
           name: 'RSASSA-PKCS1-v1_5',
           hash: 'SHA-384',
         };
-      } else if (alg.includes('512')) {
+      }
+      if (alg.includes('512')) {
         return {
           name: 'RSASSA-PKCS1-v1_5',
           hash: 'SHA-512',
         };
-      } else {
-        return null;
       }
-    case 'E':
+      return null;
+    }
+    case 'E': {
       if (alg.includes('256')) {
         return {
           name: 'ECDSA',
           namedCurve: 'P-256',
         };
-      } else if (alg.includes('384')) {
+      }
+      if (alg.includes('384')) {
         return {
           name: 'ECDSA',
           namedCurve: 'P-384',
         };
-      } else {
-        return null;
       }
+      return null;
+    }
     default:
       return null;
   }

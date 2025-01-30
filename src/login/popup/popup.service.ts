@@ -1,11 +1,11 @@
 import { DOCUMENT } from '../../dom';
 import { inject, Injectable } from 'injection-js';
-import { Observable, Subject } from 'rxjs';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import { type Observable, Subject } from 'rxjs';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
-import { PopupOptions } from './popup-options';
-import { PopupResult } from './popup-result';
+import type { PopupOptions } from './popup-options';
+import type { PopupResult } from './popup-result';
 
 @Injectable()
 export class PopUpService {
@@ -90,7 +90,7 @@ export class PopUpService {
       return;
     }
 
-    this.loggerService.logDebug(config, 'Opened popup with url ' + url);
+    this.loggerService.logDebug(config, `Opened popup with url ${url}`);
 
     const listener = (event: MessageEvent): void => {
       if (!event?.data || typeof event.data !== 'string') {
@@ -104,7 +104,7 @@ export class PopUpService {
 
       this.loggerService.logDebug(
         config,
-        'Received message from popup with url ' + event.data
+        `Received message from popup with url ${event.data}`
       );
 
       this.resultInternal$.next({ userClosed: false, receivedUrl: event.data });

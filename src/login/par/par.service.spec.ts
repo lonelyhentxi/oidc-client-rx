@@ -1,6 +1,6 @@
-import { TestBed } from '@/testing';
+import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpHeaders } from '@ngify/http';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -26,9 +26,6 @@ describe('ParService', () => {
         mockProvider(StoragePersistenceService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(ParService);
     dataService = TestBed.inject(DataService);
     loggerService = TestBed.inject(LoggerService);
@@ -50,13 +47,13 @@ describe('ParService', () => {
         ['authWellKnownEndPoints', { configId: 'configId1' }],
         () => null
       );
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        error: (err) => {
-          expect(err.message).toBe(
-            'Could not read PAR endpoint because authWellKnownEndPoints are not given'
-          );
-        },
-      });
+      try {
+        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+      } catch (err: any) {
+        expect(err.message).toBe(
+          'Could not read PAR endpoint because authWellKnownEndPoints are not given'
+        );
+      }
     });
 
     it('throws error if par endpoint does not exist in storage', async () => {
@@ -68,13 +65,13 @@ describe('ParService', () => {
         ['authWellKnownEndPoints', { configId: 'configId1' }],
         () => ({ some: 'thing' })
       );
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        error: (err) => {
-          expect(err.message).toBe(
-            'Could not read PAR endpoint from authWellKnownEndpoints'
-          );
-        },
-      });
+      try {
+        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+      } catch (err: any) {
+        expect(err.message).toBe(
+          'Could not read PAR endpoint from authWellKnownEndpoints'
+        );
+      }
     });
 
     it('calls data service with correct params', async () => {
@@ -92,12 +89,12 @@ describe('ParService', () => {
         .mockReturnValue(of({}));
 
       await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
-expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
-          'parEndpoint',
-          'some-url123',
-          { configId: 'configId1' },
-          expect.any(HttpHeaders)
-        );
+      expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
+        'parEndpoint',
+        'some-url123',
+        { configId: 'configId1' },
+        expect.any(HttpHeaders)
+      );
     });
 
     it('Gives back correct object properties', async () => {
@@ -112,8 +109,10 @@ expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
       vi.spyOn(dataService, 'post').mockReturnValue(
         of({ expires_in: 123, request_uri: 'request_uri' })
       );
-      const result = await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
-expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
+      const result = await lastValueFrom(
+        service.postParRequest({ configId: 'configId1' })
+      );
+      expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
     });
 
     it('throws error if data service has got an error', async () => {
@@ -130,18 +129,18 @@ expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
       );
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        error: (err) => {
-          expect(err.message).toBe(
-            'There was an error on ParService postParRequest'
-          );
-          expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
-            { configId: 'configId1' },
-            'There was an error on ParService postParRequest',
-            expect.any(Error)
-          );
-        },
-      });
+      try {
+        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+      } catch (err: any) {
+        expect(err.message).toBe(
+          'There was an error on ParService postParRequest'
+        );
+        expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
+          { configId: 'configId1' },
+          'There was an error on ParService postParRequest',
+          expect.any(Error)
+        );
+      }
     });
 
     it('should retry once', async () => {
@@ -160,12 +159,11 @@ expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
         )
       );
 
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        next: (res) => {
-          expect(res).toBeTruthy();
-          expect(res).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
-        },
-      });
+      const res = await lastValueFrom(
+        service.postParRequest({ configId: 'configId1' })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
     });
 
     it('should retry twice', async () => {
@@ -185,12 +183,11 @@ expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
         )
       );
 
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        next: (res) => {
-          expect(res).toBeTruthy();
-          expect(res).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
-        },
-      });
+      const res = await lastValueFrom(
+        service.postParRequest({ configId: 'configId1' })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
     });
 
     it('should fail after three tries', async () => {
@@ -211,11 +208,11 @@ expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
         )
       );
 
-      service.postParRequest({ configId: 'configId1' }).subscribe({
-        error: (err) => {
-          expect(err).toBeTruthy();
-        },
-      });
+      try {
+        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
   });
 });

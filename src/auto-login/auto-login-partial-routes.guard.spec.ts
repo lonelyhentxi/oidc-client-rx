@@ -4,7 +4,7 @@ import {
   type ActivatedRouteSnapshot,
   type RouterStateSnapshot,
 } from 'oidc-client-rx';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { CheckAuthService } from '../auth-state/check-auth.service';

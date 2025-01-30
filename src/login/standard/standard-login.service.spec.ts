@@ -1,5 +1,5 @@
-import { TestBed, fakeAsync, tick } from '@/testing';
-import { of } from 'rxjs';
+import { TestBed } from '@/testing';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
 import { FlowsDataService } from '../../flows/flows-data.service';
@@ -32,9 +32,6 @@ describe('StandardLoginService', () => {
         mockProvider(FlowsDataService),
       ],
     });
-  });
-
-  beforeEach(() => {
     standardLoginService = TestBed.inject(StandardLoginService);
     loggerService = TestBed.inject(LoggerService);
     responseTypeValidationService = TestBed.inject(
@@ -59,9 +56,11 @@ describe('StandardLoginService', () => {
       ).mockReturnValue(false);
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
-      const result = standardLoginService.loginStandard({
-        configId: 'configId1',
-      });
+      const result = await lastValueFrom(
+        standardLoginService.loginStandard({
+          configId: 'configId1',
+        })
+      );
 
       expect(result).toBeUndefined();
       expect(loggerSpy).toHaveBeenCalled();
@@ -84,7 +83,9 @@ describe('StandardLoginService', () => {
       vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
       const flowsDataSpy = vi.spyOn(flowsDataService, 'setCodeFlowInProgress');
 
-      const result = standardLoginService.loginStandard(config);
+      const result = await lastValueFrom(
+        standardLoginService.loginStandard(config)
+      );
 
       expect(result).toBeUndefined();
       expect(flowsDataSpy).toHaveBeenCalled();
@@ -106,7 +107,9 @@ describe('StandardLoginService', () => {
       ).mockReturnValue(of({}));
       vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
 
-      const result = standardLoginService.loginStandard(config);
+      const result = await lastValueFrom(
+        standardLoginService.loginStandard(config)
+      );
 
       expect(result).toBeUndefined();
     });
@@ -126,10 +129,10 @@ describe('StandardLoginService', () => {
         'queryAndStoreAuthWellKnownEndPoints'
       ).mockReturnValue(of({}));
       vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
-      const redirectSpy = vi.spyOn(redirectService, 'redirectTo')();
+      const redirectSpy = vi.spyOn(redirectService, 'redirectTo');
 
       standardLoginService.loginStandard(config);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(redirectSpy).toHaveBeenCalledExactlyOnceWith('someUrl');
     });
 
@@ -151,13 +154,13 @@ describe('StandardLoginService', () => {
       const redirectSpy = vi
         .spyOn(redirectService, 'redirectTo')
         .mockImplementation(() => undefined);
-      const spy = jasmine.createSpy();
+      const spy = vi.fn();
       const urlHandler = (url: any): void => {
         spy(url);
       };
 
       standardLoginService.loginStandard(config, { urlHandler });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(spy).toHaveBeenCalledExactlyOnceWith('someUrl');
       expect(redirectSpy).not.toHaveBeenCalled();
     });
@@ -183,7 +186,7 @@ describe('StandardLoginService', () => {
       );
 
       standardLoginService.loginStandard(config, {});
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(flowsDataSpy).toHaveBeenCalled();
     });
@@ -212,7 +215,7 @@ describe('StandardLoginService', () => {
       standardLoginService.loginStandard(config, {
         customParams: { to: 'add', as: 'well' },
       });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(redirectSpy).toHaveBeenCalledExactlyOnceWith('someUrl');
       expect(getAuthorizeUrlSpy).toHaveBeenCalledExactlyOnceWith(config, {
         customParams: { to: 'add', as: 'well' },
@@ -241,7 +244,7 @@ describe('StandardLoginService', () => {
         .mockImplementation(() => undefined);
 
       standardLoginService.loginStandard(config);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'Could not create URL',

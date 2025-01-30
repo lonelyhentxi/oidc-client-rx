@@ -1,6 +1,6 @@
+import { Injectable, inject } from 'injection-js';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { DOCUMENT } from '../../dom';
-import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 
 const PARTS_OF_TOKEN = 3;
@@ -111,7 +111,7 @@ export class TokenHelperService {
         output += '=';
         break;
       default:
-        throw Error('Illegal base64url string!');
+        throw new Error('Illegal base64url string!');
     }
 
     const decoded =
@@ -129,11 +129,11 @@ export class TokenHelperService {
         decoded
           .split('')
           .map(
-            (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            (c: string) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`
           )
           .join('')
       );
-    } catch (err) {
+    } catch {
       return decoded;
     }
   }

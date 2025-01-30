@@ -1,6 +1,6 @@
 import { Injectable, inject } from 'injection-js';
 import { type Observable, of, throwError } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { map, shareReplay, switchMap, take } from 'rxjs/operators';
 import type { AuthOptions } from '../../auth-options';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
@@ -39,7 +39,7 @@ export class ParLoginService {
   loginPar(
     configuration: OpenIdConfiguration,
     authOptions?: AuthOptions
-  ): void {
+  ): Observable<void> {
     if (
       !this.responseTypeValidationService.hasConfigValidResponseType(
         configuration
@@ -55,38 +55,53 @@ export class ParLoginService {
       'BEGIN Authorize OIDC Flow, no auth data'
     );
 
-    this.authWellKnownService
+    const result$ = this.authWellKnownService
       .queryAndStoreAuthWellKnownEndPoints(configuration)
       .pipe(
         switchMap(() =>
           this.parService.postParRequest(configuration, authOptions)
-        )
-      )
-      .subscribe((response) => {
-        this.loggerService.logDebug(configuration, 'par response: ', response);
+        ),
+        map(() => {
+          (response) => {
+            this.loggerService.logDebug(
+              configuration,
+              'par response: ',
+              response
+            );
 
-        const url = this.urlService.getAuthorizeParUrl(
-          response.requestUri,
-          configuration
-        );
+            const url = this.urlService.getAuthorizeParUrl(
+              response.requestUri,
+              configuration
+            );
 
-        this.loggerService.logDebug(configuration, 'par request url: ', url);
+            this.loggerService.logDebug(
+              configuration,
+              'par request url: ',
+              url
+            );
 
-        if (!url) {
-          this.loggerService.logError(
-            configuration,
-            `Could not create URL with param ${response.requestUri}: '${url}'`
-          );
+            if (!url) {
+              this.loggerService.logError(
+                configuration,
+                `Could not create URL with param ${response.requestUri}: '${url}'`
+              );
 
-          return;
-        }
+              return;
+            }
 
-        if (authOptions?.urlHandler) {
-          authOptions.urlHandler(url);
-        } else {
-          this.redirectService.redirectTo(url);
-        }
-      });
+            if (authOptions?.urlHandler) {
+              authOptions.urlHandler(url);
+            } else {
+              this.redirectService.redirectTo(url);
+            }
+          };
+        }),
+        shareReplay(1)
+      );
+
+    result$.subscribe();
+
+    return result$;
   }
 
   loginWithPopUpPar(

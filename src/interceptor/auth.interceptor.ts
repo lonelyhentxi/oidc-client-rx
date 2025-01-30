@@ -73,7 +73,7 @@ function interceptRequest(
   if (allRoutesConfiguredFlat.length === 0) {
     deps.loggerService.logDebug(
       allConfigurations[0],
-      `No routes to check configured`
+      'No routes to check configured'
     );
 
     return next(req);
@@ -114,7 +114,7 @@ function interceptRequest(
     `'${req.url}' matches configured route '${matchingRoute}', adding token`
   );
   req = req.clone({
-    headers: req.headers.set('Authorization', 'Bearer ' + token),
+    headers: req.headers.set('Authorization', `Bearer ${token}`),
   });
 
   return next(req);

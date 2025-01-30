@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpErrorResponse, HttpHeaders } from '@ngify/http';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -26,9 +26,6 @@ describe('RefreshTokenCallbackHandlerService', () => {
         mockProvider(StoragePersistenceService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(RefreshTokenCallbackHandlerService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
     dataService = TestBed.inject(DataService);
@@ -48,13 +45,13 @@ describe('RefreshTokenCallbackHandlerService', () => {
     });
 
     it('throws error if no tokenEndpoint is given', async () => {
-      (service as any)
-        .refreshTokensRequestTokens({} as CallbackContext)
-        .subscribe({
-          error: (err: unknown) => {
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          (service as any).refreshTokensRequestTokens({} as CallbackContext)
+        );
+      } catch (err: unknown) {
+        expect(err).toBeTruthy();
+      }
     });
 
     it('calls data service if all params are good', async () => {
@@ -66,21 +63,22 @@ describe('RefreshTokenCallbackHandlerService', () => {
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      await lastValueFrom(service
-        .refreshTokensRequestTokens({} as CallbackContext, {
+      await lastValueFrom(
+        service.refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
-        }));
-expect(postSpy).toHaveBeenCalledExactlyOnceWith(
-            'tokenEndpoint',
-            undefined,
-            { configId: 'configId1' },
-            expect.any(HttpHeaders)
-          );;
-const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;;
-expect(httpHeaders.has('Content-Type')).toBeTruthy();;
-expect(httpHeaders.get('Content-Type')).toBe(
-            'application/x-www-form-urlencoded'
-          );
+        })
+      );
+      expect(postSpy).toHaveBeenCalledExactlyOnceWith(
+        'tokenEndpoint',
+        undefined,
+        { configId: 'configId1' },
+        expect.any(HttpHeaders)
+      );
+      const httpHeaders = postSpy.mock.calls.at(-1)?.[3] as HttpHeaders;
+      expect(httpHeaders.has('Content-Type')).toBeTruthy();
+      expect(httpHeaders.get('Content-Type')).toBe(
+        'application/x-www-form-urlencoded'
+      );
     });
 
     it('calls data service with correct headers if all params are good', async () => {
@@ -92,15 +90,16 @@ expect(httpHeaders.get('Content-Type')).toBe(
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      await lastValueFrom(service
-        .refreshTokensRequestTokens({} as CallbackContext, {
+      await lastValueFrom(
+        service.refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
-        }));
-const httpHeaders = postSpy.calls.mostRecent().args[3] as HttpHeaders;;
-expect(httpHeaders.has('Content-Type')).toBeTruthy();;
-expect(httpHeaders.get('Content-Type')).toBe(
-            'application/x-www-form-urlencoded'
-          );
+        })
+      );
+      const httpHeaders = postSpy.mock.calls.at(-1)?.[3] as HttpHeaders;
+      expect(httpHeaders.has('Content-Type')).toBeTruthy();
+      expect(httpHeaders.get('Content-Type')).toBe(
+        'application/x-www-form-urlencoded'
+      );
     });
 
     it('returns error in case of http error', async () => {
@@ -115,13 +114,13 @@ expect(httpHeaders.get('Content-Type')).toBe(
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      service
-        .refreshTokensRequestTokens({} as CallbackContext, config)
-        .subscribe({
-          error: (err) => {
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.refreshTokensRequestTokens({} as CallbackContext, config)
+        );
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
 
     it('retries request in case of no connection http error and succeeds', async () => {
@@ -139,18 +138,15 @@ expect(httpHeaders.get('Content-Type')).toBe(
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      service
-        .refreshTokensRequestTokens({} as CallbackContext, config)
-        .subscribe({
-          next: (res) => {
-            expect(res).toBeTruthy();
-            expect(postSpy).toHaveBeenCalledTimes(1);
-          },
-          error: (err) => {
-            // fails if there should be a result
-            expect(err).toBeFalsy();
-          },
-        });
+      try {
+        const res = await lastValueFrom(
+          service.refreshTokensRequestTokens({} as CallbackContext, config)
+        );
+        expect(res).toBeTruthy();
+        expect(postSpy).toHaveBeenCalledTimes(1);
+      } catch (err: any) {
+        expect(err).toBeFalsy();
+      }
     });
 
     it('retries request in case of no connection http error and fails because of http error afterwards', async () => {
@@ -168,18 +164,15 @@ expect(httpHeaders.get('Content-Type')).toBe(
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      service
-        .refreshTokensRequestTokens({} as CallbackContext, config)
-        .subscribe({
-          next: (res) => {
-            // fails if there should be a result
-            expect(res).toBeFalsy();
-          },
-          error: (err) => {
-            expect(err).toBeTruthy();
-            expect(postSpy).toHaveBeenCalledTimes(1);
-          },
-        });
+      try {
+        const res = await lastValueFrom(
+          service.refreshTokensRequestTokens({} as CallbackContext, config)
+        );
+        expect(res).toBeFalsy();
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+        expect(postSpy).toHaveBeenCalledTimes(1);
+      }
     });
   });
 });

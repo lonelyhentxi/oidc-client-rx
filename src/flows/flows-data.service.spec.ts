@@ -1,4 +1,4 @@
-import { TestBed } from '@/testing';
+import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
@@ -21,15 +21,13 @@ describe('Flows Data Service', () => {
         mockProvider(StoragePersistenceService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(FlowsDataService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
   });
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   afterEach(() => {
-    jasmine.clock().uninstall();
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -141,10 +139,11 @@ describe('Flows Data Service', () => {
 
   describe('codeVerifier', () => {
     it('getCodeVerifier returns value from the store', () => {
-      const spy = vi
-        .spyOn(storagePersistenceService, 'read')
-        .withArgs('codeVerifier', { configId: 'configId1' })
-        .mockReturnValue('Genesis');
+      const spy = mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['codeVerifier', { configId: 'configId1' }],
+        () => 'Genesis'
+      );
 
       const result = service.getCodeVerifier({ configId: 'configId1' });
 
@@ -173,11 +172,12 @@ describe('Flows Data Service', () => {
         configId: 'configId1',
       };
 
-      jasmine.clock().uninstall();
-      jasmine.clock().install();
+      vi.useRealTimers();
+      vi.useFakeTimers();
+
       const baseTime = new Date();
 
-      jasmine.clock().mockDate(baseTime);
+      vi.setSystemTime(baseTime);
 
       mockImplementationWhenArgsEqual(
         vi.spyOn(storagePersistenceService, 'read'),
@@ -212,11 +212,11 @@ describe('Flows Data Service', () => {
 
   describe('setCodeFlowInProgress', () => {
     it('set setCodeFlowInProgress to `in progress` when called', () => {
-      jasmine.clock().uninstall();
-      jasmine.clock().install();
+      vi.useRealTimers();
+      vi.useFakeTimers();
       const baseTime = new Date();
 
-      jasmine.clock().mockDate(baseTime);
+      vi.setSystemTime(baseTime);
 
       const spy = vi.spyOn(storagePersistenceService, 'write');
 
@@ -253,23 +253,27 @@ describe('Flows Data Service', () => {
         configId: 'configId1',
       };
 
-      jasmine.clock().uninstall();
-      jasmine.clock().install();
+      vi.useRealTimers();
+      vi.useFakeTimers();
       const baseTime = new Date();
 
-      jasmine.clock().mockDate(baseTime);
+      vi.setSystemTime(baseTime);
 
       const storageObject = {
         state: 'running',
         dateOfLaunchedProcessUtc: baseTime.toISOString(),
       };
 
-      vi.spyOn(storagePersistenceService, 'read')
-        .withArgs('storageSilentRenewRunning', config)
-        .mockReturnValue(JSON.stringify(storageObject));
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['storageSilentRenewRunning', config],
+        () => JSON.stringify(storageObject)
+      );
       const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
-      jasmine.clock().tick((config.silentRenewTimeoutInSeconds + 1) * 1000);
+      vi.advanceTimersByTimeAsync(
+        (config.silentRenewTimeoutInSeconds + 1) * 1000
+      );
 
       const isSilentRenewRunningResult = service.isSilentRenewRunning(config);
 
@@ -287,20 +291,22 @@ describe('Flows Data Service', () => {
         configId: 'configId1',
       };
 
-      jasmine.clock().uninstall();
-      jasmine.clock().install();
+      vi.useRealTimers();
+      vi.useFakeTimers();
       const baseTime = new Date();
 
-      jasmine.clock().mockDate(baseTime);
+      vi.setSystemTime(baseTime);
 
       const storageObject = {
         state: 'running',
         dateOfLaunchedProcessUtc: baseTime.toISOString(),
       };
 
-      vi.spyOn(storagePersistenceService, 'read')
-        .withArgs('storageSilentRenewRunning', config)
-        .mockReturnValue(JSON.stringify(storageObject));
+      mockImplementationWhenArgsEqual(
+        vi.spyOn(storagePersistenceService, 'read'),
+        ['storageSilentRenewRunning', config],
+        () => JSON.stringify(storageObject)
+      );
       const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
       const isSilentRenewRunningResult = service.isSilentRenewRunning(config);
@@ -326,11 +332,11 @@ describe('Flows Data Service', () => {
 
   describe('setSilentRenewRunning', () => {
     it('set setSilentRenewRunning to `running` with lauched time when called', () => {
-      jasmine.clock().uninstall();
-      jasmine.clock().install();
+      vi.useRealTimers();
+      vi.useFakeTimers();
       const baseTime = new Date();
 
-      jasmine.clock().mockDate(baseTime);
+      vi.setSystemTime(baseTime);
 
       const storageObject = {
         state: 'running',

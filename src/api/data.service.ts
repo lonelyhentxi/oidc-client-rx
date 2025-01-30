@@ -1,7 +1,7 @@
 import { HttpHeaders, HttpParams } from '@ngify/http';
 import { Injectable, inject } from 'injection-js';
-import { Observable } from 'rxjs';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { Observable } from 'rxjs';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { HttpBaseService } from './http-base.service';
 
 const NGSW_CUSTOM_PARAM = 'ngsw-bypass';
@@ -41,10 +41,10 @@ export class DataService {
 
     headers = headers.set('Accept', 'application/json');
 
-    if (!!token) {
+    if (token) {
       headers = headers.set(
         'Authorization',
-        'Bearer ' + decodeURIComponent(token)
+        `Bearer ${decodeURIComponent(token)}`
       );
     }
 

@@ -1,5 +1,6 @@
-import { TestBed, fakeAsync, tick } from '@/testing';
-import { vi } from 'vitest';
+import { TestBed, spyOnProperty } from '@/testing';
+import { lastValueFrom } from 'rxjs';
+import { type MockInstance, vi } from 'vitest';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
@@ -113,7 +114,7 @@ describe('PopUpService', () => {
       };
 
       const result = await lastValueFrom(popUpService.result$);
-expect(result).toBe(popupResult);
+      expect(result).toBe(popupResult);
 
       (popUpService as any).resultInternal$.next(popupResult);
     });
@@ -122,7 +123,7 @@ expect(result).toBe(popupResult);
   describe('openPopup', () => {
     it('popup opens with parameters and default options', async () => {
       // arrange
-      const popupSpy = vi.spyOn(window, 'open').and.callFake(
+      const popupSpy = vi.spyOn(window, 'open').mockImplementation(
         () =>
           ({
             closed: true,
@@ -143,7 +144,7 @@ expect(result).toBe(popupResult);
 
     it('popup opens with parameters and passed options', async () => {
       // arrange
-      const popupSpy = vi.spyOn(window, 'open').and.callFake(
+      const popupSpy = vi.spyOn(window, 'open').mockImplementation(
         () =>
           ({
             closed: true,
@@ -180,9 +181,9 @@ expect(result).toBe(popupResult);
     describe('popup closed', () => {
       let popup: Window;
       let popupResult: PopupResult;
-      let cleanUpSpy: jasmine.Spy;
+      let cleanUpSpy: MockInstance;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         popup = {
           closed: false,
           close: () => undefined,
@@ -190,12 +191,12 @@ expect(result).toBe(popupResult);
 
         vi.spyOn(window, 'open').mockReturnValue(popup);
 
-        cleanUpSpy = vi.spyOn(popUpService as any, 'cleanUp')();
+        cleanUpSpy = vi.spyOn(popUpService as any, 'cleanUp');
 
         popupResult = {} as PopupResult;
 
         const result = await lastValueFrom(popUpService.result$);
-(popupResult = result)
+        popupResult = result;
       });
 
       it('message received with data', async () => {
@@ -203,8 +204,10 @@ expect(result).toBe(popupResult);
           return;
         };
 
-        vi.spyOn(window, 'addEventListener').and.callFake(
-          (_: any, func: any) => (listener = func)
+        vi.spyOn(window, 'addEventListener').mockImplementation(
+          // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+          // biome-ignore lint/complexity/noVoid: <explanation>
+          (_: any, func: any) => void (listener = func)
         );
 
         popUpService.openPopUp('url', {}, { configId: 'configId1' });
@@ -214,7 +217,7 @@ expect(result).toBe(popupResult);
 
         listener(new MessageEvent('message', { data: 'some-url1111' }));
 
-        tick(200);
+        await vi.advanceTimersByTimeAsync(200);
 
         expect(popupResult).toEqual({
           userClosed: false,
@@ -230,7 +233,8 @@ expect(result).toBe(popupResult);
           return;
         };
 
-        vi.spyOn(window, 'addEventListener').and.callFake(
+        vi.spyOn(window, 'addEventListener').mockImplementation(
+          // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
           (_: any, func: any) => (listener = func)
         );
         const nextSpy = vi.spyOn((popUpService as any).resultInternal$, 'next');
@@ -242,7 +246,7 @@ expect(result).toBe(popupResult);
 
         listener(new MessageEvent('message', { data: null }));
 
-        tick(200);
+        vi.advanceTimersByTimeAsync(200);
 
         expect(popupResult).toEqual({} as PopupResult);
         expect(cleanUpSpy).toHaveBeenCalled();
@@ -257,7 +261,7 @@ expect(result).toBe(popupResult);
 
         (popup as any).closed = true;
 
-        tick(200);
+        await vi.advanceTimersByTimeAsync(200);
 
         expect(popupResult).toEqual({
           userClosed: true,
@@ -277,6 +281,8 @@ expect(result).toBe(popupResult);
 
       // act
       popUpService.sendMessageToMainWindow('', {});
+
+      await vi.advanceTimersToNextFrame();
 
       // assert
       expect(sendMessageSpy).not.toHaveBeenCalled();

@@ -1,5 +1,5 @@
-import { JwtKeys } from '../validation/jwtkeys';
-import { StateValidationResult } from '../validation/state-validation-result';
+import type { JwtKeys } from '../validation/jwtkeys';
+import type { StateValidationResult } from '../validation/state-validation-result';
 
 export interface CallbackContext {
   code: string;

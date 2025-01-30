@@ -4,19 +4,24 @@
   "linter": {
     "rules": {
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "off",
+        "useFilenamingConvention": "warn"
       },
       "suspicious": {
         "noExplicitAny": "off"
       },
       "complexity": {
-        "noForEach": "info"
+        "noForEach": "off"
       },
       "correctness": {
         "noUnusedImports": {
           "fix": "none",
           "level": "warn"
         }
+      },
+      "nursery": {
+        "noEnum": "off"
       }
     }
   },

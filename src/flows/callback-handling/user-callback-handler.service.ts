@@ -35,6 +35,7 @@ export class UserCallbackHandlerService {
     if (!autoUserInfo) {
       if (!isRenewProcess || renewUserInfoAfterTokenRenew) {
         // userData is set to the id_token decoded, auto get user data set to false
+        // biome-ignore lint/nursery/useCollapsedIf: <explanation>
         if (validationResult?.decodedIdToken) {
           this.userService.setUserDataToStore(
             validationResult.decodedIdToken,
@@ -66,7 +67,7 @@ export class UserCallbackHandlerService {
       )
       .pipe(
         switchMap((userData) => {
-          if (!!userData) {
+          if (userData) {
             if (!refreshToken) {
               this.flowsDataService.setSessionState(
                 authResult?.session_state,
@@ -77,18 +78,17 @@ export class UserCallbackHandlerService {
             this.publishAuthState(validationResult, isRenewProcess);
 
             return of(callbackContext);
-          } else {
-            this.resetAuthDataService.resetAuthorizationData(
-              configuration,
-              allConfigs
-            );
-            this.publishUnauthenticatedState(validationResult, isRenewProcess);
-            const errorMessage = `Called for userData but they were ${userData}`;
-
-            this.loggerService.logWarning(configuration, errorMessage);
-
-            return throwError(() => new Error(errorMessage));
           }
+          this.resetAuthDataService.resetAuthorizationData(
+            configuration,
+            allConfigs
+          );
+          this.publishUnauthenticatedState(validationResult, isRenewProcess);
+          const errorMessage = `Called for userData but they were ${userData}`;
+
+          this.loggerService.logWarning(configuration, errorMessage);
+
+          return throwError(() => new Error(errorMessage));
         }),
         catchError((err) => {
           const errorMessage = `Failed to retrieve user info with error:  ${err}`;

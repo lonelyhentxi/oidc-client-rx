@@ -1,5 +1,5 @@
 import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { FlowHelper } from '../../utils/flowHelper/flow-helper.service';
 

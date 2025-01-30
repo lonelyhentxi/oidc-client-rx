@@ -1,4 +1,4 @@
-import { OpenIdConfiguration } from '../openid-configuration';
+import type { OpenIdConfiguration } from '../openid-configuration';
 
 export interface Rule {
   validate(passedConfig: OpenIdConfiguration): RuleValidationResult;

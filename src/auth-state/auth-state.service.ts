@@ -257,9 +257,8 @@ export class AuthStateService {
   private decodeURIComponentSafely(token: string): string {
     if (token) {
       return decodeURIComponent(token);
-    } else {
-      return '';
     }
+    return '';
   }
 
   private persistAccessTokenExpirationTime(

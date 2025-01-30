@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
 import { CryptoService } from './crypto.service';
 
@@ -16,9 +15,6 @@ describe('CryptoService', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     cryptoService = TestBed.inject(CryptoService);
   });
 
@@ -50,9 +46,6 @@ describe('CryptoService: msCrypto', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     cryptoService = TestBed.inject(CryptoService);
   });
 

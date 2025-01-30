@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { mockProvider } from '../testing/mock';
 import { ClosestMatchingRouteService } from './closest-matching-route.service';
@@ -11,9 +10,6 @@ describe('ClosestMatchingRouteService', () => {
     TestBed.configureTestingModule({
       providers: [ClosestMatchingRouteService, mockProvider(LoggerService)],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(ClosestMatchingRouteService);
   });
 

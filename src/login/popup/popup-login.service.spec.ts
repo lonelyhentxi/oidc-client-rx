@@ -59,12 +59,14 @@ describe('PopUpLoginService', () => {
       ).mockReturnValue(false);
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
-      popUpLoginService.loginWithPopUpStandard(config, [config]).subscribe({
-        error: (err) => {
-          expect(loggerSpy).toHaveBeenCalled();
-          expect(err.message).toBe('Invalid response type!');
-        },
-      });
+      try {
+        await lastValueFrom(
+          popUpLoginService.loginWithPopUpStandard(config, [config])
+        );
+      } catch (err: any) {
+        expect(loggerSpy).toHaveBeenCalled();
+        expect(err.message).toBe('Invalid response type!');
+      }
     });
 
     it('calls urlService.getAuthorizeUrl() if everything fits', async () => {

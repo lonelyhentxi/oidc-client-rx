@@ -18,9 +18,6 @@ describe('ResponseTypeValidationService', () => {
         mockProvider(FlowHelper),
       ],
     });
-  });
-
-  beforeEach(() => {
     responseTypeValidationService = TestBed.inject(
       ResponseTypeValidationService
     );

@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { IFrameService } from '../../iframe/existing-iframe.service';
 import { EqualityService } from './equality.service';
 
@@ -10,9 +9,6 @@ describe('EqualityService Tests', () => {
     TestBed.configureTestingModule({
       providers: [EqualityService, IFrameService],
     });
-  });
-
-  beforeEach(() => {
     equalityHelperService = TestBed.inject(EqualityService);
   });
 

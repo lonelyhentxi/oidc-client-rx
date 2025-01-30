@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -30,9 +30,6 @@ describe('UserCallbackHandlerService', () => {
         mockProvider(ResetAuthDataService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(UserCallbackHandlerService);
     flowsDataService = TestBed.inject(FlowsDataService);
     authStateService = TestBed.inject(AuthStateService);
@@ -73,10 +70,11 @@ describe('UserCallbackHandlerService', () => {
 
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(spy).toHaveBeenCalledExactlyOnceWith('mystate', allConfigs[0]);;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(spy).toHaveBeenCalledExactlyOnceWith('mystate', allConfigs[0]);
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('does NOT call flowsDataService.setSessionState if autoUserInfo is false, isRenewProcess is true and refreshToken is null', async () => {
@@ -105,10 +103,11 @@ expect(resultCallbackContext).toEqual(callbackContext);
       ];
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(spy).not.toHaveBeenCalled();;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(spy).not.toHaveBeenCalled();
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('does NOT call flowsDataService.setSessionState if autoUserInfo is false isRenewProcess is false, refreshToken has value', async () => {
@@ -137,10 +136,11 @@ expect(resultCallbackContext).toEqual(callbackContext);
       ];
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(spy).not.toHaveBeenCalled();;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(spy).not.toHaveBeenCalled();
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('does NOT call flowsDataService.setSessionState if autoUserInfo is false isRenewProcess is false, refreshToken has value, id_token is false', async () => {
@@ -165,10 +165,11 @@ expect(resultCallbackContext).toEqual(callbackContext);
 
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(spy).not.toHaveBeenCalled();;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(spy).not.toHaveBeenCalled();
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('calls authStateService.updateAndPublishAuthState with correct params if autoUserInfo is false', async () => {
@@ -202,14 +203,15 @@ expect(resultCallbackContext).toEqual(callbackContext);
         'updateAndPublishAuthState'
       );
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
-            isAuthenticated: true,
-            validationResult: ValidationResult.NotSet,
-            isRenewProcess: false,
-          });;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+        isAuthenticated: true,
+        validationResult: ValidationResult.NotSet,
+        isRenewProcess: false,
+      });
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('calls userService.getAndPersistUserDataInStore with correct params if autoUserInfo is true', async () => {
@@ -242,18 +244,17 @@ expect(resultCallbackContext).toEqual(callbackContext);
         .spyOn(userService, 'getAndPersistUserDataInStore')
         .mockReturnValue(of({ user: 'some_data' }));
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(
-            getAndPersistUserDataInStoreSpy
-          ).toHaveBeenCalledExactlyOnceWith(
-            allConfigs[0]!,
-            allConfigs,
-            false,
-            'idtoken',
-            'decoded'
-          );;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(getAndPersistUserDataInStoreSpy).toHaveBeenCalledExactlyOnceWith(
+        allConfigs[0]!,
+        allConfigs,
+        false,
+        'idtoken',
+        'decoded'
+      );
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('calls authStateService.updateAndPublishAuthState with correct params if autoUserInfo is true', async () => {
@@ -291,14 +292,15 @@ expect(resultCallbackContext).toEqual(callbackContext);
         'updateAndPublishAuthState'
       );
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
-            isAuthenticated: true,
-            validationResult: ValidationResult.MaxOffsetExpired,
-            isRenewProcess: false,
-          });;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+        isAuthenticated: true,
+        validationResult: ValidationResult.MaxOffsetExpired,
+        isRenewProcess: false,
+      });
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('calls flowsDataService.setSessionState with correct params if user data is present and NOT refresh token', async () => {
@@ -333,13 +335,14 @@ expect(resultCallbackContext).toEqual(callbackContext);
       );
       const setSessionStateSpy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs));
-expect(setSessionStateSpy).toHaveBeenCalledExactlyOnceWith(
-            'mystate',
-            allConfigs[0]
-          );;
-expect(resultCallbackContext).toEqual(callbackContext);
+      const resultCallbackContext = await lastValueFrom(
+        service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+      );
+      expect(setSessionStateSpy).toHaveBeenCalledExactlyOnceWith(
+        'mystate',
+        allConfigs[0]
+      );
+      expect(resultCallbackContext).toEqual(callbackContext);
     });
 
     it('calls authStateService.publishUnauthorizedState with correct params if user info which are coming back are null', async () => {
@@ -377,22 +380,20 @@ expect(resultCallbackContext).toEqual(callbackContext);
         'updateAndPublishAuthState'
       );
 
-      service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs)
-        .subscribe({
-          error: (err) => {
-            expect(
-              updateAndPublishAuthStateSpy
-            ).toHaveBeenCalledExactlyOnceWith({
-              isAuthenticated: false,
-              validationResult: ValidationResult.MaxOffsetExpired,
-              isRenewProcess: false,
-            });
-            expect(err.message).toEqual(
-              'Failed to retrieve user info with error:  Error: Called for userData but they were null'
-            );
-          },
+      try {
+        await lastValueFrom(
+          service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+        );
+      } catch (err: any) {
+        expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+          isAuthenticated: false,
+          validationResult: ValidationResult.MaxOffsetExpired,
+          isRenewProcess: false,
         });
+        expect(err.message).toEqual(
+          'Failed to retrieve user info with error:  Error: Called for userData but they were null'
+        );
+      }
     });
 
     it('calls resetAuthDataService.resetAuthorizationData if user info which are coming back are null', async () => {
@@ -430,16 +431,16 @@ expect(resultCallbackContext).toEqual(callbackContext);
         'resetAuthorizationData'
       );
 
-      service
-        .callbackUser(callbackContext, allConfigs[0]!, allConfigs)
-        .subscribe({
-          error: (err) => {
-            expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
-            expect(err.message).toEqual(
-              'Failed to retrieve user info with error:  Error: Called for userData but they were null'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
+        );
+      } catch (err: any) {
+        expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
+        expect(err.message).toEqual(
+          'Failed to retrieve user info with error:  Error: Called for userData but they were null'
+        );
+      }
     });
   });
 });

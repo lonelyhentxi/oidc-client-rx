@@ -1,6 +1,6 @@
 import { inject, Injectable } from 'injection-js';
 import { Router } from '@angular/router';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 
 const STORAGE_KEY = 'redirect';

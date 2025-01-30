@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import type { AuthWellKnownEndpoints } from '../config/auth-well-known/auth-well-known-endpoints';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
@@ -36,18 +36,12 @@ describe('State Validation Service', () => {
         FlowHelper,
       ],
     });
-  });
-
-  beforeEach(() => {
     stateValidationService = TestBed.inject(StateValidationService);
     tokenValidationService = TestBed.inject(TokenValidationService);
     tokenHelperService = TestBed.inject(TokenHelperService);
     loggerService = TestBed.inject(LoggerService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
     flowHelper = TestBed.inject(FlowHelper);
-  });
-
-  beforeEach(() => {
     config = {
       authority: 'https://localhost:44363',
       redirectUrl: 'https://localhost:44363',
@@ -694,7 +688,7 @@ describe('State Validation Service', () => {
       );
 
       const isValid = await lastValueFrom(isValidObs$);
-expect(isValid.authResponseIsValid).toBe(false);
+      expect(isValid.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid context error', async () => {
@@ -730,7 +724,7 @@ expect(isValid.authResponseIsValid).toBe(false);
       );
 
       const isValid = await lastValueFrom(isValidObs$);
-expect(isValid.authResponseIsValid).toBe(false);
+      expect(isValid.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenExpNotExpired is false', async () => {
@@ -825,14 +819,14 @@ expect(isValid.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback id token expired'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback id token expired'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateStateFromHashCallback is false', async () => {
@@ -877,14 +871,14 @@ expect(state.authResponseIsValid).toBe(false);
       ).toHaveBeenCalled();
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect state'
-        );;
-expect(state.accessToken).toBe('');;
-expect(state.authResponseIsValid).toBe(false);;
-expect(state.decodedIdToken).toBeDefined();;
-expect(state.idToken).toBe('');
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect state'
+      );
+      expect(state.accessToken).toBe('');
+      expect(state.authResponseIsValid).toBe(false);
+      expect(state.decodedIdToken).toBeDefined();
+      expect(state.idToken).toBe('');
     });
 
     it('access_token should equal result.access_token and is valid if response_type is "id_token token"', async () => {
@@ -974,10 +968,10 @@ expect(state.idToken).toBe('');
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(true);
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(true);
     });
 
     it('should return invalid result if validateSignatureIdToken is false', async () => {
@@ -1027,14 +1021,14 @@ expect(state.authResponseIsValid).toBe(true);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logDebugSpy).toBeCalledWith([
-          [config, 'authCallback Signature validation failed id_token'],
-          [config, 'authCallback token(s) invalid'],
-        ]);;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logDebugSpy).toBeCalledWith([
+        [config, 'authCallback Signature validation failed id_token'],
+        [config, 'authCallback token(s) invalid'],
+      ]);
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenNonce is false', async () => {
@@ -1087,14 +1081,14 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect nonce, did you call the checkAuth() method multiple times?'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect nonce, did you call the checkAuth() method multiple times?'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateRequiredIdToken is false', async () => {
@@ -1155,18 +1149,18 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logDebugSpy).toHaveBeenCalledWith(
-          config,
-          'authCallback Validation, one of the REQUIRED properties missing from id_token'
-        );;
-expect(logDebugSpy).toHaveBeenCalledWith(
-          config,
-          'authCallback token(s) invalid'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logDebugSpy).toHaveBeenCalledWith(
+        config,
+        'authCallback Validation, one of the REQUIRED properties missing from id_token'
+      );
+      expect(logDebugSpy).toHaveBeenCalledWith(
+        config,
+        'authCallback token(s) invalid'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenIatMaxOffset is false', async () => {
@@ -1230,14 +1224,14 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback Validation, iat rejected id_token was issued too far away from the current time'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback Validation, iat rejected id_token was issued too far away from the current time'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenIss is false and has authWellKnownEndPoints', async () => {
@@ -1308,14 +1302,14 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect iss does not match authWellKnownEndpoints issuer'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect iss does not match authWellKnownEndpoints issuer'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenIss is false and has no authWellKnownEndPoints', async () => {
@@ -1374,15 +1368,15 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authWellKnownEndpoints is undefined'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);;
-expect(state.state).toBe(ValidationResult.NoAuthWellKnownEndPoints);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authWellKnownEndpoints is undefined'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
+      expect(state.state).toBe(ValidationResult.NoAuthWellKnownEndPoints);
     });
 
     it('should return invalid result if validateIdTokenAud is false', async () => {
@@ -1451,14 +1445,14 @@ expect(state.state).toBe(ValidationResult.NoAuthWellKnownEndPoints);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect aud'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect aud'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return invalid result if validateIdTokenAzpExistsIfMoreThanOneAud is false', async () => {
@@ -1531,15 +1525,15 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback missing azp'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);;
-expect(state.state).toBe(ValidationResult.IncorrectAzp);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback missing azp'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
+      expect(state.state).toBe(ValidationResult.IncorrectAzp);
     });
 
     it('should return invalid result if validateIdTokenAzpValid is false', async () => {
@@ -1616,15 +1610,15 @@ expect(state.state).toBe(ValidationResult.IncorrectAzp);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect azp'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);;
-expect(state.state).toBe(ValidationResult.IncorrectAzp);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect azp'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
+      expect(state.state).toBe(ValidationResult.IncorrectAzp);
     });
 
     it('should return invalid result if isIdTokenAfterRefreshTokenRequestValid is false', async () => {
@@ -1705,17 +1699,17 @@ expect(state.state).toBe(ValidationResult.IncorrectAzp);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback pre, post id_token claims do not match in refresh'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);;
-expect(state.state).toBe(
-          ValidationResult.IncorrectIdTokenClaimsAfterRefresh
-        );
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback pre, post id_token claims do not match in refresh'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
+      expect(state.state).toBe(
+        ValidationResult.IncorrectIdTokenClaimsAfterRefresh
+      );
     });
 
     it('Reponse is valid if authConfiguration.response_type does not equal "id_token token"', async () => {
@@ -1808,18 +1802,18 @@ expect(state.state).toBe(
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logDebugSpy).toHaveBeenCalledWith(
-          config,
-          'authCallback token(s) validated, continue'
-        );;
-expect(logDebugSpy).toHaveBeenCalledWith(
-          config,
-          'authCallback token(s) invalid'
-        );;
-expect(state.accessToken).toBe('');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(true);
+      expect(logDebugSpy).toHaveBeenCalledWith(
+        config,
+        'authCallback token(s) validated, continue'
+      );
+      expect(logDebugSpy).toHaveBeenCalledWith(
+        config,
+        'authCallback token(s) invalid'
+      );
+      expect(state.accessToken).toBe('');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(true);
     });
 
     it('Response is invalid if validateIdTokenAtHash is false', async () => {
@@ -1913,14 +1907,14 @@ expect(state.authResponseIsValid).toBe(true);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
-          config,
-          'authCallback incorrect at_hash'
-        );;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('id_tokenTEST');;
-expect(state.decodedIdToken).toBe('decoded_id_token');;
-expect(state.authResponseIsValid).toBe(false);
+      expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'authCallback incorrect at_hash'
+      );
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('id_tokenTEST');
+      expect(state.decodedIdToken).toBe('decoded_id_token');
+      expect(state.authResponseIsValid).toBe(false);
     });
 
     it('should return valid result if validateIdTokenIss is false and iss_validation_off is true', async () => {
@@ -2010,15 +2004,15 @@ expect(state.authResponseIsValid).toBe(false);
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(logDebugSpy).toBeCalledWith([
-          [config, 'iss validation is turned off, this is not recommended!'],
-          [config, 'authCallback token(s) validated, continue'],
-        ]);;
-expect(state.state).toBe(ValidationResult.Ok);;
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.authResponseIsValid).toBe(true);;
-expect(state.decodedIdToken).toBeDefined();;
-expect(state.idToken).toBe('id_tokenTEST');
+      expect(logDebugSpy).toBeCalledWith([
+        [config, 'iss validation is turned off, this is not recommended!'],
+        [config, 'authCallback token(s) validated, continue'],
+      ]);
+      expect(state.state).toBe(ValidationResult.Ok);
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.authResponseIsValid).toBe(true);
+      expect(state.decodedIdToken).toBeDefined();
+      expect(state.idToken).toBe('id_tokenTEST');
     });
 
     it('should return valid if there is no id_token', async () => {
@@ -2095,10 +2089,10 @@ expect(state.idToken).toBe('id_tokenTEST');
       );
 
       const state = await lastValueFrom(stateObs$);
-expect(state.accessToken).toBe('access_tokenTEST');;
-expect(state.idToken).toBe('');;
-expect(state.decodedIdToken).toBeDefined();;
-expect(state.authResponseIsValid).toBe(true);
+      expect(state.accessToken).toBe('access_tokenTEST');
+      expect(state.idToken).toBe('');
+      expect(state.decodedIdToken).toBeDefined();
+      expect(state.authResponseIsValid).toBe(true);
     });
 
     it('should return OK if disableIdTokenValidation is true', async () => {
@@ -2134,8 +2128,8 @@ expect(state.authResponseIsValid).toBe(true);
       );
 
       const isValid = await lastValueFrom(isValidObs$);
-expect(isValid.state).toBe(ValidationResult.Ok);;
-expect(isValid.authResponseIsValid).toBe(true);
+      expect(isValid.state).toBe(ValidationResult.Ok);
+      expect(isValid.authResponseIsValid).toBe(true);
     });
 
     it('should return OK if disableIdTokenValidation is true', async () => {
@@ -2171,8 +2165,8 @@ expect(isValid.authResponseIsValid).toBe(true);
       );
 
       const isValid = await lastValueFrom(isValidObs$);
-expect(isValid.state).toBe(ValidationResult.Ok);;
-expect(isValid.authResponseIsValid).toBe(true);
+      expect(isValid.state).toBe(ValidationResult.Ok);
+      expect(isValid.authResponseIsValid).toBe(true);
     });
 
     it('should return OK if disableIdTokenValidation is false but inrefreshtokenflow and no id token is returned', async () => {
@@ -2208,8 +2202,8 @@ expect(isValid.authResponseIsValid).toBe(true);
       );
 
       const isValid = await lastValueFrom(isValidObs$);
-expect(isValid.state).toBe(ValidationResult.Ok);;
-expect(isValid.authResponseIsValid).toBe(true);
+      expect(isValid.state).toBe(ValidationResult.Ok);
+      expect(isValid.authResponseIsValid).toBe(true);
     });
   });
 });

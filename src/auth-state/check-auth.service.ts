@@ -57,7 +57,7 @@ export class CheckAuthService {
     const stateParamFromUrl =
       this.currentUrlService.getStateParamFromCurrentUrl(url);
 
-    return Boolean(stateParamFromUrl)
+    return stateParamFromUrl
       ? this.getConfigurationWithUrlState([configuration], stateParamFromUrl)
       : configuration;
   }

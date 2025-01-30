@@ -1,5 +1,5 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { EmptyError, lastValueFrom, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
@@ -216,18 +216,22 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .userForceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe({
-          error: () => {
-            expect.fail('It should not return any error.');
-          },
-          complete: () => {
-            expect(
-              flowsDataService.resetSilentRenewRunning
-            ).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
-          },
-        });
+      try {
+        await lastValueFrom(
+          refreshSessionService.userForceRefreshSession(
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch (err: any) {
+        if (err instanceof EmptyError) {
+          expect(
+            flowsDataService.resetSilentRenewRunning
+          ).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
+        } else {
+          expect.fail('It should not return any error.');
+        }
+      }
     });
   });
 
@@ -448,18 +452,16 @@ describe('RefreshSessionService ', () => {
         'resetSilentRenewRunning'
       );
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe({
-          next: () => {
-            expect.fail('It should not return any result.');
-          },
-          error: (error) => {
-            expect(error).toBeInstanceOf(Error);
-            expect(error.message).toEqual(`Error: ${expectedErrorMessage}`);
-            expect(resetSilentRenewRunningSpy).not.toHaveBeenCalled();
-          },
-        });
+      try {
+        await lastValueFrom(
+          refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+        );
+        expect.fail('It should not return any result.');
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toEqual(`Error: ${expectedErrorMessage}`);
+        expect(resetSilentRenewRunningSpy).not.toHaveBeenCalled();
+      }
     });
 
     describe('NOT isCurrentFlowCodeFlowWithRefreshTokens', () => {

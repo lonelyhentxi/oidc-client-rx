@@ -141,18 +141,7 @@ export class LogoffRevocationService {
       return this.revokeRefreshToken(config).pipe(
         switchMap((_) => this.revokeAccessToken(config)),
         catchError((error) => {
-          const errorMessage = `revoke token failed`;
-
-          this.loggerService.logError(config, errorMessage, error);
-
-          return throwError(() => new Error(errorMessage));
-        }),
-        concatMap(() => this.logoff(config, allConfigs, logoutAuthOptions))
-      );
-    } else {
-      return this.revokeAccessToken(config).pipe(
-        catchError((error) => {
-          const errorMessage = `revoke accessToken failed`;
+          const errorMessage = 'revoke token failed';
 
           this.loggerService.logError(config, errorMessage, error);
 
@@ -161,6 +150,16 @@ export class LogoffRevocationService {
         concatMap(() => this.logoff(config, allConfigs, logoutAuthOptions))
       );
     }
+    return this.revokeAccessToken(config).pipe(
+      catchError((error) => {
+        const errorMessage = 'revoke accessToken failed';
+
+        this.loggerService.logError(config, errorMessage, error);
+
+        return throwError(() => new Error(errorMessage));
+      }),
+      concatMap(() => this.logoff(config, allConfigs, logoutAuthOptions))
+    );
   }
 
   // https://tools.ietf.org/html/rfc7009
@@ -281,7 +280,7 @@ export class LogoffRevocationService {
         return of(response);
       }),
       catchError((error) => {
-        const errorMessage = `Revocation request failed`;
+        const errorMessage = 'Revocation request failed';
 
         this.loggerService.logError(configuration, errorMessage, error);
 

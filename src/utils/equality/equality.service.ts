@@ -99,7 +99,7 @@ export class EqualityService {
     return typeof value === 'object';
   }
 
-  private arraysStrictEqual(arr1: Array<string>, arr2: Array<string>): boolean {
+  private arraysStrictEqual(arr1: string[], arr2: string[]): boolean {
     if (arr1.length !== arr2.length) {
       return false;
     }
@@ -113,10 +113,7 @@ export class EqualityService {
     return true;
   }
 
-  private arraysHaveEqualContent(
-    arr1: Array<string>,
-    arr2: Array<string>
-  ): boolean {
+  private arraysHaveEqualContent(arr1: string[], arr2: string[]): boolean {
     if (arr1.length !== arr2.length) {
       return false;
     }

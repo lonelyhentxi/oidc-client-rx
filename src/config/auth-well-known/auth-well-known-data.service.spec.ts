@@ -39,9 +39,6 @@ describe('AuthWellKnownDataService', () => {
         mockProvider(LoggerService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(AuthWellKnownDataService);
     loggerService = TestBed.inject(LoggerService);
     dataService = TestBed.inject(DataService);
@@ -73,7 +70,7 @@ describe('AuthWellKnownDataService', () => {
       const dataServiceSpy = vi
         .spyOn(dataService, 'get')
         .mockReturnValue(of(null));
-      const urlWithSuffix = `myUrl/.well-known/openid-configuration`;
+      const urlWithSuffix = 'myUrl/.well-known/openid-configuration';
 
       await lastValueFrom(
         (service as any).getWellKnownDocument(urlWithSuffix, {
@@ -89,7 +86,8 @@ describe('AuthWellKnownDataService', () => {
       const dataServiceSpy = vi
         .spyOn(dataService, 'get')
         .mockReturnValue(of(null));
-      const urlWithSuffix = `myUrl/.well-known/openid-configuration/and/some/more/stuff`;
+      const urlWithSuffix =
+        'myUrl/.well-known/openid-configuration/and/some/more/stuff';
 
       await lastValueFrom(
         (service as any).getWellKnownDocument(urlWithSuffix, {
@@ -105,7 +103,7 @@ describe('AuthWellKnownDataService', () => {
       const dataServiceSpy = vi
         .spyOn(dataService, 'get')
         .mockReturnValue(of(null));
-      const urlWithoutSuffix = `myUrl`;
+      const urlWithoutSuffix = 'myUrl';
       const urlWithSuffix = `${urlWithoutSuffix}/.well-known/test-openid-configuration`;
 
       await lastValueFrom(
@@ -128,14 +126,13 @@ describe('AuthWellKnownDataService', () => {
         )
       );
 
-      (service as any)
-        .getWellKnownDocument('anyurl', { configId: 'configId1' })
-        .subscribe({
-          next: (res: unknown) => {
-            expect(res).toBeTruthy();
-            expect(res).toEqual(DUMMY_WELL_KNOWN_DOCUMENT);
-          },
-        });
+      const res: unknown = await lastValueFrom(
+        (service as any).getWellKnownDocument('anyurl', {
+          configId: 'configId1',
+        })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual(DUMMY_WELL_KNOWN_DOCUMENT);
     });
 
     it('should retry twice', async () => {
@@ -147,14 +144,13 @@ describe('AuthWellKnownDataService', () => {
         )
       );
 
-      (service as any)
-        .getWellKnownDocument('anyurl', { configId: 'configId1' })
-        .subscribe({
-          next: (res: any) => {
-            expect(res).toBeTruthy();
-            expect(res).toEqual(DUMMY_WELL_KNOWN_DOCUMENT);
-          },
-        });
+      const res: any = await lastValueFrom(
+        (service as any).getWellKnownDocument('anyurl', {
+          configId: 'configId1',
+        })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual(DUMMY_WELL_KNOWN_DOCUMENT);
     });
 
     it('should fail after three tries', async () => {
@@ -167,11 +163,13 @@ describe('AuthWellKnownDataService', () => {
         )
       );
 
-      (service as any).getWellKnownDocument('anyurl', 'configId').subscribe({
-        error: (err: unknown) => {
-          expect(err).toBeTruthy();
-        },
-      });
+      try {
+        await lastValueFrom(
+          (service as any).getWellKnownDocument('anyurl', 'configId')
+        );
+      } catch (err: unknown) {
+        expect(err).toBeTruthy();
+      }
     });
   });
 
@@ -181,7 +179,7 @@ describe('AuthWellKnownDataService', () => {
         of({ jwks_uri: 'jwks_uri' })
       );
 
-      const spy = vi.spyOn(service as any, 'getWellKnownDocument')();
+      const spy = vi.spyOn(service as any, 'getWellKnownDocument');
 
       const result = await lastValueFrom(
         service.getWellKnownEndPointsForConfig({
@@ -201,15 +199,15 @@ describe('AuthWellKnownDataService', () => {
         authWellknownEndpointUrl: undefined,
       };
 
-      service.getWellKnownEndPointsForConfig(config).subscribe({
-        error: (error) => {
-          expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
-            config,
-            'no authWellknownEndpoint given!'
-          );
-          expect(error.message).toEqual('no authWellknownEndpoint given!');
-        },
-      });
+      try {
+        await lastValueFrom(service.getWellKnownEndPointsForConfig(config));
+      } catch (error: any) {
+        expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
+          config,
+          'no authWellknownEndpoint given!'
+        );
+        expect(error.message).toEqual('no authWellknownEndpoint given!');
+      }
     });
 
     it('should merge the mapped endpoints with the provided endpoints', async () => {
@@ -233,7 +231,7 @@ describe('AuthWellKnownDataService', () => {
           },
         })
       );
-      expect(result).toEqual(jasmine.objectContaining(expected));
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 });

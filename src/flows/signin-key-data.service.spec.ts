@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpResponse } from '@ngify/http';
-import { isObservable, of, throwError } from 'rxjs';
+import { EmptyError, isObservable, lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../api/data.service';
 import { LoggerService } from '../logging/logger.service';
@@ -40,9 +40,6 @@ describe('Signin Key Data Service', () => {
         mockProvider(StoragePersistenceService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(SigninKeyDataService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
     dataService = TestBed.inject(DataService);
@@ -62,11 +59,11 @@ describe('Signin Key Data Service', () => {
       );
       const result = service.getSigningKeys({ configId: 'configId1' });
 
-      result.subscribe({
-        error: (err) => {
-          expect(err).toBeTruthy();
-        },
-      });
+      try {
+        await lastValueFrom(result);
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
 
     it('throws error when no jwksUri given', async () => {
@@ -77,11 +74,11 @@ describe('Signin Key Data Service', () => {
       );
       const result = service.getSigningKeys({ configId: 'configId1' });
 
-      result.subscribe({
-        error: (err) => {
-          expect(err).toBeTruthy();
-        },
-      });
+      try {
+        await lastValueFrom(result);
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
 
     it('calls dataservice if jwksurl is given', async () => {
@@ -94,13 +91,15 @@ describe('Signin Key Data Service', () => {
 
       const result = service.getSigningKeys({ configId: 'configId1' });
 
-      result.subscribe({
-        complete: () => {
+      try {
+        await lastValueFrom(result);
+      } catch (err: any) {
+        if (err instanceof EmptyError) {
           expect(spy).toHaveBeenCalledExactlyOnceWith('someUrl', {
             configId: 'configId1',
           });
-        },
-      });
+        }
+      }
     });
 
     it('should retry once', async () => {
@@ -116,12 +115,11 @@ describe('Signin Key Data Service', () => {
         )
       );
 
-      service.getSigningKeys({ configId: 'configId1' }).subscribe({
-        next: (res) => {
-          expect(res).toBeTruthy();
-          expect(res).toEqual(DUMMY_JWKS);
-        },
-      });
+      const res = await lastValueFrom(
+        service.getSigningKeys({ configId: 'configId1' })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual(DUMMY_JWKS);
     });
 
     it('should retry twice', async () => {
@@ -138,12 +136,11 @@ describe('Signin Key Data Service', () => {
         )
       );
 
-      service.getSigningKeys({ configId: 'configId1' }).subscribe({
-        next: (res) => {
-          expect(res).toBeTruthy();
-          expect(res).toEqual(DUMMY_JWKS);
-        },
-      });
+      const res = await lastValueFrom(
+        service.getSigningKeys({ configId: 'configId1' })
+      );
+      expect(res).toBeTruthy();
+      expect(res).toEqual(DUMMY_JWKS);
     });
 
     it('should fail after three tries', async () => {
@@ -161,16 +158,16 @@ describe('Signin Key Data Service', () => {
         )
       );
 
-      service.getSigningKeys({ configId: 'configId1' }).subscribe({
-        error: (err) => {
-          expect(err).toBeTruthy();
-        },
-      });
+      try {
+        await lastValueFrom(service.getSigningKeys({ configId: 'configId1' }));
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
   });
 
   describe('handleErrorGetSigningKeys', () => {
-    it('keeps observable if error is catched', async () => {
+    it('keeps observable if error is catched', () => {
       const result = (service as any).handleErrorGetSigningKeys(
         new HttpResponse()
       );
@@ -182,52 +179,54 @@ describe('Signin Key Data Service', () => {
     it('logs error if error is response', async () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
-      (service as any)
-        .handleErrorGetSigningKeys(
-          new HttpResponse({ status: 400, statusText: 'nono' }),
-          { configId: 'configId1' }
-        )
-        .subscribe({
-          error: () => {
-            expect(logSpy).toHaveBeenCalledExactlyOnceWith(
-              { configId: 'configId1' },
-              '400 - nono {}'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          (service as any).handleErrorGetSigningKeys(
+            new HttpResponse({ status: 400, statusText: 'nono' }),
+            { configId: 'configId1' }
+          )
+        );
+      } catch {
+        expect(logSpy).toHaveBeenCalledExactlyOnceWith(
+          { configId: 'configId1' },
+          '400 - nono {}'
+        );
+      }
     });
 
     it('logs error if error is not a response', async () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
-      (service as any)
-        .handleErrorGetSigningKeys('Just some Error', { configId: 'configId1' })
-        .subscribe({
-          error: () => {
-            expect(logSpy).toHaveBeenCalledExactlyOnceWith(
-              { configId: 'configId1' },
-              'Just some Error'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          (service as any).handleErrorGetSigningKeys('Just some Error', {
+            configId: 'configId1',
+          })
+        );
+      } catch {
+        expect(logSpy).toHaveBeenCalledExactlyOnceWith(
+          { configId: 'configId1' },
+          'Just some Error'
+        );
+      }
     });
 
     it('logs error if error with message property is not a response', async () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
-      (service as any)
-        .handleErrorGetSigningKeys(
-          { message: 'Just some Error' },
-          { configId: 'configId1' }
-        )
-        .subscribe({
-          error: () => {
-            expect(logSpy).toHaveBeenCalledExactlyOnceWith(
-              { configId: 'configId1' },
-              'Just some Error'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          (service as any).handleErrorGetSigningKeys(
+            { message: 'Just some Error' },
+            { configId: 'configId1' }
+          )
+        );
+      } catch {
+        expect(logSpy).toHaveBeenCalledExactlyOnceWith(
+          { configId: 'configId1' },
+          'Just some Error'
+        );
+      }
     });
   });
 });

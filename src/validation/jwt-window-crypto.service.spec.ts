@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
+import { lastValueFrom } from 'rxjs';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import { JwtWindowCryptoService } from './jwt-window-crypto.service';
 
@@ -11,9 +11,6 @@ describe('JwtWindowCryptoService', () => {
       imports: [],
       providers: [JwtWindowCryptoService, CryptoService],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(JwtWindowCryptoService);
   });
 
@@ -29,7 +26,7 @@ describe('JwtWindowCryptoService', () => {
       );
 
       const value = await lastValueFrom(observable);
-expect(value).toBe(outcome);
+      expect(value).toBe(outcome);
     });
   });
 });

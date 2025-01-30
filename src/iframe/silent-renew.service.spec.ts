@@ -1,5 +1,5 @@
-﻿import { TestBed, fakeAsync, tick } from '@/testing';
-import { Observable, of, throwError } from 'rxjs';
+﻿import { TestBed } from '@/testing';
+import { Observable, lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ImplicitFlowCallbackService } from '../callback/implicit-flow-callback.service';
@@ -42,9 +42,6 @@ describe('SilentRenewService  ', () => {
         FlowHelper,
       ],
     });
-  });
-
-  beforeEach(() => {
     silentRenewService = TestBed.inject(SilentRenewService);
     iFrameService = TestBed.inject(IFrameService);
     flowHelper = TestBed.inject(FlowHelper);
@@ -152,13 +149,18 @@ describe('SilentRenewService  ', () => {
       const urlParts =
         'code=some-code&state=some-state&session_state=some-session-state';
 
-      await lastValueFrom(silentRenewService
-        .codeFlowCallbackSilentRenewIframe([url, urlParts], config, allConfigs));
-expect(spy).toHaveBeenCalledExactlyOnceWith(
-            expectedContext,
-            config,
-            allConfigs
-          );
+      await lastValueFrom(
+        silentRenewService.codeFlowCallbackSilentRenewIframe(
+          [url, urlParts],
+          config,
+          allConfigs
+        )
+      );
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        expectedContext,
+        config,
+        allConfigs
+      );
     });
 
     it('throws error if url has error param and resets everything on error', async () => {
@@ -185,25 +187,29 @@ expect(spy).toHaveBeenCalledExactlyOnceWith(
       const url = 'url-part-1';
       const urlParts = 'error=some_error';
 
-      silentRenewService
-        .codeFlowCallbackSilentRenewIframe([url, urlParts], config, allConfigs)
-        .subscribe({
-          error: (error) => {
-            expect(error).toEqual(new Error('some_error'));
-            expect(spy).not.toHaveBeenCalled();
-            expect(authStateServiceSpy).toHaveBeenCalledExactlyOnceWith({
-              isAuthenticated: false,
-              validationResult: ValidationResult.LoginRequired,
-              isRenewProcess: true,
-            });
-            expect(resetAuthorizationDataSpy).toHaveBeenCalledExactlyOnceWith(
-              config,
-              allConfigs
-            );
-            expect(setNonceSpy).toHaveBeenCalledExactlyOnceWith('', config);
-            expect(stopPeriodicTokenCheckSpy).toHaveBeenCalledTimes(1);
-          },
+      try {
+        await lastValueFrom(
+          silentRenewService.codeFlowCallbackSilentRenewIframe(
+            [url, urlParts],
+            config,
+            allConfigs
+          )
+        );
+      } catch (error) {
+        expect(error).toEqual(new Error('some_error'));
+        expect(spy).not.toHaveBeenCalled();
+        expect(authStateServiceSpy).toHaveBeenCalledExactlyOnceWith({
+          isAuthenticated: false,
+          validationResult: ValidationResult.LoginRequired,
+          isRenewProcess: true,
         });
+        expect(resetAuthorizationDataSpy).toHaveBeenCalledExactlyOnceWith(
+          config,
+          allConfigs
+        );
+        expect(setNonceSpy).toHaveBeenCalledExactlyOnceWith('', config);
+        expect(stopPeriodicTokenCheckSpy).toHaveBeenCalledTimes(1);
+      }
     });
   });
 
@@ -306,10 +312,12 @@ expect(spy).toHaveBeenCalledExactlyOnceWith(
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      const result = await lastValueFrom(silentRenewService.refreshSessionWithIFrameCompleted$);
-expect(result).toEqual({
-            refreshToken: 'callbackContext',
-          } as CallbackContext);
+      const result = await lastValueFrom(
+        silentRenewService.refreshSessionWithIFrameCompleted$
+      );
+      expect(result).toEqual({
+        refreshToken: 'callbackContext',
+      } as CallbackContext);
 
       silentRenewService.silentRenewEventHandler(
         eventData,
@@ -352,8 +360,10 @@ expect(result).toEqual({
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      const result = await lastValueFrom(silentRenewService.refreshSessionWithIFrameCompleted$);
-expect(result).toBeNull();
+      const result = await lastValueFrom(
+        silentRenewService.refreshSessionWithIFrameCompleted$
+      );
+      expect(result).toBeNull();
 
       silentRenewService.silentRenewEventHandler(
         eventData,

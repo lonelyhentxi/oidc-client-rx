@@ -1,11 +1,14 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, inject } from 'injection-js';
+import { Injectable, InjectionToken, inject } from 'injection-js';
+
+export type PlatformId = 'browser' | 'server';
+
+export const PLATFORM_ID = new InjectionToken<PlatformId>('PLATFORM_ID');
 
 @Injectable()
 export class PlatformProvider {
   private readonly platformId = inject<string>(PLATFORM_ID);
 
   isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
+    return this.platformId === 'browser';
   }
 }

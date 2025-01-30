@@ -1,5 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
@@ -35,15 +35,13 @@ describe('CheckSessionService', () => {
         ),
       ],
     });
-  });
-
-  beforeEach(() => {
     checkSessionService = TestBed.inject(CheckSessionService);
     loggerService = TestBed.inject(LoggerService);
     iFrameService = TestBed.inject(IFrameService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
   });
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   afterEach(() => {
     const iFrameIdwhichshouldneverexist = window.document.getElementById(
       'idwhichshouldneverexist'
@@ -68,7 +66,7 @@ describe('CheckSessionService', () => {
   });
 
   it('getOrCreateIframe calls iFrameService.addIFrameToWindowBody if no Iframe exists', () => {
-    vi.spyOn(iFrameService, 'addIFrameToWindowBody')();
+    vi.spyOn(iFrameService, 'addIFrameToWindowBody');
 
     const result = (checkSessionService as any).getOrCreateIframe({
       configId: 'configId1',
@@ -106,15 +104,18 @@ describe('CheckSessionService', () => {
   });
 
   it('log warning if authWellKnownEndpoints.check_session_iframe is not existing', () => {
-    const spyLogWarning = vi.spyOn<any>(loggerService, 'logWarning');
+    const spyLogWarning = vi.spyOn<any, any>(loggerService, 'logWarning');
     const config = { configId: 'configId1' };
 
-    vi.spyOn<any>(loggerService, 'logDebug').mockImplementation(
+    vi.spyOn<any, any>(loggerService, 'logDebug').mockImplementation(
       () => undefined
     );
-    vi.spyOn(storagePersistenceService, 'read')
-      .withArgs('authWellKnownEndPoints', config)
-      .mockReturnValue({ checkSessionIframe: undefined });
+
+    mockImplementationWhenArgsEqual(
+      vi.spyOn(storagePersistenceService, 'read'),
+      ['authWellKnownEndPoints', config],
+      () => ({ checkSessionIframe: undefined })
+    );
     (checkSessionService as any).init(config);
 
     expect(spyLogWarning).toHaveBeenCalledExactlyOnceWith(
@@ -124,7 +125,7 @@ describe('CheckSessionService', () => {
   });
 
   it('start() calls pollserversession() with clientId if no scheduledheartbeat is set', () => {
-    const spy = vi.spyOn<any>(checkSessionService, 'pollServerSession');
+    const spy = vi.spyOn<any, any>(checkSessionService, 'pollServerSession');
     const config = { clientId: 'clientId', configId: 'configId1' };
 
     checkSessionService.start(config);
@@ -133,7 +134,7 @@ describe('CheckSessionService', () => {
 
   it('start() does not call pollServerSession() if scheduledHeartBeatRunning is set', () => {
     const config = { configId: 'configId1' };
-    const spy = vi.spyOn<any>(checkSessionService, 'pollServerSession');
+    const spy = vi.spyOn<any, any>(checkSessionService, 'pollServerSession');
 
     (checkSessionService as any).scheduledHeartBeatRunning = (): void =>
       undefined;
@@ -154,7 +155,10 @@ describe('CheckSessionService', () => {
 
   it('stopCheckingSession does nothing if scheduledHeartBeatRunning is not set', () => {
     (checkSessionService as any).scheduledHeartBeatRunning = null;
-    const spy = vi.spyOn<any>(checkSessionService, 'clearScheduledHeartBeat');
+    const spy = vi.spyOn<any, any>(
+      checkSessionService,
+      'clearScheduledHeartBeat'
+    );
 
     checkSessionService.stop();
     expect(spy).not.toHaveBeenCalledExactlyOnceWith();
@@ -187,11 +191,16 @@ describe('CheckSessionService', () => {
 
   describe('pollServerSession', () => {
     beforeEach(() => {
-      vi.spyOn<any>(checkSessionService, 'init').mockReturnValue(of(undefined));
+      vi.spyOn<any, any>(checkSessionService, 'init').mockReturnValue(
+        of(undefined)
+      );
     });
 
     it('increases outstandingMessages', () => {
-      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue({
+      vi.spyOn<any, any>(
+        checkSessionService,
+        'getExistingIframe'
+      ).mockReturnValue({
         contentWindow: { postMessage: () => undefined },
       });
       const authWellKnownEndpoints = {
@@ -200,21 +209,25 @@ describe('CheckSessionService', () => {
       const config = { configId: 'configId1' };
 
       mockImplementationWhenArgsEqual(
-        vi.spyOn(storagePersistenceService, 'read'),
-        ['authWellKnownEndPoints', config],
-        () => authWellKnownEndpoints
-      )
-        .withArgs('session_state', config)
-        .mockReturnValue('session_state');
+        mockImplementationWhenArgsEqual(
+          vi.spyOn(storagePersistenceService, 'read'),
+          ['authWellKnownEndPoints', config],
+          () => authWellKnownEndpoints
+        ),
+        ['session_state', config],
+        () => 'session_state'
+      );
+
       vi.spyOn(loggerService, 'logDebug').mockImplementation(() => undefined);
       (checkSessionService as any).pollServerSession('clientId', config);
       expect((checkSessionService as any).outstandingMessages).toBe(1);
     });
 
     it('logs warning if iframe does not exist', () => {
-      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
-        null
-      );
+      vi.spyOn<any, any>(
+        checkSessionService,
+        'getExistingIframe'
+      ).mockReturnValue(null);
       const authWellKnownEndpoints = {
         checkSessionIframe: 'https://some-testing-url.com',
       };
@@ -238,9 +251,10 @@ describe('CheckSessionService', () => {
     });
 
     it('logs warning if clientId is not set', () => {
-      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
-        {}
-      );
+      vi.spyOn<any, any>(
+        checkSessionService,
+        'getExistingIframe'
+      ).mockReturnValue({});
       const authWellKnownEndpoints = {
         checkSessionIframe: 'https://some-testing-url.com',
       };
@@ -264,21 +278,24 @@ describe('CheckSessionService', () => {
     });
 
     it('logs debug if session_state is not set', () => {
-      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
-        {}
-      );
+      vi.spyOn<any, any>(
+        checkSessionService,
+        'getExistingIframe'
+      ).mockReturnValue({});
       const authWellKnownEndpoints = {
         checkSessionIframe: 'https://some-testing-url.com',
       };
       const config = { configId: 'configId1' };
 
       mockImplementationWhenArgsEqual(
-        vi.spyOn(storagePersistenceService, 'read'),
-        ['authWellKnownEndPoints', config],
-        () => authWellKnownEndpoints
-      )
-        .withArgs('session_state', config)
-        .mockReturnValue(null);
+        mockImplementationWhenArgsEqual(
+          vi.spyOn(storagePersistenceService, 'read'),
+          ['authWellKnownEndPoints', config],
+          () => authWellKnownEndpoints
+        ),
+        ['session_state', config],
+        () => null
+      );
 
       const spyLogDebug = vi
         .spyOn(loggerService, 'logDebug')
@@ -289,19 +306,23 @@ describe('CheckSessionService', () => {
     });
 
     it('logs debug if session_state is set but authWellKnownEndpoints are not set', () => {
-      vi.spyOn<any>(checkSessionService, 'getExistingIframe').mockReturnValue(
-        {}
+      vi.spyOn(checkSessionService, 'getExistingIframe').mockReturnValue(
+        {} as any
       );
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const authWellKnownEndpoints = null;
       const config = { configId: 'configId1' };
 
       mockImplementationWhenArgsEqual(
-        vi.spyOn(storagePersistenceService, 'read'),
-        ['authWellKnownEndPoints', config],
-        () => authWellKnownEndpoints
-      )
-        .withArgs('session_state', config)
-        .mockReturnValue('some_session_state');
+        mockImplementationWhenArgsEqual(
+          vi.spyOn(storagePersistenceService, 'read'),
+          ['authWellKnownEndPoints', config],
+          () => authWellKnownEndpoints
+        ),
+        ['session_state', config],
+        () => 'some_session_state'
+      );
+
       const spyLogDebug = vi
         .spyOn(loggerService, 'logDebug')
         .mockImplementation(() => undefined);
@@ -321,7 +342,7 @@ describe('CheckSessionService', () => {
       serviceAsAny.iframeRefreshInterval = lastRefresh;
 
       const result = await lastValueFrom(serviceAsAny.init());
-expect(result).toBeUndefined();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -345,9 +366,10 @@ expect(result).toBeUndefined();
 
   describe('checkSessionChanged$', () => {
     it('emits when internal event is thrown', async () => {
-      const result = await lastValueFrom(checkSessionService.checkSessionChanged$
-        .pipe(skip(1)));
-expect(result).toBe(true);
+      const result = await lastValueFrom(
+        checkSessionService.checkSessionChanged$.pipe(skip(1))
+      );
+      expect(result).toBe(true);
 
       const serviceAsAny = checkSessionService as any;
 
@@ -355,17 +377,21 @@ expect(result).toBe(true);
     });
 
     it('emits false initially', async () => {
-      const result = await lastValueFrom(checkSessionService.checkSessionChanged$);
-expect(result).toBe(false);
+      const result = await lastValueFrom(
+        checkSessionService.checkSessionChanged$
+      );
+      expect(result).toBe(false);
     });
 
     it('emits false then true when emitted', async () => {
       const expectedResultsInOrder = [false, true];
       let counter = 0;
 
-      const result = await lastValueFrom(checkSessionService.checkSessionChanged$);
-expect(result).toBe(expectedResultsInOrder[counter]);;
-counter++;
+      const result = await lastValueFrom(
+        checkSessionService.checkSessionChanged$
+      );
+      expect(result).toBe(expectedResultsInOrder[counter]);
+      counter++;
 
       (checkSessionService as any).checkSessionChangedInternal$.next(true);
     });

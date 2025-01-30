@@ -1,6 +1,6 @@
 import { TestBed, mockRouterProvider } from '@/testing';
 import { AbstractRouter } from 'oidc-client-rx';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
@@ -81,14 +81,19 @@ describe('ImplicitFlowCallbackService ', () => {
         triggerAuthorizationResultEvent: true,
       };
 
-      await lastValueFrom(implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash'));
-expect(spy).toHaveBeenCalledExactlyOnceWith(
-            config,
-            [config],
-            'some-hash'
-          );;
-expect(routerSpy).not.toHaveBeenCalled();
+      await lastValueFrom(
+        implicitFlowCallbackService.authenticatedImplicitFlowCallback(
+          config,
+          [config],
+          'some-hash'
+        )
+      );
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        [config],
+        'some-hash'
+      );
+      expect(routerSpy).not.toHaveBeenCalled();
     });
 
     it('calls router if triggerAuthorizationResultEvent is false and isRenewProcess is false', async () => {
@@ -113,14 +118,19 @@ expect(routerSpy).not.toHaveBeenCalled();
         postLoginRoute: 'postLoginRoute',
       };
 
-      await lastValueFrom(implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash'));
-expect(spy).toHaveBeenCalledExactlyOnceWith(
-            config,
-            [config],
-            'some-hash'
-          );;
-expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
+      await lastValueFrom(
+        implicitFlowCallbackService.authenticatedImplicitFlowCallback(
+          config,
+          [config],
+          'some-hash'
+        )
+      );
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        config,
+        [config],
+        'some-hash'
+      );
+      expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
     });
 
     it('resetSilentRenewRunning and stopPeriodicallyTokenCheck in case of error', async () => {
@@ -141,15 +151,19 @@ expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
         postLoginRoute: 'postLoginRoute',
       };
 
-      implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash')
-        .subscribe({
-          error: (err) => {
-            expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
-            expect(stopPeriodicallyTokenCheckSpy).toHaveBeenCalled();
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          implicitFlowCallbackService.authenticatedImplicitFlowCallback(
+            config,
+            [config],
+            'some-hash'
+          )
+        );
+      } catch (err: any) {
+        expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
+        expect(stopPeriodicallyTokenCheckSpy).toHaveBeenCalled();
+        expect(err).toBeTruthy();
+      }
     });
 
     it(`navigates to unauthorizedRoute in case of error and  in case of error and
@@ -173,18 +187,20 @@ expect(routerSpy).toHaveBeenCalledExactlyOnceWith('postLoginRoute');
         unauthorizedRoute: 'unauthorizedRoute',
       };
 
-      implicitFlowCallbackService
-        .authenticatedImplicitFlowCallback(config, [config], 'some-hash')
-        .subscribe({
-          error: (err) => {
-            expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
-            expect(stopPeriodicallTokenCheckSpy).toHaveBeenCalled();
-            expect(err).toBeTruthy();
-            expect(routerSpy).toHaveBeenCalledExactlyOnceWith(
-              'unauthorizedRoute'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          implicitFlowCallbackService.authenticatedImplicitFlowCallback(
+            config,
+            [config],
+            'some-hash'
+          )
+        );
+      } catch (err: any) {
+        expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
+        expect(stopPeriodicallTokenCheckSpy).toHaveBeenCalled();
+        expect(err).toBeTruthy();
+        expect(routerSpy).toHaveBeenCalledExactlyOnceWith('unauthorizedRoute');
+      }
     });
   });
 });

@@ -9,9 +9,6 @@ describe('DefaultLocalStorageService', () => {
     TestBed.configureTestingModule({
       providers: [DefaultLocalStorageService],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(DefaultLocalStorageService);
   });
 

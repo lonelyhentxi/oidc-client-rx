@@ -1,7 +1,8 @@
-import { inject, Injectable } from 'injection-js';
-import { AuthOptions } from '../../auth-options';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, map, shareReplay, switchMap } from 'rxjs';
+import type { AuthOptions } from '../../auth-options';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { FlowsDataService } from '../../flows/flows-data.service';
 import { LoggerService } from '../../logging/logger.service';
 import { RedirectService } from '../../utils/redirect/redirect.service';
@@ -27,7 +28,7 @@ export class StandardLoginService {
   loginStandard(
     configuration: OpenIdConfiguration,
     authOptions?: AuthOptions
-  ): void {
+  ): Observable<void> {
     if (
       !this.responseTypeValidationService.hasConfigValidResponseType(
         configuration
@@ -44,32 +45,37 @@ export class StandardLoginService {
     );
     this.flowsDataService.setCodeFlowInProgress(configuration);
 
-    this.authWellKnownService
+    const result$ = this.authWellKnownService
       .queryAndStoreAuthWellKnownEndPoints(configuration)
-      .subscribe(() => {
-        const { urlHandler } = authOptions || {};
+      .pipe(
+        switchMap(() => {
+          this.flowsDataService.resetSilentRenewRunning(configuration);
 
-        this.flowsDataService.resetSilentRenewRunning(configuration);
+          return this.urlService.getAuthorizeUrl(configuration, authOptions);
+        }),
+        map((url) => {
+          const { urlHandler } = authOptions || {};
+          if (!url) {
+            this.loggerService.logError(
+              configuration,
+              'Could not create URL',
+              url
+            );
 
-        this.urlService
-          .getAuthorizeUrl(configuration, authOptions)
-          .subscribe((url) => {
-            if (!url) {
-              this.loggerService.logError(
-                configuration,
-                'Could not create URL',
-                url
-              );
+            return;
+          }
 
-              return;
-            }
+          if (urlHandler) {
+            urlHandler(url);
+          } else {
+            this.redirectService.redirectTo(url);
+          }
+        }),
+        shareReplay(1)
+      );
 
-            if (urlHandler) {
-              urlHandler(url);
-            } else {
-              this.redirectService.redirectTo(url);
-            }
-          });
-      });
+    result$.subscribe();
+
+    return result$;
   }
 }

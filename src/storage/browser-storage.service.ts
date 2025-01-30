@@ -1,5 +1,5 @@
 import { inject, Injectable } from 'injection-js';
-import { OpenIdConfiguration } from '../config/openid-configuration';
+import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { LoggerService } from '../logging/logger.service';
 import { AbstractSecurityStorage } from './abstract-security-storage';
 
@@ -54,7 +54,7 @@ export class BrowserStorageService {
     if (!this.hasStorage()) {
       this.loggerService.logDebug(
         configuration,
-        `Wanted to write but Storage was falsy`
+        'Wanted to write but Storage was falsy'
       );
 
       return false;
@@ -94,7 +94,7 @@ export class BrowserStorageService {
     if (!this.hasStorage()) {
       this.loggerService.logDebug(
         configuration,
-        `Wanted to clear storage but Storage was falsy`
+        'Wanted to clear storage but Storage was falsy'
       );
 
       return false;

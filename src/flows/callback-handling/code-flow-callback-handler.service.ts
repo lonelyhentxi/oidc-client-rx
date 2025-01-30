@@ -1,14 +1,14 @@
 import { HttpHeaders } from '@ngify/http';
 import { inject, Injectable } from 'injection-js';
-import { Observable, of, throwError, timer } from 'rxjs';
+import { type Observable, of, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
 import { UrlService } from '../../utils/url/url.service';
 import { TokenValidationService } from '../../validation/token-validation.service';
-import { AuthResult, CallbackContext } from '../callback-context';
+import type { AuthResult, CallbackContext } from '../callback-context';
 import { FlowsDataService } from '../flows-data.service';
 import { isNetworkError } from './error-helper';
 

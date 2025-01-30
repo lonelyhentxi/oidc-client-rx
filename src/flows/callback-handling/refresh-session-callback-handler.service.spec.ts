@@ -1,4 +1,5 @@
 import { TestBed } from '@/testing';
+import { lastValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -21,9 +22,6 @@ describe('RefreshSessionCallbackHandlerService', () => {
         mockProvider(FlowsDataService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(RefreshSessionCallbackHandlerService);
     flowsDataService = TestBed.inject(FlowsDataService);
     authStateService = TestBed.inject(AuthStateService);
@@ -56,9 +54,10 @@ describe('RefreshSessionCallbackHandlerService', () => {
         existingIdToken: 'henlo-legger',
       } as CallbackContext;
 
-      const callbackContext = await lastValueFrom(service
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' }));
-expect(callbackContext).toEqual(expectedCallbackContext);
+      const callbackContext = await lastValueFrom(
+        service.refreshSessionWithRefreshTokens({ configId: 'configId1' })
+      );
+      expect(callbackContext).toEqual(expectedCallbackContext);
     });
 
     it('throws error if no refresh token is given', async () => {
@@ -69,13 +68,13 @@ expect(callbackContext).toEqual(expectedCallbackContext);
       vi.spyOn(authStateService, 'getRefreshToken').mockReturnValue('');
       vi.spyOn(authStateService, 'getIdToken').mockReturnValue('henlo-legger');
 
-      service
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' })
-        .subscribe({
-          error: (err) => {
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.refreshSessionWithRefreshTokens({ configId: 'configId1' })
+        );
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
   });
 });

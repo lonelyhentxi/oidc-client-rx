@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { LoggerService } from '../../logging/logger.service';
 import { mockProvider } from '../../testing/mock';
 import { TokenHelperService } from './token-helper.service';
@@ -11,9 +10,6 @@ describe('Token Helper Service', () => {
     TestBed.configureTestingModule({
       providers: [mockProvider(LoggerService)],
     });
-  });
-
-  beforeEach(() => {
     tokenHelperService = TestBed.inject(TokenHelperService);
   });
 
@@ -215,7 +211,7 @@ describe('Token Helper Service', () => {
         configId: 'configId1',
       });
 
-      expect(result).toEqual(jasmine.objectContaining(expected));
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 

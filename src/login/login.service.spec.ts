@@ -1,6 +1,6 @@
 import { TestBed } from '@/testing';
 import { CommonModule } from '@angular/common';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { mockProvider } from '../testing/mock';
@@ -31,9 +31,6 @@ describe('LoginService', () => {
         mockProvider(PopUpService),
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(LoginService);
     parLoginService = TestBed.inject(ParLoginService);
     popUpLoginService = TestBed.inject(PopUpLoginService);
@@ -89,6 +86,7 @@ describe('LoginService', () => {
 
     it("should throw error if configuration is null and doesn't call loginPar or loginStandard", () => {
       // arrange
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const config = null;
       const loginParSpy = vi.spyOn(parLoginService, 'loginPar');
       const standardLoginSpy = vi.spyOn(standardLoginService, 'loginStandard');
@@ -119,8 +117,8 @@ describe('LoginService', () => {
 
       // act
       await lastValueFrom(service.loginWithPopUp(config, [config]));
-expect(loginWithPopUpPar).toHaveBeenCalledTimes(1);;
-expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
+      expect(loginWithPopUpPar).toHaveBeenCalledTimes(1);
+      expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
     });
 
     it('calls standardLoginService loginstandard if usePushedAuthorisationRequests is false', async () => {
@@ -135,8 +133,8 @@ expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
 
       // act
       await lastValueFrom(service.loginWithPopUp(config, [config]));
-expect(loginWithPopUpPar).not.toHaveBeenCalled();;
-expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
+      expect(loginWithPopUpPar).not.toHaveBeenCalled();
+      expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
     });
 
     it('stores the customParams to the storage if customParams are given', async () => {
@@ -153,15 +151,17 @@ expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
       );
 
       // act
-      await lastValueFrom(service.loginWithPopUp(config, [config], authOptions));
-expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
-          'storageCustomParamsAuthRequest',
-          { custom: 'params' },
-          config
-        );
+      await lastValueFrom(
+        service.loginWithPopUp(config, [config], authOptions)
+      );
+      expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
+        'storageCustomParamsAuthRequest',
+        { custom: 'params' },
+        config
+      );
     });
 
-    it('returns error if there is already a popup open', () => {
+    it('returns error if there is already a popup open', async () => {
       // arrange
       const config = { usePushedAuthorisationRequests: false };
       const authOptions = { customParams: { custom: 'params' } };
@@ -175,13 +175,14 @@ expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
       vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
 
       // act
-      const result = await lastValueFrom(service
-        .loginWithPopUp(config, [config], authOptions));
-expect(result).toEqual({
-            errorMessage: 'There is already a popup open.',
-          } as LoginResponse);;
-expect(loginWithPopUpPar).not.toHaveBeenCalled();;
-expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
+      const result = await lastValueFrom(
+        service.loginWithPopUp(config, [config], authOptions)
+      );
+      expect(result).toEqual({
+        errorMessage: 'There is already a popup open.',
+      } as LoginResponse);
+      expect(loginWithPopUpPar).not.toHaveBeenCalled();
+      expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,9 +9,6 @@ describe('DefaultSessionStorageService', () => {
     TestBed.configureTestingModule({
       providers: [DefaultSessionStorageService],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(DefaultSessionStorageService);
   });
 

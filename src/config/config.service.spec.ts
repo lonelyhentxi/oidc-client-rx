@@ -276,7 +276,9 @@ describe('Configuration Service', () => {
         false
       );
 
-      await lastValueFrom(configService.getOpenIDConfigurations());
+      const { allConfigs, currentConfig } = await lastValueFrom(
+        configService.getOpenIDConfigurations()
+      );
       expect(allConfigs).toEqual([]);
       expect(currentConfig).toBeNull();
     });

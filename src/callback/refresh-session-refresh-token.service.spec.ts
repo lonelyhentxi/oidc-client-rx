@@ -62,16 +62,17 @@ describe('RefreshSessionRefreshTokenService', () => {
         'resetAuthorizationData'
       );
 
-      refreshSessionRefreshTokenService
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' }, [
-          { configId: 'configId1' },
-        ])
-        .subscribe({
-          error: (err) => {
-            expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
+            { configId: 'configId1' },
+            [{ configId: 'configId1' }]
+          )
+        );
+      } catch (err: any) {
+        expect(resetSilentRenewRunningSpy).toHaveBeenCalled();
+        expect(err).toBeTruthy();
+      }
     });
 
     it('finalize with stopPeriodicTokenCheck in case of error', async () => {
@@ -83,15 +84,16 @@ describe('RefreshSessionRefreshTokenService', () => {
         'stopPeriodicTokenCheck'
       );
 
-      refreshSessionRefreshTokenService
-        .refreshSessionWithRefreshTokens({ configId: 'configId1' }, [
-          { configId: 'configId1' },
-        ])
-        .subscribe({
-          error: (err) => {
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        await lastValueFrom(
+          refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
+            { configId: 'configId1' },
+            [{ configId: 'configId1' }]
+          )
+        );
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
       await vi.advanceTimersByTimeAsync(0);
       expect(stopPeriodicallyTokenCheckSpy).toHaveBeenCalled();
     });

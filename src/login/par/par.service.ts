@@ -1,14 +1,14 @@
 import { HttpHeaders } from '@ngify/http';
 import { inject, Injectable } from 'injection-js';
-import { Observable, throwError } from 'rxjs';
+import { type Observable, throwError } from 'rxjs';
 import { catchError, map, retry, switchMap } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
-import { AuthOptions } from '../../auth-options';
-import { OpenIdConfiguration } from '../../config/openid-configuration';
+import type { AuthOptions } from '../../auth-options';
+import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
 import { UrlService } from '../../utils/url/url.service';
-import { ParResponse } from './par-response';
+import type { ParResponse } from './par-response';
 
 @Injectable()
 export class ParService {
@@ -74,7 +74,7 @@ export class ParService {
                 };
               }),
               catchError((error) => {
-                const errorMessage = `There was an error on ParService postParRequest`;
+                const errorMessage = 'There was an error on ParService postParRequest';
 
                 this.loggerService.logError(configuration, errorMessage, error);
 

@@ -1,12 +1,12 @@
-import { inject, Injectable } from 'injection-js';
-import { Observable, throwError } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { type Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { EventTypes } from '../../public-events/event-types';
 import { PublicEventsService } from '../../public-events/public-events.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
-import { OpenIdConfiguration } from '../openid-configuration';
+import type { OpenIdConfiguration } from '../openid-configuration';
 import { AuthWellKnownDataService } from './auth-well-known-data.service';
-import { AuthWellKnownEndpoints } from './auth-well-known-endpoints';
+import type { AuthWellKnownEndpoints } from './auth-well-known-endpoints';
 
 @Injectable()
 export class AuthWellKnownService {

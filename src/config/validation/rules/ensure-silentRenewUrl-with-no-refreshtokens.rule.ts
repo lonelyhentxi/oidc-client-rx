@@ -1,5 +1,5 @@
-import { OpenIdConfiguration } from '../../openid-configuration';
-import { POSITIVE_VALIDATION_RESULT, RuleValidationResult } from '../rule';
+import type { OpenIdConfiguration } from '../../openid-configuration';
+import { POSITIVE_VALIDATION_RESULT, type RuleValidationResult } from '../rule';
 
 export const ensureSilentRenewUrlWhenNoRefreshTokenUsed = (
   passedConfig: OpenIdConfiguration

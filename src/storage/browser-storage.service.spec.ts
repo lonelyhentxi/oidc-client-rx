@@ -20,9 +20,6 @@ describe('BrowserStorageService', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     abstractSecurityStorage = TestBed.inject(AbstractSecurityStorage);
     service = TestBed.inject(BrowserStorageService);
   });
@@ -76,7 +73,7 @@ describe('BrowserStorageService', () => {
       const config = { configId: 'configId1' };
 
       vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
-      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write')();
+      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write');
 
       const result = service.write({ anyKey: 'anyvalue' }, config);
 
@@ -92,7 +89,7 @@ describe('BrowserStorageService', () => {
 
       vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
 
-      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write')();
+      const writeSpy = vi.spyOn(abstractSecurityStorage, 'write');
       const somethingFalsy = '';
 
       const result = service.write(somethingFalsy, config);
@@ -117,7 +114,7 @@ describe('BrowserStorageService', () => {
       vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
       const config = { configId: 'configId1' };
 
-      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'remove')();
+      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'remove');
 
       const result = service.remove('anyKey', config);
 
@@ -137,7 +134,7 @@ describe('BrowserStorageService', () => {
     it('returns true if clear is called', () => {
       vi.spyOn(service as any, 'hasStorage').mockReturnValue(true);
 
-      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'clear')();
+      const setItemSpy = vi.spyOn(abstractSecurityStorage, 'clear');
       const config = { configId: 'configId1' };
 
       const result = service.clear(config);
@@ -149,8 +146,11 @@ describe('BrowserStorageService', () => {
 
   describe('hasStorage', () => {
     it('returns false if there is no storage', () => {
+      // biome-ignore lint/suspicious/noGlobalAssign: <explanation>
       (Storage as any) = undefined;
       expect((service as any).hasStorage()).toBeFalsy();
+      // biome-ignore lint/correctness/noSelfAssign: <explanation>
+      // biome-ignore lint/suspicious/noGlobalAssign: <explanation>
       Storage = Storage;
     });
   });

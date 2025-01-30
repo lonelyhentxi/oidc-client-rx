@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { vi } from 'vitest';
 import { LoggerService } from '../../logging/logger.service';
 import { mockProvider } from '../../testing/mock';
 import { CryptoService } from '../../utils/crypto/crypto.service';
@@ -12,9 +11,6 @@ describe('RandomService Tests', () => {
     TestBed.configureTestingModule({
       providers: [RandomService, mockProvider(LoggerService), CryptoService],
     });
-  });
-
-  beforeEach(() => {
     randomService = TestBed.inject(RandomService);
   });
 

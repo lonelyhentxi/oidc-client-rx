@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -83,17 +83,18 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(service
-        .callbackHistoryAndResetJwtKeys(
+      await lastValueFrom(
+        service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(storagePersistenceServiceSpy).toBeCalledWith([
-            ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
-            ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);;
-expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
+        )
+      );
+      expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
+        ['jwtKeys', { keys: [] }, allConfigs[0]],
+      ]);
+      expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
     });
 
     it('writes refresh_token into the storage without reuse (refresh token rotation)', async () => {
@@ -120,17 +121,18 @@ expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
         of({ keys: [] } as JwtKeys)
       );
 
-      await lastValueFrom(service
-        .callbackHistoryAndResetJwtKeys(
+      await lastValueFrom(
+        service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(storagePersistenceServiceSpy).toBeCalledWith([
-            ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
-            ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);;
-expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
+        )
+      );
+      expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
+        ['jwtKeys', { keys: [] }, allConfigs[0]],
+      ]);
+      expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
     });
 
     it('writes refresh_token into the storage with reuse (without refresh token rotation)', async () => {
@@ -157,18 +159,19 @@ expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(service
-        .callbackHistoryAndResetJwtKeys(
+      await lastValueFrom(
+        service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(storagePersistenceServiceSpy).toBeCalledWith([
-            ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
-            ['reusable_refresh_token', 'dummy_refresh_token', allConfigs[0]],
-            ['jwtKeys', { keys: [] }, allConfigs[0]],
-          ]);;
-expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(3);
+        )
+      );
+      expect(storagePersistenceServiceSpy).toBeCalledWith([
+        ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
+        ['reusable_refresh_token', 'dummy_refresh_token', allConfigs[0]],
+        ['jwtKeys', { keys: [] }, allConfigs[0]],
+      ]);
+      expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(3);
     });
 
     it('resetBrowserHistory if historyCleanup is turned on and is not in a renewProcess', async () => {
@@ -191,13 +194,14 @@ expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(3);
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(service
-        .callbackHistoryAndResetJwtKeys(
+      await lastValueFrom(
+        service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(windowSpy).toHaveBeenCalledTimes(1);
+        )
+      );
+      expect(windowSpy).toHaveBeenCalledTimes(1);
     });
 
     it('returns callbackContext with jwtkeys filled if everything works fine', async () => {
@@ -219,17 +223,18 @@ expect(windowSpy).toHaveBeenCalledTimes(1);
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [{ kty: 'henlo' } as JwtKey] } as JwtKeys)
       );
-      const result = await lastValueFrom(service
-        .callbackHistoryAndResetJwtKeys(
+      const result = await lastValueFrom(
+        service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(result).toEqual({
-            isRenewProcess: false,
-            authResult: DUMMY_AUTH_RESULT,
-            jwtKeys: { keys: [{ kty: 'henlo' }] },
-          } as CallbackContext);
+        )
+      );
+      expect(result).toEqual({
+        isRenewProcess: false,
+        authResult: DUMMY_AUTH_RESULT,
+        jwtKeys: { keys: [{ kty: 'henlo' }] },
+      } as CallbackContext);
     });
 
     it('returns error if no jwtKeys have been in the call --> keys are null', async () => {
@@ -251,19 +256,19 @@ expect(result).toEqual({
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({} as JwtKeys)
       );
-      service
-        .callbackHistoryAndResetJwtKeys(
-          callbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: (err) => {
-            expect(err.message).toEqual(
-              'Failed to retrieve signing key with error: Error: Failed to retrieve signing key'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            callbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch (err: any) {
+        expect(err.message).toEqual(
+          'Failed to retrieve signing key with error: Error: Failed to retrieve signing key'
+        );
+      }
     });
 
     it('returns error if no jwtKeys have been in the call --> keys throw an error', async () => {
@@ -284,19 +289,19 @@ expect(result).toEqual({
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         throwError(() => new Error('error'))
       );
-      service
-        .callbackHistoryAndResetJwtKeys(
-          callbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: (err) => {
-            expect(err.message).toEqual(
-              'Failed to retrieve signing key with error: Error: Error: error'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            callbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch (err: any) {
+        expect(err.message).toEqual(
+          'Failed to retrieve signing key with error: Error: Error: error'
+        );
+      }
     });
 
     it('returns error if callbackContext.authresult has an error property filled', async () => {
@@ -310,19 +315,19 @@ expect(result).toEqual({
         },
       ];
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          callbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: (err) => {
-            expect(err.message).toEqual(
-              'AuthCallback AuthResult came with error: someError'
-            );
-          },
-        });
+      try {
+        await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            callbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch (err: any) {
+        expect(err.message).toEqual(
+          'AuthCallback AuthResult came with error: someError'
+        );
+      }
     });
 
     it('calls resetAuthorizationData, resets nonce and authStateService in case of an error', async () => {
@@ -347,25 +352,23 @@ expect(result).toEqual({
         'updateAndPublishAuthState'
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          callbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: () => {
-            expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
-            expect(setNonceSpy).toHaveBeenCalledTimes(1);
-            expect(
-              updateAndPublishAuthStateSpy
-            ).toHaveBeenCalledExactlyOnceWith({
-              isAuthenticated: false,
-              validationResult: ValidationResult.SecureTokenServerError,
-              isRenewProcess: false,
-            });
-          },
+      try {
+        await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            callbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch {
+        expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
+        expect(setNonceSpy).toHaveBeenCalledTimes(1);
+        expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+          isAuthenticated: false,
+          validationResult: ValidationResult.SecureTokenServerError,
+          isRenewProcess: false,
         });
+      }
     });
 
     it('calls authStateService.updateAndPublishAuthState with login required if the error is `login_required`', async () => {
@@ -390,25 +393,23 @@ expect(result).toEqual({
         'updateAndPublishAuthState'
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          callbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: () => {
-            expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
-            expect(setNonceSpy).toHaveBeenCalledTimes(1);
-            expect(
-              updateAndPublishAuthStateSpy
-            ).toHaveBeenCalledExactlyOnceWith({
-              isAuthenticated: false,
-              validationResult: ValidationResult.LoginRequired,
-              isRenewProcess: false,
-            });
-          },
+      try {
+        await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            callbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch {
+        expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
+        expect(setNonceSpy).toHaveBeenCalledTimes(1);
+        expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+          isAuthenticated: false,
+          validationResult: ValidationResult.LoginRequired,
+          isRenewProcess: false,
         });
+      }
     });
 
     it('should store jwtKeys', async () => {
@@ -434,26 +435,23 @@ expect(result).toEqual({
         of(DUMMY_JWT_KEYS)
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          initialCallbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          next: (callbackContext: CallbackContext) => {
-            expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
-            expect(storagePersistenceServiceSpy).toBeCalledWith([
-              ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
-              ['jwtKeys', DUMMY_JWT_KEYS, allConfigs[0]],
-            ]);
-
-            expect(callbackContext.jwtKeys).toEqual(DUMMY_JWT_KEYS);
-          },
-          error: (err) => {
-            expect(err).toBeFalsy();
-          },
-        });
+      try {
+        const callbackContext: CallbackContext = await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            initialCallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+        expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
+        expect(storagePersistenceServiceSpy).toBeCalledWith([
+          ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
+          ['jwtKeys', DUMMY_JWT_KEYS, allConfigs[0]],
+        ]);
+        expect(callbackContext.jwtKeys).toEqual(DUMMY_JWT_KEYS);
+      } catch (err: any) {
+        expect(err).toBeFalsy();
+      }
     });
 
     it('should not store jwtKeys on error', async () => {
@@ -480,29 +478,23 @@ expect(result).toEqual({
         throwError(() => new Error('Error'))
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          initialCallbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          next: (callbackContext: CallbackContext) => {
-            expect(callbackContext).toBeFalsy();
-          },
-          error: (err) => {
-            expect(err).toBeTruthy();
-
-            // storagePersistenceService.write() should not have been called with jwtKeys
-            expect(
-              storagePersistenceServiceSpy
-            ).toHaveBeenCalledExactlyOnceWith(
-              'authnResult',
-              authResult,
-              allConfigs[0]
-            );
-          },
-        });
+      try {
+        const callbackContext: CallbackContext = await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            initialCallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+        expect(callbackContext).toBeFalsy();
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+        expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
+          'authnResult',
+          authResult,
+          allConfigs[0]
+        );
+      }
     });
 
     it('should fallback to stored jwtKeys on error', async () => {
@@ -530,23 +522,22 @@ expect(result).toEqual({
         throwError(() => new Error('Error'))
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          initialCallbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          next: (callbackContext: CallbackContext) => {
-            expect(
-              storagePersistenceServiceSpy
-            ).toHaveBeenCalledExactlyOnceWith('jwtKeys', allConfigs[0]);
-            expect(callbackContext.jwtKeys).toEqual(DUMMY_JWT_KEYS);
-          },
-          error: (err) => {
-            expect(err).toBeFalsy();
-          },
-        });
+      try {
+        const callbackContext: CallbackContext = await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            initialCallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+        expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
+          'jwtKeys',
+          allConfigs[0]
+        );
+        expect(callbackContext.jwtKeys).toEqual(DUMMY_JWT_KEYS);
+      } catch (err: any) {
+        expect(err).toBeFalsy();
+      }
     });
 
     it('should throw error if no jwtKeys are stored', async () => {
@@ -568,20 +559,18 @@ expect(result).toEqual({
         throwError(() => new Error('Error'))
       );
 
-      service
-        .callbackHistoryAndResetJwtKeys(
-          initialCallbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          next: (callbackContext: CallbackContext) => {
-            expect(callbackContext).toBeFalsy();
-          },
-          error: (err) => {
-            expect(err).toBeTruthy();
-          },
-        });
+      try {
+        const callbackContext: CallbackContext = await lastValueFrom(
+          service.callbackHistoryAndResetJwtKeys(
+            initialCallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+        expect(callbackContext).toBeFalsy();
+      } catch (err: any) {
+        expect(err).toBeTruthy();
+      }
     });
   });
 

@@ -1,4 +1,3 @@
-// biome-ignore lint/nursery/noEnum: <explanation>
 export enum EventTypes {
   /**
    *  This only works in the AppModule Constructor

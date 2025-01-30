@@ -11,7 +11,7 @@ export interface RouterStateSnapshot {
 }
 
 export abstract class AbstractRouter {
-  navigateByUrl(url: string): void {
+  navigateByUrl(_url: string): void {
     // TODO
     // Implementation of navigating to a URL
   }
@@ -23,5 +23,9 @@ export abstract class AbstractRouter {
   }
 
   // TODO
-  parseUrl(url: string) {}
+  parseUrl(_url: string): any {
+    // TODO
+    // Implementation of getting the current navigation
+    return null;
+  }
 }

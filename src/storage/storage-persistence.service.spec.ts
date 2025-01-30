@@ -12,9 +12,6 @@ describe('Storage Persistence Service', () => {
     TestBed.configureTestingModule({
       providers: [mockProvider(BrowserStorageService)],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(StoragePersistenceService);
     securityStorage = TestBed.inject(BrowserStorageService);
   });

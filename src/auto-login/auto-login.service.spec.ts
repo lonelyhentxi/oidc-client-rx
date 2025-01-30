@@ -16,9 +16,6 @@ describe('AutoLoginService ', () => {
       imports: [RouterTestingModule],
       providers: [AutoLoginService, mockProvider(StoragePersistenceService)],
     });
-  });
-
-  beforeEach(() => {
     router = TestBed.inject(Router);
     autoLoginService = TestBed.inject(AutoLoginService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);

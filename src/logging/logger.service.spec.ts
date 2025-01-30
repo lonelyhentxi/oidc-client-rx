@@ -15,9 +15,6 @@ describe('Logger Service', () => {
         { provide: AbstractLoggerService, useClass: ConsoleLoggerService },
       ],
     });
-  });
-
-  beforeEach(() => {
     loggerService = TestBed.inject(LoggerService);
   });
 

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { DOCUMENT } from '../../dom';
@@ -42,9 +42,6 @@ describe('StateValidationCallbackHandlerService', () => {
         },
       ],
     });
-  });
-
-  beforeEach(() => {
     service = TestBed.inject(StateValidationCallbackHandlerService);
     stateValidationService = TestBed.inject(StateValidationService);
     loggerService = TestBed.inject(LoggerService);
@@ -69,18 +66,19 @@ describe('StateValidationCallbackHandlerService', () => {
       );
       const allConfigs = [{ configId: 'configId1' }];
 
-      const newCallbackContext = await lastValueFrom(service
-        .callbackStateValidation(
+      const newCallbackContext = await lastValueFrom(
+        service.callbackStateValidation(
           {} as CallbackContext,
           allConfigs[0]!,
           allConfigs
-        ));
-expect(newCallbackContext).toEqual({
-            validationResult: {
-              idToken: 'idTokenJustForTesting',
-              authResponseIsValid: true,
-            },
-          } as CallbackContext);
+        )
+      );
+      expect(newCallbackContext).toEqual({
+        validationResult: {
+          idToken: 'idTokenJustForTesting',
+          authResponseIsValid: true,
+        },
+      } as CallbackContext);
     });
 
     it('logs error in case of an error', async () => {
@@ -96,20 +94,20 @@ expect(newCallbackContext).toEqual({
       const loggerSpy = vi.spyOn(loggerService, 'logWarning');
       const allConfigs = [{ configId: 'configId1' }];
 
-      service
-        .callbackStateValidation(
-          {} as CallbackContext,
+      try {
+        await lastValueFrom(
+          service.callbackStateValidation(
+            {} as CallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch {
+        expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
           allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: () => {
-            expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
-              allConfigs[0]!,
-              'authorizedCallback, token(s) validation failed, resetting. Hash: &anyFakeHash'
-            );
-          },
-        });
+          'authorizedCallback, token(s) validation failed, resetting. Hash: &anyFakeHash'
+        );
+      }
     });
 
     it('calls resetAuthDataService.resetAuthorizationData and authStateService.updateAndPublishAuthState in case of an error', async () => {
@@ -133,24 +131,22 @@ expect(newCallbackContext).toEqual({
       );
       const allConfigs = [{ configId: 'configId1' }];
 
-      service
-        .callbackStateValidation(
-          { isRenewProcess: true } as CallbackContext,
-          allConfigs[0]!,
-          allConfigs
-        )
-        .subscribe({
-          error: () => {
-            expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
-            expect(
-              updateAndPublishAuthStateSpy
-            ).toHaveBeenCalledExactlyOnceWith({
-              isAuthenticated: false,
-              validationResult: ValidationResult.LoginRequired,
-              isRenewProcess: true,
-            });
-          },
+      try {
+        await lastValueFrom(
+          service.callbackStateValidation(
+            { isRenewProcess: true } as CallbackContext,
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+      } catch {
+        expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(1);
+        expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
+          isAuthenticated: false,
+          validationResult: ValidationResult.LoginRequired,
+          isRenewProcess: true,
         });
+      }
     });
   });
 });

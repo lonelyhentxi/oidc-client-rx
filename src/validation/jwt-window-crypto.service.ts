@@ -1,5 +1,5 @@
 import { inject, Injectable } from 'injection-js';
-import { from, Observable } from 'rxjs';
+import { from, type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CryptoService } from '../utils/crypto/crypto.service';
 

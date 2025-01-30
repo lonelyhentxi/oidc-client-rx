@@ -98,10 +98,10 @@ export class HistoryJwtKeysCallbackHandlerService {
         // fallback: try to load jwtKeys from storage
         const storedJwtKeys = this.readSigningKeys(config);
 
-        if (!!storedJwtKeys) {
+        if (storedJwtKeys) {
           this.loggerService.logWarning(
             config,
-            `Failed to retrieve signing keys, fallback to stored keys`
+            'Failed to retrieve signing keys, fallback to stored keys'
           );
 
           return of(storedJwtKeys);
@@ -116,7 +116,7 @@ export class HistoryJwtKeysCallbackHandlerService {
           return of(callbackContext);
         }
 
-        const errorMessage = `Failed to retrieve signing key`;
+        const errorMessage = 'Failed to retrieve signing key';
 
         this.loggerService.logWarning(config, errorMessage);
 

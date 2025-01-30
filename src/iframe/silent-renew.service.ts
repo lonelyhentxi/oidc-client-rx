@@ -153,7 +153,7 @@ export class SilentRenewService {
         this.flowsDataService.resetSilentRenewRunning(config);
       },
       error: (err: unknown) => {
-        this.loggerService.logError(config, 'Error: ' + err);
+        this.loggerService.logError(config, `Error: ${err}`);
         this.refreshSessionWithIFrameCompletedInternal$.next(null);
         this.flowsDataService.resetSilentRenewRunning(config);
       },
