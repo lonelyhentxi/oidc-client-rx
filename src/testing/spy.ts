@@ -51,3 +51,57 @@ export function mockImplementationWhenArgs<M extends MockInstance<any>>(
     return spyImpl?.(...args);
   });
 }
+
+/**
+ * mock Jasmine spyOnProperty
+ */
+export function spyOnProperty<T, K extends keyof T>(
+  obj: T,
+  propertyKey: K,
+  accessType: 'get' | 'set' = 'get',
+  mockImplementation?: any
+) {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(obj, propertyKey);
+
+  if (!originalDescriptor) {
+    throw new Error(
+      `Property ${String(propertyKey)} does not exist on the object.`
+    );
+  }
+
+  const spy = vi.fn();
+
+  let value: T[K] | undefined;
+
+  if (accessType === 'get') {
+    Object.defineProperty(obj, propertyKey, {
+      get: mockImplementation
+        ? () => {
+            value = mockImplementation();
+            return value;
+          }
+        : spy,
+      configurable: true,
+    });
+  } else if (accessType === 'set') {
+    Object.defineProperty(obj, propertyKey, {
+      set: mockImplementation
+        ? (next) => {
+            value = next;
+          }
+        : spy,
+      configurable: true,
+    });
+  }
+
+  // 恢复原始属性
+  spy.mockRestore = () => {
+    if (originalDescriptor) {
+      Object.defineProperty(obj, propertyKey, originalDescriptor);
+    } else {
+      delete obj[propertyKey];
+    }
+  };
+
+  return spy;
+}

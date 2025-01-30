@@ -85,7 +85,7 @@ describe('PopUpLoginService', () => {
         authWellKnownService,
         'queryAndStoreAuthWellKnownEndPoints'
       ).mockReturnValue(of({}));
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
+      spyOnProperty(popupService, 'result$').mockReturnValue(
         of({} as PopupResult)
       );
       vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
@@ -115,7 +115,7 @@ describe('PopUpLoginService', () => {
         'queryAndStoreAuthWellKnownEndPoints'
       ).mockReturnValue(of({}));
       vi.spyOn(urlService, 'getAuthorizeUrl').mockReturnValue(of('someUrl'));
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
+      spyOnProperty(popupService, 'result$').mockReturnValue(
         of({} as PopupResult)
       );
       vi.spyOn(checkAuthService, 'checkAuth').mockReturnValue(
@@ -162,9 +162,7 @@ describe('PopUpLoginService', () => {
         receivedUrl: 'someUrl',
       };
 
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
-        of(popupResult)
-      );
+      spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
       popUpLoginService
         .loginWithPopUpStandard(config, [config])
@@ -207,9 +205,7 @@ describe('PopUpLoginService', () => {
         .mockReturnValue(of({} as LoginResponse));
       const popupResult = { userClosed: true } as PopupResult;
 
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
-        of(popupResult)
-      );
+      spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
       popUpLoginService
         .loginWithPopUpStandard(config, [config])

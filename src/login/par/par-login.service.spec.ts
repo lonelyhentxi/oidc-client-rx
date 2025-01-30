@@ -363,7 +363,7 @@ describe('ParLoginService', () => {
       vi.spyOn(checkAuthService, 'checkAuth').mockReturnValue(
         of({} as LoginResponse)
       );
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
+      spyOnProperty(popupService, 'result$').mockReturnValue(
         of({} as PopupResult)
       );
       const spy = vi.spyOn(popupService, 'openPopUp');
@@ -417,9 +417,7 @@ describe('ParLoginService', () => {
         receivedUrl: 'someUrl',
       };
 
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
-        of(popupResult)
-      );
+      spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
       service.loginWithPopUpPar(config, allConfigs).subscribe((result) => {
         expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
@@ -465,9 +463,7 @@ describe('ParLoginService', () => {
       const checkAuthSpy = vi.spyOn(checkAuthService, 'checkAuth');
       const popupResult = { userClosed: true } as PopupResult;
 
-      vi.spyOnProperty(popupService, 'result$').mockReturnValue(
-        of(popupResult)
-      );
+      spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
       service.loginWithPopUpPar(config, allConfigs).subscribe((result) => {
         expect(checkAuthSpy).not.toHaveBeenCalled();

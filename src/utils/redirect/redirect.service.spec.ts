@@ -39,7 +39,7 @@ describe('Redirect Service Tests', () => {
   });
 
   it('redirectTo sets window location href', () => {
-    const spy = vi.spyOnProperty(myDocument.location, 'href', 'set');
+    const spy = spyOnProperty(myDocument.location, 'href', 'set');
 
     service.redirectTo('anyurl');
     expect(spy).toHaveBeenCalledExactlyOnceWith('anyurl');

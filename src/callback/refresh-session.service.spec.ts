@@ -1,5 +1,5 @@
-import { TestBed, fakeAsync, tick } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { TestBed, spyOnProperty } from '@/testing';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
@@ -50,9 +50,6 @@ describe('RefreshSessionService ', () => {
         mockProvider(PublicEventsService),
       ],
     });
-  });
-
-  beforeEach(() => {
     refreshSessionService = TestBed.inject(RefreshSessionService);
     flowsDataService = TestBed.inject(FlowsDataService);
     flowHelper = TestBed.inject(FlowHelper);
@@ -180,23 +177,24 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      refreshSessionService
-        .userForceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe({
-          next: () => {
-            fail('It should not return any result.');
-          },
-          error: (error) => {
-            expect(error).toBeInstanceOf(Error);
-          },
-          complete: () => {
-            expect(
-              flowsDataService.resetSilentRenewRunning
-            ).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
-          },
-        });
+      try {
+        const result = await lastValueFrom(
+          refreshSessionService.userForceRefreshSession(
+            allConfigs[0]!,
+            allConfigs
+          )
+        );
+        if (result) {
+          expect.fail('It should not return any result.');
+        } else {
+          expect(
+            flowsDataService.resetSilentRenewRunning
+          ).toHaveBeenCalledExactlyOnceWith(allConfigs[0]);
+        }
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(Error);
+      }
     });
-
     it('should call resetSilentRenewRunning in case of no error', async () => {
       vi.spyOn(refreshSessionService, 'forceRefreshSession').mockReturnValue(
         of({} as LoginResponse)
@@ -214,7 +212,7 @@ describe('RefreshSessionService ', () => {
         .userForceRefreshSession(allConfigs[0]!, allConfigs)
         .subscribe({
           error: () => {
-            fail('It should not return any error.');
+            expect.fail('It should not return any error.');
           },
           complete: () => {
             expect(
@@ -302,7 +300,7 @@ describe('RefreshSessionService ', () => {
       vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         true
       );
-      vi.spyOnProperty(
+      spyOnProperty(
         silentRenewService,
         'refreshSessionWithIFrameCompleted$'
       ).mockReturnValue(
@@ -340,7 +338,7 @@ describe('RefreshSessionService ', () => {
       vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
         false
       );
-      vi.spyOnProperty(
+      spyOnProperty(
         silentRenewService,
         'refreshSessionWithIFrameCompleted$'
       ).mockReturnValue(of(null));
@@ -374,7 +372,7 @@ describe('RefreshSessionService ', () => {
         refreshSessionService as any,
         'startRefreshSession'
       ).mockReturnValue(of(null));
-      vi.spyOnProperty(
+      spyOnProperty(
         silentRenewService,
         'refreshSessionWithIFrameCompleted$'
       ).mockReturnValue(of(null).pipe(delay(11000)));
@@ -395,21 +393,24 @@ describe('RefreshSessionService ', () => {
       );
       const expectedInvokeCount = MAX_RETRY_ATTEMPTS;
 
-      refreshSessionService
-        .forceRefreshSession(allConfigs[0]!, allConfigs)
-        .subscribe({
-          next: () => {
-            fail('It should not return any result.');
-          },
-          error: (error) => {
-            expect(error).toBeInstanceOf(Error);
-            expect(resetSilentRenewRunningSpy).toHaveBeenCalledTimes(
-              expectedInvokeCount
-            );
-          },
-        });
+      try {
+        const result = await lastValueFrom(
+          refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+        );
 
-      tick(allConfigs[0].silentRenewTimeoutInSeconds * 10000);
+        if (result) {
+          expect.fail('It should not return any result.');
+        }
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(Error);
+        expect(resetSilentRenewRunningSpy).toHaveBeenCalledTimes(
+          expectedInvokeCount
+        );
+      }
+
+      await vi.advanceTimersByTimeAsync(
+        allConfigs[0]!.silentRenewTimeoutInSeconds * 10000
+      );
     });
 
     it('occurs unknown error throws it to subscriber', async () => {
@@ -426,7 +427,7 @@ describe('RefreshSessionService ', () => {
         flowHelper,
         'isCurrentFlowCodeFlowWithRefreshTokens'
       ).mockReturnValue(false);
-      vi.spyOnProperty(
+      spyOnProperty(
         silentRenewService,
         'refreshSessionWithIFrameCompleted$'
       ).mockReturnValue(of(null));
@@ -447,7 +448,7 @@ describe('RefreshSessionService ', () => {
         .forceRefreshSession(allConfigs[0]!, allConfigs)
         .subscribe({
           next: () => {
-            fail('It should not return any result.');
+            expect.fail('It should not return any result.');
           },
           error: (error) => {
             expect(error).toBeInstanceOf(Error);
@@ -477,7 +478,7 @@ describe('RefreshSessionService ', () => {
         vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
           false
         );
-        vi.spyOnProperty(
+        spyOnProperty(
           silentRenewService,
           'refreshSessionWithIFrameCompleted$'
         ).mockReturnValue(of(null));
@@ -512,7 +513,7 @@ describe('RefreshSessionService ', () => {
           refreshSessionService as any,
           'startRefreshSession'
         ).mockReturnValue(of(null));
-        vi.spyOnProperty(
+        spyOnProperty(
           silentRenewService,
           'refreshSessionWithIFrameCompleted$'
         ).mockReturnValue(

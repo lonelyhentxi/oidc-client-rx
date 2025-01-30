@@ -2,8 +2,9 @@ import {
   TestBed,
   mockImplementationWhenArgsEqual,
   mockRouterProvider,
+  spyOnProperty,
 } from '@/testing';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AutoLoginService } from '../auto-login/auto-login.service';
 import { CallbackService } from '../callback/callback.service';
@@ -108,13 +109,14 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      checkAuthService.checkAuth(allConfigs[0]!, allConfigs).subscribe(() => {
-        expect(spy).toHaveBeenCalledExactlyOnceWith(
-          allConfigs[0]!,
-          allConfigs,
-          undefined
-        );
-      });
+      await lastValueFrom(
+        checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
+      );
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        allConfigs[0]!,
+        allConfigs,
+        undefined
+      );
     });
 
     it('throws error when url has state param and stored config with matching state param is not found', async () => {
@@ -171,7 +173,7 @@ describe('CheckAuthService', () => {
       vi.spyOn(currentUrlService, 'getCurrentUrl').mockReturnValue(
         'http://localhost:4200'
       );
-      vi.spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
+      spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
         opener: {} as Window,
       });
       vi.spyOn(storagePersistenceService, 'read').mockReturnValue(null);

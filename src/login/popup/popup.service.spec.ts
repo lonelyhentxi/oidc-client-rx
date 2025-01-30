@@ -52,7 +52,7 @@ describe('PopUpService', () => {
       vi.spyOn(popUpService as any, 'canAccessSessionStorage').mockReturnValue(
         false
       );
-      vi.spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
+      spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
         opener: {} as Window,
       });
       vi.spyOn(storagePersistenceService, 'read').mockReturnValue({
@@ -89,7 +89,7 @@ describe('PopUpService', () => {
       vi.spyOn(popUpService as any, 'canAccessSessionStorage').mockReturnValue(
         true
       );
-      vi.spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
+      spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
         opener: {} as Window,
       });
       vi.spyOn(storagePersistenceService, 'read').mockReturnValue({
@@ -271,7 +271,7 @@ describe('PopUpService', () => {
   describe('sendMessageToMainWindow', () => {
     it('does nothing if window.opener is null', async () => {
       // arrange
-      vi.spyOnProperty(window, 'opener').mockReturnValue(null);
+      spyOnProperty(window, 'opener').mockReturnValue(null);
 
       const sendMessageSpy = vi.spyOn(popUpService as any, 'sendMessage');
 
@@ -284,7 +284,7 @@ describe('PopUpService', () => {
 
     it('calls postMessage when window opener is given', async () => {
       // arrange
-      vi.spyOnProperty(window, 'opener').mockReturnValue({
+      spyOnProperty(window, 'opener').mockReturnValue({
         postMessage: () => undefined,
       });
       const sendMessageSpy = vi.spyOn(window.opener, 'postMessage');
