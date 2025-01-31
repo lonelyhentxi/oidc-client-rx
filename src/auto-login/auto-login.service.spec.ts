@@ -1,6 +1,5 @@
-import { TestBed } from '@/testing';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { TestBed, mockRouterProvider } from '@/testing';
+import { AbstractRouter } from 'oidc-client-rx/router';
 import { vi } from 'vitest';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { mockProvider } from '../testing/mock';
@@ -9,14 +8,18 @@ import { AutoLoginService } from './auto-login.service';
 describe('AutoLoginService ', () => {
   let autoLoginService: AutoLoginService;
   let storagePersistenceService: StoragePersistenceService;
-  let router: Router;
+  let router: AbstractRouter;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [AutoLoginService, mockProvider(StoragePersistenceService)],
+      imports: [],
+      providers: [
+        mockRouterProvider(),
+        AutoLoginService,
+        mockProvider(StoragePersistenceService),
+      ],
     });
-    router = TestBed.inject(Router);
+    router = TestBed.inject(AbstractRouter);
     autoLoginService = TestBed.inject(AutoLoginService);
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
   });

@@ -6,7 +6,8 @@
       "style": {
         "noNonNullAssertion": "off",
         "noParameterAssign": "off",
-        "useFilenamingConvention": "warn"
+        "useFilenamingConvention": "warn",
+        "noParameterProperties": "off"
       },
       "suspicious": {
         "noExplicitAny": "off"
@@ -21,7 +22,8 @@
         }
       },
       "nursery": {
-        "noEnum": "off"
+        "noEnum": "off",
+        "useConsistentMemberAccessibility": "off"
       }
     }
   },

@@ -1,6 +1,5 @@
 import { TestBed } from '@/testing';
-import { PLATFORM_ID } from '@angular/core';
-import { PlatformProvider } from './platform.provider';
+import { PLATFORM_ID, PlatformProvider } from './platform.provider';
 
 describe('PlatformProvider Tests', () => {
   it('should create', () => {

@@ -873,7 +873,8 @@ export class UrlService {
   private createHttpParams(existingParams?: string): HttpParams {
     existingParams = existingParams ?? '';
 
-    return new HttpParams(existingParams, {
+    // @TODO @ngify/http
+    return new HttpParams(existingParams || undefined, {
       encoder: new UriEncoder(),
     });
   }

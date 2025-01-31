@@ -1,6 +1,7 @@
-import { inject, Injectable } from 'injection-js';
-import { Router } from '@angular/router';
+import { Injectable, inject } from 'injection-js';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { injectAbstractType } from '../injection';
+import { AbstractRouter } from '../router';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 
 const STORAGE_KEY = 'redirect';
@@ -9,7 +10,7 @@ const STORAGE_KEY = 'redirect';
 export class AutoLoginService {
   private readonly storageService = inject(StoragePersistenceService);
 
-  private readonly router = inject(Router);
+  private readonly router = injectAbstractType(AbstractRouter);
 
   checkSavedRedirectRouteAndNavigate(config: OpenIdConfiguration | null): void {
     if (!config) {

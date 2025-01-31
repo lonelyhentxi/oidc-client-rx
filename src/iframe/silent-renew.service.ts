@@ -70,9 +70,8 @@ export class SilentRenewService {
     config: OpenIdConfiguration,
     allConfigs: OpenIdConfiguration[]
   ): Observable<CallbackContext> {
-    const params = new HttpParams({
-      fromString: urlParts[1],
-    });
+    // TODO: fix @ngify/http
+    const params = new HttpParams(urlParts[1] || undefined);
 
     const errorParam = params.get('error');
 

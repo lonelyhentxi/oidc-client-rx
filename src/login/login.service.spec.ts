@@ -1,5 +1,4 @@
 import { TestBed } from '@/testing';
-import { CommonModule } from '@angular/common';
 import { lastValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
@@ -21,7 +20,7 @@ describe('LoginService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [CommonModule],
+      imports: [],
       providers: [
         LoginService,
         mockProvider(ParLoginService),

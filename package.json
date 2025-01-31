@@ -26,14 +26,15 @@
   "scripts": {
     "build": "rslib build",
     "dev": "rslib build --watch",
-    "test": "vitest --code-coverage",
-    "test-ci": "vitest --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage",
+    "test": "vitest --browser.headless",
+    "test-ci": "vitest --watch=false --browser.headless --coverage",
     "pack": "npm run build && npm pack ./dist",
     "publish": "npm run build && npm publish ./dist",
     "coverage": "vitest run --coverage",
     "lint": "ultracite lint",
     "format": "ultracite format",
-    "cli": "tsx scripts/cli.ts"
+    "cli": "tsx scripts/cli.ts",
+    "test:browser": "vitest --workspace=vitest.workspace.ts"
   },
   "dependencies": {
     "@ngify/http": "^2.0.4",
@@ -52,17 +53,21 @@
     "@rslib/core": "^0.3.1",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.12.0",
-    "@vitest/coverage-v8": "^3.0.1",
+    "@vitest/browser": "^3.0.4",
+    "@vitest/coverage-v8": "^3.0.4",
     "commander": "^13.1.0",
     "lodash-es": "^4.17.21",
     "oxc-parser": "^0.48.1",
     "oxc-walker": "^0.2.2",
+    "playwright": "^1.50.0",
     "rfc4648": "^1.5.0",
     "rxjs": "^7.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "ultracite": "^4.1.15",
-    "vitest": "^3.0.1"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.4",
+    "webdriverio": "^9.7.2"
   },
   "keywords": [
     "rxjs",

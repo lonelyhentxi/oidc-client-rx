@@ -1,6 +1,6 @@
 import { Injectable, inject } from 'injection-js';
-import { DOCUMENT } from '../../dom';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { DOCUMENT } from '../dom';
 import { LoggerService } from '../logging/logger.service';
 
 @Injectable()

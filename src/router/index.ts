@@ -10,22 +10,28 @@ export interface RouterStateSnapshot {
   url: string;
 }
 
+export interface UrlTree {
+  toString(): string;
+}
+
+export interface NavigationExtras {
+  [key: string]: any;
+}
+
+export interface Navigation {
+  id: number;
+  initialUrl: UrlTree;
+  extractedUrl: UrlTree;
+  finalUrl?: UrlTree | undefined;
+  trigger: 'imperative' | 'popstate' | 'hashchange';
+  previousNavigation: Navigation | null;
+  extras?: NavigationExtras;
+}
+
 export abstract class AbstractRouter {
-  navigateByUrl(_url: string): void {
-    // TODO
-    // Implementation of navigating to a URL
-  }
+  abstract navigateByUrl(url: string): void;
 
-  getCurrentNavigation(): any {
-    // TODO
-    // Implementation of getting the current navigation
-    return null;
-  }
+  abstract getCurrentNavigation(): Navigation;
 
-  // TODO
-  parseUrl(_url: string): any {
-    // TODO
-    // Implementation of getting the current navigation
-    return null;
-  }
+  abstract parseUrl(_url: string): any;
 }
