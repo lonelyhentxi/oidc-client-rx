@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpHeaders } from '@ngify/http';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -20,6 +20,7 @@ describe('ParService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        ParService,
         mockProvider(LoggerService),
         mockProvider(UrlService),
         mockProvider(DataService),
@@ -48,7 +49,7 @@ describe('ParService', () => {
         () => null
       );
       try {
-        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+        await firstValueFrom(service.postParRequest({ configId: 'configId1' }));
       } catch (err: any) {
         expect(err.message).toBe(
           'Could not read PAR endpoint because authWellKnownEndPoints are not given'
@@ -66,7 +67,7 @@ describe('ParService', () => {
         () => ({ some: 'thing' })
       );
       try {
-        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+        await firstValueFrom(service.postParRequest({ configId: 'configId1' }));
       } catch (err: any) {
         expect(err.message).toBe(
           'Could not read PAR endpoint from authWellKnownEndpoints'
@@ -88,7 +89,7 @@ describe('ParService', () => {
         .spyOn(dataService, 'post')
         .mockReturnValue(of({}));
 
-      await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+      await firstValueFrom(service.postParRequest({ configId: 'configId1' }));
       expect(dataServiceSpy).toHaveBeenCalledExactlyOnceWith(
         'parEndpoint',
         'some-url123',
@@ -109,7 +110,7 @@ describe('ParService', () => {
       vi.spyOn(dataService, 'post').mockReturnValue(
         of({ expires_in: 123, request_uri: 'request_uri' })
       );
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.postParRequest({ configId: 'configId1' })
       );
       expect(result).toEqual({ expiresIn: 123, requestUri: 'request_uri' });
@@ -130,7 +131,7 @@ describe('ParService', () => {
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+        await firstValueFrom(service.postParRequest({ configId: 'configId1' }));
       } catch (err: any) {
         expect(err.message).toBe(
           'There was an error on ParService postParRequest'
@@ -159,7 +160,7 @@ describe('ParService', () => {
         )
       );
 
-      const res = await lastValueFrom(
+      const res = await firstValueFrom(
         service.postParRequest({ configId: 'configId1' })
       );
       expect(res).toBeTruthy();
@@ -183,7 +184,7 @@ describe('ParService', () => {
         )
       );
 
-      const res = await lastValueFrom(
+      const res = await firstValueFrom(
         service.postParRequest({ configId: 'configId1' })
       );
       expect(res).toBeTruthy();
@@ -209,7 +210,7 @@ describe('ParService', () => {
       );
 
       try {
-        await lastValueFrom(service.postParRequest({ configId: 'configId1' }));
+        await firstValueFrom(service.postParRequest({ configId: 'configId1' }));
       } catch (err: any) {
         expect(err).toBeTruthy();
       }

@@ -1,6 +1,11 @@
-import { Injectable, RendererFactory2, inject } from 'injection-js';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Injectable, inject } from 'injection-js';
+import {
+  Observable,
+  ReplaySubject,
+  type Subscription,
+  fromEventPattern,
+} from 'rxjs';
+import { filter, share, switchMap, takeUntil } from 'rxjs/operators';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { DOCUMENT } from '../dom';
 import { LoggerService } from '../logging/logger.service';
@@ -9,11 +14,6 @@ import { SilentRenewService } from './silent-renew.service';
 
 @Injectable()
 export class RefreshSessionIframeService {
-  private readonly renderer = inject(RendererFactory2).createRenderer(
-    null,
-    null
-  );
-
   private readonly loggerService = inject(LoggerService);
 
   private readonly urlService = inject(UrlService);
@@ -21,6 +21,8 @@ export class RefreshSessionIframeService {
   private readonly silentRenewService = inject(SilentRenewService);
 
   private readonly document = inject(DOCUMENT);
+
+  private silentRenewEventHandlerSubscription?: Subscription;
 
   refreshSessionWithIframe(
     config: OpenIdConfiguration,
@@ -80,24 +82,53 @@ export class RefreshSessionIframeService {
   ): void {
     const instanceId = Math.random();
 
-    const initDestroyHandler = this.renderer.listen(
-      'window',
-      'oidc-silent-renew-init',
-      (e: CustomEvent) => {
-        if (e.detail !== instanceId) {
-          initDestroyHandler();
-          renewDestroyHandler();
-        }
-      }
-    );
-    const renewDestroyHandler = this.renderer.listen(
-      'window',
-      'oidc-silent-renew-message',
-      (e) =>
-        this.silentRenewService.silentRenewEventHandler(e, config, allConfigs)
+    const oidcSilentRenewInit$ = fromEventPattern(
+      (handler) =>
+        this.document.defaultView.window.addEventListener(
+          'oidc-silent-renew-init',
+          handler
+        ),
+      (handler) =>
+        this.document.defaultView.window.removeEventListener(
+          'oidc-silent-renew-init',
+          handler
+        )
     );
 
-    this.document.defaultView?.dispatchEvent(
+    const oidcSilentRenewInitNotSelf$ = oidcSilentRenewInit$.pipe(
+      filter((e: CustomEvent) => e.detail !== instanceId)
+    );
+
+    if (this.silentRenewEventHandlerSubscription) {
+      this.silentRenewEventHandlerSubscription.unsubscribe();
+    }
+    this.silentRenewEventHandlerSubscription = fromEventPattern<CustomEvent>(
+      (handler) =>
+        this.document.defaultView.window.addEventListener(
+          'oidc-silent-renew-message',
+          handler
+        ),
+      (handler) =>
+        this.document.defaultView.window.removeEventListener(
+          'oidc-silent-renew-message',
+          handler
+        )
+    )
+      .pipe(
+        takeUntil(oidcSilentRenewInitNotSelf$),
+        switchMap((e) =>
+          this.silentRenewService.silentRenewEventHandler(e, config, allConfigs)
+        ),
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnError: false,
+          resetOnComplete: false,
+          resetOnRefCountZero: true,
+        })
+      )
+      .subscribe();
+
+    this.document.defaultView?.window.dispatchEvent(
       new CustomEvent('oidc-silent-renew-init', {
         detail: instanceId,
       })

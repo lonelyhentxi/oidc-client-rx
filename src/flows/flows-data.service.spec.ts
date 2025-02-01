@@ -247,15 +247,15 @@ describe('Flows Data Service', () => {
   });
 
   describe('isSilentRenewRunning', () => {
-    it('silent renew process timeout exceeded reset state object and returns false result', () => {
+    it('silent renew process timeout exceeded reset state object and returns false result', async () => {
       const config = {
         silentRenewTimeoutInSeconds: 10,
         configId: 'configId1',
       };
 
       vi.useRealTimers();
-      vi.useFakeTimers();
       const baseTime = new Date();
+      vi.useFakeTimers();
 
       vi.setSystemTime(baseTime);
 
@@ -271,7 +271,7 @@ describe('Flows Data Service', () => {
       );
       const spyWrite = vi.spyOn(storagePersistenceService, 'write');
 
-      vi.advanceTimersByTimeAsync(
+      await vi.advanceTimersByTimeAsync(
         (config.silentRenewTimeoutInSeconds + 1) * 1000
       );
 

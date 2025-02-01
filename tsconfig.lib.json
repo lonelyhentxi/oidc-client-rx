@@ -4,6 +4,8 @@
     "rootDir": ".",
     "outDir": "./dist/tsc-lib",
     "lib": ["dom", "es2018"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "injection-js": ["./node_modules/injection-js/lib/index.ts"]
     }

@@ -1,7 +1,8 @@
-import { TestBed, createSpyObj } from '@/testing';
-import { mockProvider } from '@/testing/mock';
+import { TestBed } from '@/testing';
+import { mockClass, mockProvider } from '@/testing/mock';
 import { APP_INITIALIZER } from 'oidc-client-rx';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { PASSED_CONFIG } from './auth-config';
 import { ConfigurationService } from './config/config.service';
 import {
@@ -60,12 +61,13 @@ describe('provideAuth', () => {
 
   describe('features', () => {
     let oidcSecurityServiceMock: OidcSecurityService;
+    let spy: any;
 
     beforeEach(async () => {
-      oidcSecurityServiceMock = createSpyObj<OidcSecurityService>(
-        'OidcSecurityService',
-        ['checkAuthMultiple']
-      );
+      //@ts-ignore
+
+      oidcSecurityServiceMock = new (mockClass(OidcSecurityService))();
+      spy = vi.spyOn(oidcSecurityServiceMock, 'checkAuthMultiple');
       await TestBed.configureTestingModule({
         providers: [
           provideAuth(
@@ -83,14 +85,11 @@ describe('provideAuth', () => {
 
     it('should provide APP_INITIALIZER config', () => {
       const config = TestBed.inject(APP_INITIALIZER);
-
       expect(
         config.length,
         'Expected an APP_INITIALIZER to be registered'
       ).toBe(1);
-      expect(oidcSecurityServiceMock.checkAuthMultiple).toHaveBeenCalledTimes(
-        1
-      );
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 });

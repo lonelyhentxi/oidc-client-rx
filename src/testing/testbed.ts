@@ -13,21 +13,33 @@ export interface TestModuleMetadata {
 }
 
 export class TestBed {
+  static environmentInjector?: Injector;
   private injector: ReflectiveInjector;
   private providers: Provider[] = [];
   private imports: Injector[] = [];
 
-  constructor(metadata: TestModuleMetadata = {}) {
+  constructor(
+    metadata: TestModuleMetadata = {},
+    environmentInjector?: Injector
+  ) {
     const providers = metadata.providers ?? [];
     const imports = metadata.imports ?? [];
-    this.injector = ReflectiveInjector.resolveAndCreate(providers);
+    this.injector = ReflectiveInjector.resolveAndCreate(
+      providers,
+      environmentInjector
+    );
     this.imports = imports.map((importFn) => importFn(this.injector));
   }
 
   static #instance?: TestBed;
 
+  static initTestEnvironment(providers: Provider[] = []) {
+    TestBed.environmentInjector =
+      ReflectiveInjector.resolveAndCreate(providers);
+  }
+
   static configureTestingModule(metadata: TestModuleMetadata = {}) {
-    const newTestBed = new TestBed(metadata);
+    const newTestBed = new TestBed(metadata, TestBed.environmentInjector);
     TestBed.#instance = newTestBed;
 
     return newTestBed;

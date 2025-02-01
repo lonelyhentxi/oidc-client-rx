@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import type { HttpHeaders } from '@ngify/http';
-import { Observable, lastValueFrom, of, throwError } from 'rxjs';
+import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../api/data.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
@@ -26,6 +26,7 @@ describe('Logout and Revoke Service', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        LogoffRevocationService,
         mockProvider(DataService),
         mockProvider(LoggerService),
         mockProvider(StoragePersistenceService),
@@ -120,7 +121,7 @@ describe('Logout and Revoke Service', () => {
       const config = { configId: 'configId1' };
 
       // Act
-      const result = await lastValueFrom(service.revokeAccessToken(config));
+      const result = await firstValueFrom(service.revokeAccessToken(config));
       expect(result).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
     });
@@ -142,7 +143,7 @@ describe('Logout and Revoke Service', () => {
 
       // Act
       try {
-        await lastValueFrom(service.revokeAccessToken(config));
+        await firstValueFrom(service.revokeAccessToken(config));
       } catch (err: any) {
         expect(loggerSpy).toHaveBeenCalled();
         expect(err).toBeTruthy();
@@ -167,7 +168,7 @@ describe('Logout and Revoke Service', () => {
         )
       );
 
-      const res = await lastValueFrom(service.revokeAccessToken(config));
+      const res = await firstValueFrom(service.revokeAccessToken(config));
       expect(res).toBeTruthy();
       expect(res).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
@@ -192,7 +193,7 @@ describe('Logout and Revoke Service', () => {
         )
       );
 
-      const res = await lastValueFrom(service.revokeAccessToken(config));
+      const res = await firstValueFrom(service.revokeAccessToken(config));
       expect(res).toBeTruthy();
       expect(res).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
@@ -219,7 +220,7 @@ describe('Logout and Revoke Service', () => {
       );
 
       try {
-        await lastValueFrom(service.revokeAccessToken(config));
+        await firstValueFrom(service.revokeAccessToken(config));
       } catch (err: any) {
         expect(err).toBeTruthy();
         expect(loggerSpy).toHaveBeenCalled();
@@ -297,7 +298,7 @@ describe('Logout and Revoke Service', () => {
       const config = { configId: 'configId1' };
 
       // Act
-      const result = await lastValueFrom(service.revokeRefreshToken(config));
+      const result = await firstValueFrom(service.revokeRefreshToken(config));
       expect(result).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
     });
@@ -319,7 +320,7 @@ describe('Logout and Revoke Service', () => {
 
       // Act
       try {
-        await lastValueFrom(service.revokeRefreshToken(config));
+        await firstValueFrom(service.revokeRefreshToken(config));
       } catch (err: any) {
         expect(loggerSpy).toHaveBeenCalled();
         expect(err).toBeTruthy();
@@ -344,7 +345,7 @@ describe('Logout and Revoke Service', () => {
         )
       );
 
-      const res = await lastValueFrom(service.revokeRefreshToken(config));
+      const res = await firstValueFrom(service.revokeRefreshToken(config));
       expect(res).toBeTruthy();
       expect(res).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
@@ -369,7 +370,7 @@ describe('Logout and Revoke Service', () => {
         )
       );
 
-      const res = await lastValueFrom(service.revokeRefreshToken(config));
+      const res = await firstValueFrom(service.revokeRefreshToken(config));
       expect(res).toBeTruthy();
       expect(res).toEqual({ data: 'anything' });
       expect(loggerSpy).toHaveBeenCalled();
@@ -396,7 +397,7 @@ describe('Logout and Revoke Service', () => {
       );
 
       try {
-        await lastValueFrom(service.revokeRefreshToken(config));
+        await firstValueFrom(service.revokeRefreshToken(config));
       } catch (err: any) {
         expect(err).toBeTruthy();
         expect(loggerSpy).toHaveBeenCalled();
@@ -419,7 +420,7 @@ describe('Logout and Revoke Service', () => {
       const result$ = service.logoff(config, [config]);
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(serverStateChangedSpy).not.toHaveBeenCalled();
     });
 
@@ -435,7 +436,7 @@ describe('Logout and Revoke Service', () => {
       const result$ = service.logoff(config, [config]);
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).not.toHaveBeenCalled();
     });
 
@@ -461,7 +462,7 @@ describe('Logout and Revoke Service', () => {
       const result$ = service.logoff(config, [config], { urlHandler });
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).not.toHaveBeenCalled();
       expect(spy).toHaveBeenCalledExactlyOnceWith('someValue');
       expect(resetAuthorizationDataSpy).toHaveBeenCalled();
@@ -482,7 +483,7 @@ describe('Logout and Revoke Service', () => {
       const result$ = service.logoff(config, [config]);
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).toHaveBeenCalledExactlyOnceWith('someValue');
     });
 
@@ -501,7 +502,7 @@ describe('Logout and Revoke Service', () => {
       const result$ = service.logoff(config, [config], { logoffMethod: 'GET' });
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).toHaveBeenCalledExactlyOnceWith('someValue');
     });
 
@@ -533,7 +534,7 @@ describe('Logout and Revoke Service', () => {
       });
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).not.toHaveBeenCalled();
       expect(postSpy).toHaveBeenCalledExactlyOnceWith(
         'some-url',
@@ -585,7 +586,7 @@ describe('Logout and Revoke Service', () => {
       });
 
       // Assert
-      await lastValueFrom(result$);
+      await firstValueFrom(result$);
       expect(redirectSpy).not.toHaveBeenCalled();
       expect(postSpy).toHaveBeenCalledExactlyOnceWith(
         'some-url',
@@ -647,7 +648,7 @@ describe('Logout and Revoke Service', () => {
         .mockReturnValue(of({ any: 'thing' }));
 
       // Act
-      await lastValueFrom(service.logoffAndRevokeTokens(config, [config]));
+      await firstValueFrom(service.logoffAndRevokeTokens(config, [config]));
       expect(revokeRefreshTokenSpy).toHaveBeenCalled();
       expect(revokeAccessTokenSpy).toHaveBeenCalled();
     });
@@ -676,7 +677,7 @@ describe('Logout and Revoke Service', () => {
 
       // Act
       try {
-        await lastValueFrom(service.logoffAndRevokeTokens(config, [config]));
+        await firstValueFrom(service.logoffAndRevokeTokens(config, [config]));
       } catch (err: any) {
         expect(loggerSpy).toHaveBeenCalled();
         expect(err).toBeTruthy();
@@ -700,7 +701,7 @@ describe('Logout and Revoke Service', () => {
       const config = { configId: 'configId1' };
 
       // Act
-      await lastValueFrom(service.logoffAndRevokeTokens(config, [config]));
+      await firstValueFrom(service.logoffAndRevokeTokens(config, [config]));
       expect(logoffSpy).toHaveBeenCalled();
     });
 
@@ -722,7 +723,7 @@ describe('Logout and Revoke Service', () => {
       const config = { configId: 'configId1' };
 
       // Act
-      await lastValueFrom(
+      await firstValueFrom(
         service.logoffAndRevokeTokens(config, [config], { urlHandler })
       );
       expect(logoffSpy).toHaveBeenCalledExactlyOnceWith(config, [config], {
@@ -749,7 +750,7 @@ describe('Logout and Revoke Service', () => {
         .mockReturnValue(of({ any: 'thing' }));
 
       // Act
-      await lastValueFrom(service.logoffAndRevokeTokens(config, [config]));
+      await firstValueFrom(service.logoffAndRevokeTokens(config, [config]));
       expect(revokeRefreshTokenSpy).not.toHaveBeenCalled();
       expect(revokeAccessTokenSpy).toHaveBeenCalled();
     });
@@ -774,7 +775,7 @@ describe('Logout and Revoke Service', () => {
 
       // Act
       try {
-        await lastValueFrom(service.logoffAndRevokeTokens(config, [config]));
+        await firstValueFrom(service.logoffAndRevokeTokens(config, [config]));
       } catch (err: any) {
         expect(loggerSpy).toHaveBeenCalled();
         expect(err).toBeTruthy();
@@ -798,7 +799,7 @@ describe('Logout and Revoke Service', () => {
       // Assert
       expect(resetAuthorizationDataSpy).toHaveBeenCalledTimes(2);
       expect(checkSessionServiceSpy).toHaveBeenCalledTimes(2);
-      expect(resetAuthorizationDataSpy).toBeCalledWith([
+      expect(resetAuthorizationDataSpy.mock.calls).toEqual([
         [allConfigs[0]!, allConfigs],
         [allConfigs[1], allConfigs],
       ]);

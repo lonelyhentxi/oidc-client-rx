@@ -1,6 +1,6 @@
 import { TestBed, mockRouterProvider } from '@/testing';
 import { AbstractRouter } from 'oidc-client-rx';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
@@ -20,6 +20,7 @@ describe('ImplicitFlowCallbackService ', () => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
+        ImplicitFlowCallbackService,
         mockRouterProvider(),
         mockProvider(FlowsService),
         mockProvider(FlowsDataService),
@@ -81,7 +82,7 @@ describe('ImplicitFlowCallbackService ', () => {
         triggerAuthorizationResultEvent: true,
       };
 
-      await lastValueFrom(
+      await firstValueFrom(
         implicitFlowCallbackService.authenticatedImplicitFlowCallback(
           config,
           [config],
@@ -118,7 +119,7 @@ describe('ImplicitFlowCallbackService ', () => {
         postLoginRoute: 'postLoginRoute',
       };
 
-      await lastValueFrom(
+      await firstValueFrom(
         implicitFlowCallbackService.authenticatedImplicitFlowCallback(
           config,
           [config],
@@ -152,7 +153,7 @@ describe('ImplicitFlowCallbackService ', () => {
       };
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           implicitFlowCallbackService.authenticatedImplicitFlowCallback(
             config,
             [config],
@@ -188,7 +189,7 @@ describe('ImplicitFlowCallbackService ', () => {
       };
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           implicitFlowCallbackService.authenticatedImplicitFlowCallback(
             config,
             [config],

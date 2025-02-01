@@ -18,7 +18,8 @@ describe('DefaultSessionStorageService', () => {
 
   describe('read', () => {
     it('should call sessionstorage.getItem', () => {
-      const spy = vi.spyOn(sessionStorage, 'getItem');
+      // https://github.com/jsdom/jsdom/issues/2318
+      const spy = vi.spyOn(Storage.prototype, 'getItem');
 
       service.read('henlo');
 
@@ -28,7 +29,8 @@ describe('DefaultSessionStorageService', () => {
 
   describe('write', () => {
     it('should call sessionstorage.setItem', () => {
-      const spy = vi.spyOn(sessionStorage, 'setItem');
+      // https://github.com/jsdom/jsdom/issues/2318
+      const spy = vi.spyOn(Storage.prototype, 'setItem');
 
       service.write('henlo', 'furiend');
 
@@ -38,7 +40,8 @@ describe('DefaultSessionStorageService', () => {
 
   describe('remove', () => {
     it('should call sessionstorage.removeItem', () => {
-      const spy = vi.spyOn(sessionStorage, 'removeItem');
+      // https://github.com/jsdom/jsdom/issues/2318
+      const spy = vi.spyOn(Storage.prototype, 'removeItem');
 
       service.remove('henlo');
 
@@ -48,7 +51,8 @@ describe('DefaultSessionStorageService', () => {
 
   describe('clear', () => {
     it('should call sessionstorage.clear', () => {
-      const spy = vi.spyOn(sessionStorage, 'clear');
+      // https://github.com/jsdom/jsdom/issues/2318
+      const spy = vi.spyOn(Storage.prototype, 'clear');
 
       service.clear();
 

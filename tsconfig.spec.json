@@ -6,6 +6,8 @@
     "noUncheckedIndexedAccess": true,
     "outDir": "./dist/tsc-test",
     "types": ["vitest/globals", "node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "@/testing": ["./src/testing"],
       "@/testing/*": ["./src/testing/*"],

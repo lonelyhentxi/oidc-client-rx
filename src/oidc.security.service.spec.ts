@@ -1,5 +1,5 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { Observable, lastValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 import { type MockInstance, vi } from 'vitest';
 import { AuthStateService } from './auth-state/auth-state.service';
 import { CheckAuthService } from './auth-state/check-auth.service';
@@ -89,36 +89,38 @@ describe('OidcSecurityService', () => {
     expect(oidcSecurityService).toBeTruthy();
   });
 
-  describe('userData$', () => {
-    it('calls userService.userData$', async () => {
-      await lastValueFrom(oidcSecurityService.userData$);
-      // 1x from this subscribe
-      // 1x by the signal property
-      expect(userDataSpy).toHaveBeenCalledTimes(2);
-    });
-  });
+  // without signal
+  // describe('userData$', () => {
+  //   it('calls userService.userData$', async () => {
+  //     await firstValueFrom(oidcSecurityService.userData());
+  //     // 1x from this subscribe
+  //     // 1x by the signal property
+  //     expect(userDataSpy).toHaveBeenCalledTimes(2);
+  //   });
+  // });
 
   describe('userData', () => {
     it('calls userService.userData$', async () => {
-      const _userdata = await lastValueFrom(oidcSecurityService.userData());
+      const _userdata = await firstValueFrom(oidcSecurityService.userData$);
 
       expect(userDataSpy).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('isAuthenticated$', () => {
-    it('calls authStateService.isAuthenticated$', async () => {
-      await lastValueFrom(oidcSecurityService.isAuthenticated$);
-      // 1x from this subscribe
-      // 1x by the signal property
-      expect(authenticatedSpy).toHaveBeenCalledTimes(2);
-    });
-  });
+  // describe('isAuthenticated$', () => {
+  //   it('calls authStateService.isAuthenticated$', async () => {
+  //     await firstValueFrom(oidcSecurityService.isAuthenticated());
+  //     // 1x from this subscribe
+  //     // 1x by the signal property
+  //     expect(authenticatedSpy).toHaveBeenCalledTimes(2);
+  //   });
+  // });
 
+  // without signal
   describe('authenticated', () => {
     it('calls authStateService.isAuthenticated$', async () => {
-      const _authenticated = await lastValueFrom(
-        oidcSecurityService.authenticated()
+      const _authenticated = await firstValueFrom(
+        oidcSecurityService.isAuthenticated$
       );
 
       expect(authenticatedSpy).toHaveBeenCalledTimes(1);
@@ -131,19 +133,20 @@ describe('OidcSecurityService', () => {
         checkSessionService,
         'checkSessionChanged$'
       ).mockReturnValue(of(true));
-      await lastValueFrom(oidcSecurityService.checkSessionChanged$);
+      await firstValueFrom(oidcSecurityService.checkSessionChanged$);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('stsCallback$', () => {
-    it('calls callbackService.stsCallback$', async () => {
+    it('calls callbackService.stsCallback$', () => {
       const spy = spyOnProperty(
         callbackService,
         'stsCallback$'
       ).mockReturnValue(of());
 
-      await lastValueFrom(oidcSecurityService.stsCallback$);
+      oidcSecurityService.stsCallback$.subscribe();
+
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
@@ -159,7 +162,7 @@ describe('OidcSecurityService', () => {
         .spyOn(authWellKnownService, 'queryAndStoreAuthWellKnownEndPoints')
         .mockReturnValue(of({}));
 
-      await lastValueFrom(oidcSecurityService.preloadAuthWellKnownDocument());
+      await firstValueFrom(oidcSecurityService.preloadAuthWellKnownDocument());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -210,7 +213,7 @@ describe('OidcSecurityService', () => {
           some: 'thing',
         });
 
-      await lastValueFrom(oidcSecurityService.getUserData('configId'));
+      await firstValueFrom(oidcSecurityService.getUserData('configId'));
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
 
@@ -225,8 +228,10 @@ describe('OidcSecurityService', () => {
         some: 'thing',
       });
 
-      const result = await lastValueFrom(oidcSecurityService.getUserData('configId'));
-expect(result).toEqual({ some: 'thing' });
+      const result = await firstValueFrom(
+        oidcSecurityService.getUserData('configId')
+      );
+      expect(result).toEqual({ some: 'thing' });
     });
   });
 
@@ -242,7 +247,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(checkAuthService, 'checkAuth')
         .mockReturnValue(of({} as LoginResponse));
 
-      await lastValueFrom(oidcSecurityService.checkAuth());
+      await firstValueFrom(oidcSecurityService.checkAuth());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config], undefined);
     });
 
@@ -257,7 +262,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(checkAuthService, 'checkAuth')
         .mockReturnValue(of({} as LoginResponse));
 
-      await lastValueFrom(oidcSecurityService.checkAuth('some-url'));
+      await firstValueFrom(oidcSecurityService.checkAuth('some-url'));
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config], 'some-url');
     });
   });
@@ -274,7 +279,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(checkAuthService, 'checkAuthMultiple')
         .mockReturnValue(of([{}] as LoginResponse[]));
 
-      await lastValueFrom(oidcSecurityService.checkAuthMultiple());
+      await firstValueFrom(oidcSecurityService.checkAuthMultiple());
       expect(spy).toHaveBeenCalledExactlyOnceWith([config], undefined);
     });
 
@@ -289,8 +294,8 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(checkAuthService, 'checkAuthMultiple')
         .mockReturnValue(of([{}] as LoginResponse[]));
 
-      await lastValueFrom(oidcSecurityService.checkAuthMultiple('some-url'));
-      expect(spy).toHaveBeenCalledExactlyOnceWith([config], 'some-u-+rl');
+      await firstValueFrom(oidcSecurityService.checkAuthMultiple('some-url'));
+      expect(spy).toHaveBeenCalledExactlyOnceWith([config], 'some-url');
     });
   });
 
@@ -306,7 +311,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(authStateService, 'isAuthenticated')
         .mockReturnValue(true);
 
-      await lastValueFrom(oidcSecurityService.isAuthenticated());
+      await firstValueFrom(oidcSecurityService.isAuthenticated());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -323,7 +328,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(checkAuthService, 'checkAuthIncludingServer')
         .mockReturnValue(of({} as LoginResponse));
 
-      await lastValueFrom(oidcSecurityService.checkAuthIncludingServer());
+      await firstValueFrom(oidcSecurityService.checkAuthIncludingServer());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config]);
     });
   });
@@ -340,7 +345,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(authStateService, 'getAccessToken')
         .mockReturnValue('');
 
-      await lastValueFrom(oidcSecurityService.getAccessToken());
+      await firstValueFrom(oidcSecurityService.getAccessToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -355,7 +360,7 @@ expect(result).toEqual({ some: 'thing' });
 
       const spy = vi.spyOn(authStateService, 'getIdToken').mockReturnValue('');
 
-      await lastValueFrom(oidcSecurityService.getIdToken());
+      await firstValueFrom(oidcSecurityService.getIdToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -371,7 +376,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(authStateService, 'getRefreshToken')
         .mockReturnValue('');
 
-      await lastValueFrom(oidcSecurityService.getRefreshToken());
+      await firstValueFrom(oidcSecurityService.getRefreshToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -388,7 +393,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(authStateService, 'getAuthenticationResult')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getAuthenticationResult());
+      await firstValueFrom(oidcSecurityService.getAuthenticationResult());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -405,7 +410,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(tokenHelperService, 'getPayloadFromToken')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getPayloadFromIdToken());
+      await firstValueFrom(oidcSecurityService.getPayloadFromIdToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith('some-token', false, config);
     });
 
@@ -420,7 +425,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(tokenHelperService, 'getPayloadFromToken')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getPayloadFromIdToken(true));
+      await firstValueFrom(oidcSecurityService.getPayloadFromIdToken(true));
       expect(spy).toHaveBeenCalledExactlyOnceWith('some-token', true, config);
     });
   });
@@ -439,7 +444,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(tokenHelperService, 'getPayloadFromToken')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getPayloadFromAccessToken());
+      await firstValueFrom(oidcSecurityService.getPayloadFromAccessToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'some-access-token',
         false,
@@ -460,7 +465,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(tokenHelperService, 'getPayloadFromToken')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getPayloadFromAccessToken(true));
+      await firstValueFrom(oidcSecurityService.getPayloadFromAccessToken(true));
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'some-access-token',
         true,
@@ -478,7 +483,7 @@ expect(result).toEqual({ some: 'thing' });
       );
       const spy = vi.spyOn(flowsDataService, 'setAuthStateControl');
 
-      await lastValueFrom(oidcSecurityService.setState('anyString'));
+      await firstValueFrom(oidcSecurityService.setState('anyString'));
       expect(spy).toHaveBeenCalledExactlyOnceWith('anyString', config);
     });
   });
@@ -492,7 +497,7 @@ expect(result).toEqual({ some: 'thing' });
       );
       const spy = vi.spyOn(flowsDataService, 'getAuthStateControl');
 
-      await lastValueFrom(oidcSecurityService.getState());
+      await firstValueFrom(oidcSecurityService.getState());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config);
     });
   });
@@ -504,9 +509,11 @@ expect(result).toEqual({ some: 'thing' });
       vi.spyOn(configurationService, 'getOpenIDConfiguration').mockReturnValue(
         of(config)
       );
-      const spy = vi.spyOn(loginService, 'login');
+      const spy = vi
+        .spyOn(loginService, 'login')
+        .mockReturnValue(of(undefined));
 
-      await lastValueFrom(oidcSecurityService.authorize());
+      await firstValueFrom(oidcSecurityService.authorize());
 
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, undefined);
     });
@@ -517,9 +524,11 @@ expect(result).toEqual({ some: 'thing' });
       vi.spyOn(configurationService, 'getOpenIDConfiguration').mockReturnValue(
         of(config)
       );
-      const spy = vi.spyOn(loginService, 'login');
+      const spy = vi
+        .spyOn(loginService, 'login')
+        .mockReturnValue(of(undefined));
 
-      await lastValueFrom(
+      await firstValueFrom(
         oidcSecurityService.authorize('configId', {
           customParams: { some: 'param' },
         })
@@ -542,7 +551,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(loginService, 'loginWithPopUp')
         .mockImplementation(() => of({} as LoginResponse));
 
-      await lastValueFrom(oidcSecurityService.authorizeWithPopUp());
+      await firstValueFrom(oidcSecurityService.authorizeWithPopUp());
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         config,
         [config],
@@ -564,7 +573,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(refreshSessionService, 'userForceRefreshSession')
         .mockReturnValue(of({} as LoginResponse));
 
-      await lastValueFrom(oidcSecurityService.forceRefreshSession());
+      await firstValueFrom(oidcSecurityService.forceRefreshSession());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config], undefined);
     });
   });
@@ -580,7 +589,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'logoffAndRevokeTokens')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(oidcSecurityService.logoffAndRevokeTokens());
+      await firstValueFrom(oidcSecurityService.logoffAndRevokeTokens());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config], undefined);
     });
   });
@@ -596,7 +605,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'logoff')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(oidcSecurityService.logoff());
+      await firstValueFrom(oidcSecurityService.logoff());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config], undefined);
     });
   });
@@ -609,7 +618,7 @@ expect(result).toEqual({ some: 'thing' });
         of({ allConfigs: [config], currentConfig: config })
       );
       const spy = vi.spyOn(logoffRevocationService, 'logoffLocal');
-      await lastValueFrom(oidcSecurityService.logoffLocal());
+      await firstValueFrom(oidcSecurityService.logoffLocal());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, [config]);
     });
   });
@@ -623,7 +632,7 @@ expect(result).toEqual({ some: 'thing' });
       );
       const spy = vi.spyOn(logoffRevocationService, 'logoffLocalMultiple');
 
-      await lastValueFrom(oidcSecurityService.logoffLocalMultiple());
+      await firstValueFrom(oidcSecurityService.logoffLocalMultiple());
       expect(spy).toHaveBeenCalledExactlyOnceWith([config]);
     });
   });
@@ -639,7 +648,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'revokeAccessToken')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(oidcSecurityService.revokeAccessToken());
+      await firstValueFrom(oidcSecurityService.revokeAccessToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, undefined);
     });
 
@@ -653,7 +662,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'revokeAccessToken')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(
+      await firstValueFrom(
         oidcSecurityService.revokeAccessToken('access_token')
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, 'access_token');
@@ -671,7 +680,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'revokeRefreshToken')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(oidcSecurityService.revokeRefreshToken());
+      await firstValueFrom(oidcSecurityService.revokeRefreshToken());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, undefined);
     });
 
@@ -685,7 +694,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(logoffRevocationService, 'revokeRefreshToken')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(
+      await firstValueFrom(
         oidcSecurityService.revokeRefreshToken('refresh_token')
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, 'refresh_token');
@@ -704,7 +713,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(urlService, 'getEndSessionUrl')
         .mockReturnValue(null);
 
-      await lastValueFrom(oidcSecurityService.getEndSessionUrl());
+      await firstValueFrom(oidcSecurityService.getEndSessionUrl());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, undefined);
     });
 
@@ -719,7 +728,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(urlService, 'getEndSessionUrl')
         .mockReturnValue(null);
 
-      await lastValueFrom(
+      await firstValueFrom(
         oidcSecurityService.getEndSessionUrl({ custom: 'params' })
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, {
@@ -740,7 +749,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(urlService, 'getAuthorizeUrl')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(oidcSecurityService.getAuthorizeUrl());
+      await firstValueFrom(oidcSecurityService.getAuthorizeUrl());
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, undefined);
     });
 
@@ -755,7 +764,7 @@ expect(result).toEqual({ some: 'thing' });
         .spyOn(urlService, 'getAuthorizeUrl')
         .mockReturnValue(of(null));
 
-      await lastValueFrom(
+      await firstValueFrom(
         oidcSecurityService.getAuthorizeUrl({ custom: 'params' })
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(config, {

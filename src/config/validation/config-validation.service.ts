@@ -85,7 +85,7 @@ export class ConfigValidationService {
     return allErrorMessages.length;
   }
 
-  private getAllMessagesOfType(
+  protected getAllMessagesOfType(
     type: Level,
     results: RuleValidationResult[]
   ): string[] {

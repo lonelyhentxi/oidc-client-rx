@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpErrorResponse, HttpHeaders } from '@ngify/http';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -46,7 +46,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
 
     it('throws error if no tokenEndpoint is given', async () => {
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           (service as any).refreshTokensRequestTokens({} as CallbackContext)
         );
       } catch (err: unknown) {
@@ -63,7 +63,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
         })
@@ -90,7 +90,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
         () => ({ tokenEndpoint: 'tokenEndpoint' })
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.refreshTokensRequestTokens({} as CallbackContext, {
           configId: 'configId1',
         })
@@ -115,7 +115,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.refreshTokensRequestTokens({} as CallbackContext, config)
         );
       } catch (err: any) {
@@ -139,7 +139,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
       );
 
       try {
-        const res = await lastValueFrom(
+        const res = await firstValueFrom(
           service.refreshTokensRequestTokens({} as CallbackContext, config)
         );
         expect(res).toBeTruthy();
@@ -165,7 +165,7 @@ describe('RefreshTokenCallbackHandlerService', () => {
       );
 
       try {
-        const res = await lastValueFrom(
+        const res = await firstValueFrom(
           service.refreshTokensRequestTokens({} as CallbackContext, config)
         );
         expect(res).toBeFalsy();

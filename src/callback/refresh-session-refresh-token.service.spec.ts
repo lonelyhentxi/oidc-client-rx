@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { FlowsService } from '../flows/flows.service';
@@ -16,6 +16,7 @@ describe('RefreshSessionRefreshTokenService', () => {
   let flowsService: FlowsService;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     TestBed.configureTestingModule({
       imports: [],
       providers: [
@@ -34,6 +35,11 @@ describe('RefreshSessionRefreshTokenService', () => {
     resetAuthDataService = TestBed.inject(ResetAuthDataService);
   });
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should create', () => {
     expect(refreshSessionRefreshTokenService).toBeTruthy();
   });
@@ -44,7 +50,7 @@ describe('RefreshSessionRefreshTokenService', () => {
         .spyOn(flowsService, 'processRefreshToken')
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
           { configId: 'configId1' },
           [{ configId: 'configId1' }]
@@ -63,7 +69,7 @@ describe('RefreshSessionRefreshTokenService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
             { configId: 'configId1' },
             [{ configId: 'configId1' }]
@@ -85,7 +91,7 @@ describe('RefreshSessionRefreshTokenService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           refreshSessionRefreshTokenService.refreshSessionWithRefreshTokens(
             { configId: 'configId1' },
             [{ configId: 'configId1' }]

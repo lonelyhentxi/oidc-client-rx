@@ -7,8 +7,10 @@ describe('IntervalService', () => {
   let intervalService: IntervalService;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     TestBed.configureTestingModule({
       providers: [
+        IntervalService,
         {
           provide: Document,
           useValue: {
@@ -20,6 +22,11 @@ describe('IntervalService', () => {
       ],
     });
     intervalService = TestBed.inject(IntervalService);
+  });
+
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create', () => {

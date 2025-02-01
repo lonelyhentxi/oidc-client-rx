@@ -1,5 +1,6 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { injectAbstractType } from '../injection';
 import { LoggerService } from '../logging/logger.service';
 import { AbstractSecurityStorage } from './abstract-security-storage';
 
@@ -7,7 +8,9 @@ import { AbstractSecurityStorage } from './abstract-security-storage';
 export class BrowserStorageService {
   private readonly loggerService = inject(LoggerService);
 
-  private readonly abstractSecurityStorage = inject(AbstractSecurityStorage);
+  private readonly abstractSecurityStorage = injectAbstractType(
+    AbstractSecurityStorage
+  );
 
   read(key: string, configuration: OpenIdConfiguration): any {
     const { configId } = configuration;

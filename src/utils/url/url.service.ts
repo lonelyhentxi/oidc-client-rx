@@ -1,10 +1,10 @@
-import { HttpParams } from '@ngify/http';
 import { Injectable, inject } from 'injection-js';
 import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { AuthOptions } from '../../auth-options';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { FlowsDataService } from '../../flows/flows-data.service';
+import { HttpParams } from '../../http';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
 import { JwtWindowCryptoService } from '../../validation/jwt-window-crypto.service';
@@ -873,8 +873,8 @@ export class UrlService {
   private createHttpParams(existingParams?: string): HttpParams {
     existingParams = existingParams ?? '';
 
-    // @TODO @ngify/http
-    return new HttpParams(existingParams || undefined, {
+    return new HttpParams({
+      fromString: existingParams,
       encoder: new UriEncoder(),
     });
   }

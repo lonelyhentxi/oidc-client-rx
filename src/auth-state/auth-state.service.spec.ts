@@ -257,7 +257,7 @@ describe('Auth State Service', () => {
         [{ configId: 'configId1' }]
       );
       expect(spy).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenCalledWith([
+      expect(spy.mock.calls).toEqual([
         ['authzData', 'accesstoken', { configId: 'configId1' }],
         [
           'access_token_expires_at',

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { mockProvider } from '../testing/mock';
@@ -83,7 +83,7 @@ describe('LoginService', () => {
       );
     });
 
-    it("should throw error if configuration is null and doesn't call loginPar or loginStandard", () => {
+    it("should throw error if configuration is null and doesn't call loginPar or loginStandard", async () => {
       // arrange
       // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
       const config = null;
@@ -91,13 +91,16 @@ describe('LoginService', () => {
       const standardLoginSpy = vi.spyOn(standardLoginService, 'loginStandard');
       const authOptions = { customParams: { custom: 'params' } };
 
-      // act
-      const fn = (): void => service.login(config, authOptions);
-
-      // assert
-      expect(fn).toThrow(
-        new Error('Please provide a configuration before setting up the module')
-      );
+      try {
+        await firstValueFrom(service.login(config, authOptions));
+        expect.fail('should be error');
+      } catch (error: unknown) {
+        expect(error).toEqual(
+          new Error(
+            'Please provide a configuration before setting up the module'
+          )
+        );
+      }
       expect(loginParSpy).not.toHaveBeenCalled();
       expect(standardLoginSpy).not.toHaveBeenCalled();
     });
@@ -115,7 +118,7 @@ describe('LoginService', () => {
         .mockReturnValue(of({} as LoginResponse));
 
       // act
-      await lastValueFrom(service.loginWithPopUp(config, [config]));
+      await firstValueFrom(service.loginWithPopUp(config, [config]));
       expect(loginWithPopUpPar).toHaveBeenCalledTimes(1);
       expect(loginWithPopUpStandardSpy).not.toHaveBeenCalled();
     });
@@ -131,7 +134,7 @@ describe('LoginService', () => {
         .mockReturnValue(of({} as LoginResponse));
 
       // act
-      await lastValueFrom(service.loginWithPopUp(config, [config]));
+      await firstValueFrom(service.loginWithPopUp(config, [config]));
       expect(loginWithPopUpPar).not.toHaveBeenCalled();
       expect(loginWithPopUpStandardSpy).toHaveBeenCalledTimes(1);
     });
@@ -150,7 +153,7 @@ describe('LoginService', () => {
       );
 
       // act
-      await lastValueFrom(
+      await firstValueFrom(
         service.loginWithPopUp(config, [config], authOptions)
       );
       expect(storagePersistenceServiceSpy).toHaveBeenCalledExactlyOnceWith(
@@ -174,7 +177,7 @@ describe('LoginService', () => {
       vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
 
       // act
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.loginWithPopUp(config, [config], authOptions)
       );
       expect(result).toEqual({

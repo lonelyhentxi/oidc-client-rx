@@ -1,4 +1,4 @@
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import type { OpenIdConfiguration } from '../openid-configuration';
 import { StsConfigHttpLoader, StsConfigStaticLoader } from './config-loader';
 
@@ -15,7 +15,7 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        const result = await lastValueFrom(result$);
+        const result = await firstValueFrom(result$);
         expect(Array.isArray(result)).toBeTruthy();
       });
 
@@ -26,7 +26,7 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        const result = await lastValueFrom(result$);
+        const result = await firstValueFrom(result$);
         expect(Array.isArray(result)).toBeTruthy();
       });
     });
@@ -43,7 +43,7 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        const result = await lastValueFrom(result$);
+        const result = await firstValueFrom(result$);
         expect(Array.isArray(result)).toBeTruthy();
         expect(result[0]!.configId).toBe('configId1');
         expect(result[1]!.configId).toBe('configId2');
@@ -58,7 +58,7 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        const result = await lastValueFrom(result$);
+        const result = await firstValueFrom(result$);
         expect(Array.isArray(result)).toBeTruthy();
         expect(result[0]!.configId).toBe('configId1');
         expect(result[1]!.configId).toBe('configId2');
@@ -71,7 +71,7 @@ describe('ConfigLoader', () => {
 
         const result$ = loader.loadConfigs();
 
-        const result = await lastValueFrom(result$);
+        const result = await firstValueFrom(result$);
         expect(Array.isArray(result)).toBeTruthy();
         expect(result[0]!.configId).toBe('configId1');
       });

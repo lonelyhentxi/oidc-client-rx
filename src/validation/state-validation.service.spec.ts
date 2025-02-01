@@ -1,5 +1,9 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import {
+  mockImplementationWhenArgs,
+  mockImplementationWhenArgsEqual,
+} from '@/testing/spy';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import type { AuthWellKnownEndpoints } from '../config/auth-well-known/auth-well-known-endpoints';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
@@ -28,6 +32,7 @@ describe('State Validation Service', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        StateValidationService,
         mockProvider(StoragePersistenceService),
         mockProvider(TokenValidationService),
         mockProvider(LoggerService),
@@ -687,8 +692,8 @@ describe('State Validation Service', () => {
         config
       );
 
-      const isValid = await lastValueFrom(isValidObs$);
-      expect(isValid.authResponseIsValid).toBe(false);
+      const isValid = await firstValueFrom(isValidObs$);
+      expect(isValid.authResponseIsValid).toBeFalsy();
     });
 
     it('should return invalid context error', async () => {
@@ -723,7 +728,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const isValid = await lastValueFrom(isValidObs$);
+      const isValid = await firstValueFrom(isValidObs$);
       expect(isValid.authResponseIsValid).toBe(false);
     });
 
@@ -787,13 +792,23 @@ describe('State Validation Service', () => {
       ).mockReturnValue(false);
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
@@ -818,7 +833,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback id token expired'
@@ -832,12 +847,18 @@ describe('State Validation Service', () => {
     it('should return invalid result if validateStateFromHashCallback is false', async () => {
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+
       vi.spyOn(
         tokenValidationService,
         'validateStateFromHashCallback'
@@ -870,7 +891,7 @@ describe('State Validation Service', () => {
         tokenValidationService.validateStateFromHashCallback
       ).toHaveBeenCalled();
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect state'
@@ -940,13 +961,23 @@ describe('State Validation Service', () => {
 
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -967,7 +998,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(state.accessToken).toBe('access_tokenTEST');
       expect(state.idToken).toBe('id_tokenTEST');
       expect(state.decodedIdToken).toBe('decoded_id_token');
@@ -990,12 +1021,16 @@ describe('State Validation Service', () => {
 
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
       const logDebugSpy = vi
         .spyOn(loggerService, 'logDebug')
         .mockImplementation(() => undefined);
@@ -1020,8 +1055,8 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
-      expect(logDebugSpy).toBeCalledWith([
+      const state = await firstValueFrom(stateObs$);
+      expect(logDebugSpy.mock.calls).toEqual([
         [config, 'authCallback Signature validation failed id_token'],
         [config, 'authCallback token(s) invalid'],
       ]);
@@ -1049,13 +1084,21 @@ describe('State Validation Service', () => {
       );
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
@@ -1080,7 +1123,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect nonce, did you call the checkAuth() method multiple times?'
@@ -1118,13 +1161,21 @@ describe('State Validation Service', () => {
       ).mockReturnValue(false);
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logDebugSpy = vi
         .spyOn(loggerService, 'logDebug')
         .mockImplementation(() => undefined);
@@ -1148,7 +1199,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logDebugSpy).toHaveBeenCalledWith(
         config,
         'authCallback Validation, one of the REQUIRED properties missing from id_token'
@@ -1193,13 +1244,21 @@ describe('State Validation Service', () => {
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1223,7 +1282,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback Validation, iat rejected id_token was issued too far away from the current time'
@@ -1271,13 +1330,21 @@ describe('State Validation Service', () => {
       );
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1301,7 +1368,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect iss does not match authWellKnownEndpoints issuer'
@@ -1339,11 +1406,21 @@ describe('State Validation Service', () => {
       config.maxIdTokenIatOffsetAllowedInSeconds = 0;
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy.withArgs('authWellKnownEndPoints', config).mockReturnValue(null);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => null
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1367,7 +1444,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authWellKnownEndpoints is undefined'
@@ -1414,13 +1491,21 @@ describe('State Validation Service', () => {
       config.clientId = '';
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1444,7 +1529,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect aud'
@@ -1494,13 +1579,21 @@ describe('State Validation Service', () => {
       config.clientId = '';
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1524,7 +1617,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback missing azp'
@@ -1579,13 +1672,21 @@ describe('State Validation Service', () => {
       config.clientId = '';
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1609,7 +1710,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect azp'
@@ -1668,13 +1769,21 @@ describe('State Validation Service', () => {
       config.clientId = '';
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
         .mockImplementation(() => undefined);
@@ -1698,7 +1807,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback pre, post id_token claims do not match in refresh'
@@ -1769,13 +1878,21 @@ describe('State Validation Service', () => {
       config.autoCleanStateAfterAuthentication = false;
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const logDebugSpy = vi
         .spyOn(loggerService, 'logDebug')
@@ -1801,7 +1918,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logDebugSpy).toHaveBeenCalledWith(
         config,
         'authCallback token(s) validated, continue'
@@ -1875,13 +1992,21 @@ describe('State Validation Service', () => {
 
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const logWarningSpy = vi
         .spyOn(loggerService, 'logWarning')
@@ -1906,7 +2031,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(logWarningSpy).toHaveBeenCalledExactlyOnceWith(
         config,
         'authCallback incorrect at_hash'
@@ -1974,13 +2099,21 @@ describe('State Validation Service', () => {
       config.responseType = 'id_token token';
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const logDebugSpy = vi.spyOn(loggerService, 'logDebug'); // .mockImplementation(() => undefined);
 
@@ -2003,8 +2136,9 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
-      expect(logDebugSpy).toBeCalledWith([
+      const state = await firstValueFrom(stateObs$);
+
+      expect(logDebugSpy.mock.calls).toEqual([
         [config, 'iss validation is turned off, this is not recommended!'],
         [config, 'authCallback token(s) validated, continue'],
       ]);
@@ -2060,13 +2194,21 @@ describe('State Validation Service', () => {
 
       const readSpy = vi.spyOn(storagePersistenceService, 'read');
 
-      readSpy
-        .withArgs('authWellKnownEndPoints', config)
-        .mockReturnValue(authWellKnownEndpoints);
-      readSpy
-        .withArgs('authStateControl', config)
-        .mockReturnValue('authStateControl');
-      readSpy.withArgs('authNonce', config).mockReturnValue('authNonce');
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authWellKnownEndPoints', config],
+        () => authWellKnownEndpoints
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authStateControl', config],
+        () => 'authStateControl'
+      );
+      mockImplementationWhenArgsEqual(
+        readSpy,
+        ['authNonce', config],
+        () => 'authNonce'
+      );
 
       const callbackContext = {
         code: 'fdffsdfsdf',
@@ -2088,7 +2230,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const state = await lastValueFrom(stateObs$);
+      const state = await firstValueFrom(stateObs$);
       expect(state.accessToken).toBe('access_tokenTEST');
       expect(state.idToken).toBe('');
       expect(state.decodedIdToken).toBeDefined();
@@ -2127,7 +2269,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const isValid = await lastValueFrom(isValidObs$);
+      const isValid = await firstValueFrom(isValidObs$);
       expect(isValid.state).toBe(ValidationResult.Ok);
       expect(isValid.authResponseIsValid).toBe(true);
     });
@@ -2164,7 +2306,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const isValid = await lastValueFrom(isValidObs$);
+      const isValid = await firstValueFrom(isValidObs$);
       expect(isValid.state).toBe(ValidationResult.Ok);
       expect(isValid.authResponseIsValid).toBe(true);
     });
@@ -2201,7 +2343,7 @@ describe('State Validation Service', () => {
         config
       );
 
-      const isValid = await lastValueFrom(isValidObs$);
+      const isValid = await firstValueFrom(isValidObs$);
       expect(isValid.state).toBe(ValidationResult.Ok);
       expect(isValid.authResponseIsValid).toBe(true);
     });

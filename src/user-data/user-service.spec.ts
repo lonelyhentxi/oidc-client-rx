@@ -1,5 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { Observable, lastValueFrom, of, throwError } from 'rxjs';
+import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../api/data.service';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
@@ -30,6 +30,7 @@ describe('User Service', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        UserService,
         mockProvider(StoragePersistenceService),
         mockProvider(LoggerService),
         mockProvider(DataService),
@@ -70,7 +71,7 @@ describe('User Service', () => {
         userDataInstore
       );
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -99,7 +100,7 @@ describe('User Service', () => {
       );
       vi.spyOn(userService, 'setUserDataToStore');
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -129,7 +130,7 @@ describe('User Service', () => {
         userDataInstore
       );
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -161,7 +162,7 @@ describe('User Service', () => {
         .spyOn(userService as any, 'getIdentityUserData')
         .mockReturnValue(of(userDataFromSts));
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -202,7 +203,7 @@ describe('User Service', () => {
         'accessToken'
       );
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -246,7 +247,7 @@ describe('User Service', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           userService.getAndPersistUserDataInStore(
             config,
             [config],
@@ -283,7 +284,7 @@ describe('User Service', () => {
         .spyOn(userService as any, 'getIdentityUserData')
         .mockReturnValue(of(userDataFromSts));
 
-      const token = await lastValueFrom(
+      const token = await firstValueFrom(
         userService.getAndPersistUserDataInStore(
           config,
           [config],
@@ -539,7 +540,7 @@ describe('User Service', () => {
         () => null
       );
       try {
-        await lastValueFrom(serviceAsAny.getIdentityUserData(config));
+        await firstValueFrom(serviceAsAny.getIdentityUserData(config));
       } catch (err: any) {
         expect(err).toBeTruthy();
       }
@@ -560,7 +561,7 @@ describe('User Service', () => {
       );
 
       try {
-        await lastValueFrom(serviceAsAny.getIdentityUserData(config));
+        await firstValueFrom(serviceAsAny.getIdentityUserData(config));
       } catch (err: any) {
         expect(err).toBeTruthy();
       }
@@ -580,7 +581,7 @@ describe('User Service', () => {
         () => ({ userInfoEndpoint: 'userInfoEndpoint' })
       );
 
-      await lastValueFrom(serviceAsAny.getIdentityUserData(config));
+      await firstValueFrom(serviceAsAny.getIdentityUserData(config));
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'userInfoEndpoint',
         config,
@@ -607,7 +608,7 @@ describe('User Service', () => {
       )
     );
 
-    const res = await lastValueFrom(
+    const res = await firstValueFrom(
       (userService as any).getIdentityUserData(config)
     );
 
@@ -634,7 +635,7 @@ describe('User Service', () => {
       )
     );
 
-    const res = await lastValueFrom(
+    const res = await firstValueFrom(
       (userService as any).getIdentityUserData(config)
     );
     expect(res).toBeTruthy();
@@ -662,7 +663,7 @@ describe('User Service', () => {
     );
 
     try {
-      await lastValueFrom((userService as any).getIdentityUserData(config));
+      await firstValueFrom((userService as any).getIdentityUserData(config));
     } catch (err: any) {
       expect(err).toBeTruthy();
     }

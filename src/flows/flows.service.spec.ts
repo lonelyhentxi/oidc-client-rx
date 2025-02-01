@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { mockProvider } from '../testing/mock';
 import type { CallbackContext } from './callback-context';
@@ -87,7 +87,7 @@ describe('Flows Service', () => {
         },
       ];
 
-      const value = await lastValueFrom(
+      const value = await firstValueFrom(
         service.processCodeFlowCallback(
           'some-url1234',
           allConfigs[0]!,
@@ -129,7 +129,7 @@ describe('Flows Service', () => {
         },
       ];
 
-      const value = await lastValueFrom(
+      const value = await firstValueFrom(
         service.processSilentRenewCodeFlowCallback(
           {} as CallbackContext,
           allConfigs[0]!,
@@ -167,7 +167,7 @@ describe('Flows Service', () => {
         },
       ];
 
-      const value = await lastValueFrom(
+      const value = await firstValueFrom(
         service.processImplicitFlowCallback(
           allConfigs[0]!,
           allConfigs,
@@ -211,7 +211,7 @@ describe('Flows Service', () => {
         },
       ];
 
-      const value = await lastValueFrom(
+      const value = await firstValueFrom(
         service.processRefreshToken(allConfigs[0]!, allConfigs)
       );
       expect(value).toEqual({} as CallbackContext);

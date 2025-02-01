@@ -1,5 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { EventTypes } from '../../public-events/event-types';
 import { PublicEventsService } from '../../public-events/public-events.service';
@@ -36,7 +36,7 @@ describe('AuthWellKnownService', () => {
   describe('getAuthWellKnownEndPoints', () => {
     it('getAuthWellKnownEndPoints throws an error if not config provided', async () => {
       try {
-        await lastValueFrom(service.queryAndStoreAuthWellKnownEndPoints(null));
+        await firstValueFrom(service.queryAndStoreAuthWellKnownEndPoints(null));
       } catch (error) {
         expect(error).toEqual(
           new Error(
@@ -57,7 +57,7 @@ describe('AuthWellKnownService', () => {
         () => ({ issuer: 'anything' })
       );
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
       );
       expect(storagePersistenceService.read).not.toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe('AuthWellKnownService', () => {
       );
       const storeSpy = vi.spyOn(service, 'storeWellKnownEndpoints');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
       );
       expect(dataServiceSpy).toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('AuthWellKnownService', () => {
       const publicEventsServiceSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.queryAndStoreAuthWellKnownEndPoints({ configId: 'configId1' })
         );
       } catch (err: any) {

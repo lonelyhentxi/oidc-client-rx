@@ -1,5 +1,5 @@
 import { Injectable, inject } from 'injection-js';
-import { type Observable, of } from 'rxjs';
+import { type Observable, of, throwError } from 'rxjs';
 import type { AuthOptions } from '../auth-options';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
@@ -27,10 +27,13 @@ export class LoginService {
   login(
     configuration: OpenIdConfiguration | null,
     authOptions?: AuthOptions
-  ): void {
+  ): Observable<void> {
     if (!configuration) {
-      throw new Error(
-        'Please provide a configuration before setting up the module'
+      return throwError(
+        () =>
+          new Error(
+            'Please provide a configuration before setting up the module'
+          )
       );
     }
 
@@ -45,10 +48,9 @@ export class LoginService {
     }
 
     if (usePushedAuthorisationRequests) {
-      this.parLoginService.loginPar(configuration, authOptions);
-    } else {
-      this.standardLoginService.loginStandard(configuration, authOptions);
+      return this.parLoginService.loginPar(configuration, authOptions);
     }
+    return this.standardLoginService.loginStandard(configuration, authOptions);
   }
 
   loginWithPopUp(

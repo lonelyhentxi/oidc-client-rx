@@ -1,6 +1,10 @@
 import type { Provider } from 'injection-js';
 
-export function mockClass<T>(obj: new (...args: any[]) => T): any {
+export function mockClass<T>(
+  obj: new (...args: any[]) => T
+): new (
+  ...args: any[]
+) => T {
   const keys = Object.getOwnPropertyNames(obj.prototype);
   const allMethods = keys.filter((key) => {
     try {
@@ -14,9 +18,16 @@ export function mockClass<T>(obj: new (...args: any[]) => T): any {
   const mockedClass = class T {};
 
   for (const method of allMethods) {
-    (mockedClass.prototype as any)[method] = (): void => {
-      return;
-    };
+    const mockImplementation = Reflect.getMetadata(
+      'mock:implementation',
+      obj.prototype,
+      method
+    );
+    (mockedClass.prototype as any)[method] =
+      mockImplementation ??
+      ((): any => {
+        return;
+      });
   }
 
   for (const method of allProperties) {
@@ -28,12 +39,15 @@ export function mockClass<T>(obj: new (...args: any[]) => T): any {
     });
   }
 
-  return mockedClass;
+  return mockedClass as any;
 }
 
-export function mockProvider<T>(obj: new (...args: any[]) => T): Provider {
+export function mockProvider<T>(
+  obj: new (...args: any[]) => T,
+  token?: any
+): Provider {
   return {
-    provide: obj,
+    provide: token ?? obj,
     useClass: mockClass(obj),
   };
 }

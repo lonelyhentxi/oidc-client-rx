@@ -1,6 +1,6 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { ReplaySubject, firstValueFrom, timer } from 'rxjs';
+import { filter, share } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { EventTypes } from './event-types';
 import { PublicEventsService } from './public-events.service';
@@ -20,47 +20,63 @@ describe('Events Service', () => {
   });
 
   it('registering to single event with one event emit works', async () => {
-    const firedEvent = await lastValueFrom(eventsService.registerForEvents());
+    eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
+
+    const firedEvent = await firstValueFrom(eventsService.registerForEvents());
     expect(firedEvent).toBeTruthy();
     expect(firedEvent).toEqual({
       type: EventTypes.ConfigLoaded,
       value: { myKey: 'myValue' },
     });
-    eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
   });
 
   it('registering to single event with multiple same event emit works', async () => {
-    const spy = vi.fn()('spy');
+    const spy = vi.fn();
 
-    const firedEvent = await lastValueFrom(eventsService.registerForEvents());
-    spy(firedEvent);
-    expect(firedEvent).toBeTruthy();
+    eventsService.registerForEvents().subscribe((firedEvent) => {
+      spy(firedEvent);
+      expect(firedEvent).toBeTruthy();
+    });
+
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue2' });
 
-    expect(spy.calls.count()).toBe(2);
-    expect(spy.calls.first().args[0]).toEqual({
+    expect(spy.mock.calls.length).toBe(2);
+    expect(spy.mock.calls[0]?.[0]).toEqual({
       type: EventTypes.ConfigLoaded,
       value: { myKey: 'myValue' },
     });
-    expect(spy.postSpy.mock.calls.at(-1)?.[0]).toEqual({
+    expect(spy.mock.calls.at(-1)?.[0]).toEqual({
       type: EventTypes.ConfigLoaded,
       value: { myKey: 'myValue2' },
     });
+
+    await firstValueFrom(timer(0));
   });
 
   it('registering to single event with multiple emit works', async () => {
-    const firedEvent = await lastValueFrom(
-      eventsService
-        .registerForEvents()
-        .pipe(filter((x) => x.type === EventTypes.ConfigLoaded))
+    const o$ = eventsService.registerForEvents().pipe(
+      filter((x) => x.type === EventTypes.ConfigLoaded),
+      share({
+        connector: () => new ReplaySubject(1),
+        resetOnError: false,
+        resetOnComplete: false,
+        resetOnRefCountZero: true,
+      })
     );
-    expect(firedEvent).toBeTruthy();
-    expect(firedEvent).toEqual({
-      type: EventTypes.ConfigLoaded,
-      value: { myKey: 'myValue' },
+
+    o$.subscribe((firedEvent) => {
+      expect(firedEvent).toBeTruthy();
+      expect(firedEvent).toEqual({
+        type: EventTypes.ConfigLoaded,
+        value: { myKey: 'myValue' },
+      });
+      return firedEvent;
     });
+
     eventsService.fireEvent(EventTypes.ConfigLoaded, { myKey: 'myValue' });
     eventsService.fireEvent(EventTypes.NewAuthenticationResult, true);
+
+    await firstValueFrom(o$);
   });
 });

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { Observable, lastValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { mockProvider } from '../testing/mock';
@@ -59,7 +59,7 @@ describe('CallbackService ', () => {
         .spyOn(codeFlowCallbackService, 'authenticatedCallbackWithCode')
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         callbackService.handleCallbackAndFireEvents(
           'anyUrl',
           { configId: 'configId1' },
@@ -83,17 +83,16 @@ describe('CallbackService ', () => {
         .spyOn(implicitFlowCallbackService, 'authenticatedImplicitFlowCallback')
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         callbackService.handleCallbackAndFireEvents(
           'anyUrl',
           { configId: 'configId1' },
           [{ configId: 'configId1' }]
         )
       );
-      expect(authorizedCallbackWithCodeSpy).toHaveBeenCalledWith(
-        { configId: 'configId1' },
-        [{ configId: 'configId1' }]
-      );
+      expect(authorizedCallbackWithCodeSpy.mock.calls).toEqual([
+        [{ configId: 'configId1' }, [{ configId: 'configId1' }]],
+      ]);
     });
 
     it('calls authorizedImplicitFlowCallback with hash if current flow is implicit flow and callbackurl does include a hash', async () => {
@@ -105,7 +104,7 @@ describe('CallbackService ', () => {
         .spyOn(implicitFlowCallbackService, 'authenticatedImplicitFlowCallback')
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         callbackService.handleCallbackAndFireEvents(
           'anyUrlWithAHash#some-string',
           { configId: 'configId1' },
@@ -113,11 +112,9 @@ describe('CallbackService ', () => {
         )
       );
 
-      expect(authorizedCallbackWithCodeSpy).toHaveBeenCalledWith(
-        { configId: 'configId1' },
-        [{ configId: 'configId1' }],
-        'some-string'
-      );
+      expect(authorizedCallbackWithCodeSpy.mock.calls).toEqual([
+        [{ configId: 'configId1' }, [{ configId: 'configId1' }], 'some-string'],
+      ]);
     });
 
     it('emits callbackinternal no matter which flow it is', async () => {
@@ -131,7 +128,7 @@ describe('CallbackService ', () => {
         .spyOn(codeFlowCallbackService, 'authenticatedCallbackWithCode')
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         callbackService.handleCallbackAndFireEvents(
           'anyUrl',
           { configId: 'configId1' },

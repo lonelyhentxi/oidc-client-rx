@@ -1,12 +1,14 @@
-import { inject, Injectable } from 'injection-js';
-import { from, type Observable } from 'rxjs';
+import { Injectable, inject } from 'injection-js';
+import { BehaviorSubject, type Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CryptoService } from '../utils/crypto/crypto.service';
+import { MockUtil } from '../utils/reflect';
 
 @Injectable()
 export class JwtWindowCryptoService {
   private readonly cryptoService = inject(CryptoService);
 
+  @MockUtil({ implementation: () => new BehaviorSubject(undefined) })
   generateCodeChallenge(codeVerifier: string): Observable<string> {
     return this.calcHash(codeVerifier).pipe(
       map((challengeRaw: string) => this.base64UrlEncode(challengeRaw))

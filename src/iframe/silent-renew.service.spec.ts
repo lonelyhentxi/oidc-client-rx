@@ -1,5 +1,12 @@
 ﻿import { TestBed } from '@/testing';
-import { Observable, lastValueFrom, of, throwError } from 'rxjs';
+import {
+  Observable,
+  ReplaySubject,
+  firstValueFrom,
+  of,
+  share,
+  throwError,
+} from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ImplicitFlowCallbackService } from '../callback/implicit-flow-callback.service';
@@ -28,6 +35,7 @@ describe('SilentRenewService  ', () => {
   let intervalService: IntervalService;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     TestBed.configureTestingModule({
       providers: [
         SilentRenewService,
@@ -52,6 +60,11 @@ describe('SilentRenewService  ', () => {
     authStateService = TestBed.inject(AuthStateService);
     resetAuthDataService = TestBed.inject(ResetAuthDataService);
     intervalService = TestBed.inject(IntervalService);
+  });
+
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -149,7 +162,7 @@ describe('SilentRenewService  ', () => {
       const urlParts =
         'code=some-code&state=some-state&session_state=some-session-state';
 
-      await lastValueFrom(
+      await firstValueFrom(
         silentRenewService.codeFlowCallbackSilentRenewIframe(
           [url, urlParts],
           config,
@@ -188,7 +201,7 @@ describe('SilentRenewService  ', () => {
       const urlParts = 'error=some_error';
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           silentRenewService.codeFlowCallbackSilentRenewIframe(
             [url, urlParts],
             config,
@@ -312,19 +325,31 @@ describe('SilentRenewService  ', () => {
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      const result = await lastValueFrom(
-        silentRenewService.refreshSessionWithIFrameCompleted$
+      const test$ = silentRenewService.refreshSessionWithIFrameCompleted$.pipe(
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnError: false,
+          resetOnComplete: false,
+          resetOnRefCountZero: true,
+        })
       );
+
+      test$.subscribe();
+
+      await firstValueFrom(
+        silentRenewService.silentRenewEventHandler(
+          eventData,
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      await vi.advanceTimersByTimeAsync(1000);
+
+      const result = await firstValueFrom(test$);
+
       expect(result).toEqual({
         refreshToken: 'callbackContext',
       } as CallbackContext);
-
-      silentRenewService.silentRenewEventHandler(
-        eventData,
-        allConfigs[0]!,
-        allConfigs
-      );
-      await vi.advanceTimersByTimeAsync(1000);
     });
 
     it('loggs and calls flowsDataService.resetSilentRenewRunning in case of an error', async () => {
@@ -341,10 +366,12 @@ describe('SilentRenewService  ', () => {
       const allConfigs = [{ configId: 'configId1' }];
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
 
-      silentRenewService.silentRenewEventHandler(
-        eventData,
-        allConfigs[0]!,
-        allConfigs
+      await firstValueFrom(
+        silentRenewService.silentRenewEventHandler(
+          eventData,
+          allConfigs[0]!,
+          allConfigs
+        )
       );
       await vi.advanceTimersByTimeAsync(1000);
       expect(resetSilentRenewRunningSpy).toHaveBeenCalledTimes(1);
@@ -360,17 +387,28 @@ describe('SilentRenewService  ', () => {
       const eventData = { detail: 'detail?detail2' } as CustomEvent;
       const allConfigs = [{ configId: 'configId1' }];
 
-      const result = await lastValueFrom(
-        silentRenewService.refreshSessionWithIFrameCompleted$
+      const test$ = silentRenewService.refreshSessionWithIFrameCompleted$.pipe(
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnError: false,
+          resetOnComplete: false,
+          resetOnRefCountZero: true,
+        })
       );
-      expect(result).toBeNull();
 
-      silentRenewService.silentRenewEventHandler(
-        eventData,
-        allConfigs[0]!,
-        allConfigs
+      test$.subscribe();
+
+      await firstValueFrom(
+        silentRenewService.silentRenewEventHandler(
+          eventData,
+          allConfigs[0]!,
+          allConfigs
+        )
       );
       await vi.advanceTimersByTimeAsync(1000);
+
+      const result = await firstValueFrom(test$);
+      expect(result).toBeNull();
     });
   });
 });

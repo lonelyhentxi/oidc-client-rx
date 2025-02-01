@@ -21,7 +21,7 @@ function sourceTextFromNode(
   return magicString.getSourceText(start, end);
 }
 
-export async function rewriteObservableSubscribeToLastValueFrom(
+export async function rewriteObservableSubscribeTofirstValueFrom(
   filename: string,
   content?: string
 ) {
@@ -83,7 +83,7 @@ export async function rewriteObservableSubscribeToLastValueFrom(
               error = args[1];
               complete = args[2];
             }
-            let newContent = `await lastValueFrom(${sourceTextFromNode(context, child.expression.callee.object)});`;
+            let newContent = `await firstValueFrom(${sourceTextFromNode(context, child.expression.callee.object)});`;
 
             if (next) {
               const nextParam =
@@ -161,12 +161,12 @@ export async function rewriteObservableSubscribeToLastValueFrom(
   return result;
 }
 
-export async function rewriteAllObservableSubscribeToLastValueFrom(
+export async function rewriteAllObservableSubscribeTofirstValueFrom(
   pattern: string | string[]
 ) {
   const files = fsp.glob(pattern);
   for await (const file of files) {
-    const result = await rewriteObservableSubscribeToLastValueFrom(file);
+    const result = await rewriteObservableSubscribeTofirstValueFrom(file);
 
     await fsp.writeFile(file, result, 'utf-8');
   }

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -70,7 +70,7 @@ describe('UserCallbackHandlerService', () => {
 
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith('mystate', allConfigs[0]);
@@ -103,7 +103,7 @@ describe('UserCallbackHandlerService', () => {
       ];
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(spy).not.toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe('UserCallbackHandlerService', () => {
       ];
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(spy).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('UserCallbackHandlerService', () => {
 
       const spy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(spy).not.toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('UserCallbackHandlerService', () => {
         'updateAndPublishAuthState'
       );
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
@@ -244,7 +244,7 @@ describe('UserCallbackHandlerService', () => {
         .spyOn(userService, 'getAndPersistUserDataInStore')
         .mockReturnValue(of({ user: 'some_data' }));
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(getAndPersistUserDataInStoreSpy).toHaveBeenCalledExactlyOnceWith(
@@ -292,7 +292,7 @@ describe('UserCallbackHandlerService', () => {
         'updateAndPublishAuthState'
       );
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(updateAndPublishAuthStateSpy).toHaveBeenCalledExactlyOnceWith({
@@ -335,7 +335,7 @@ describe('UserCallbackHandlerService', () => {
       );
       const setSessionStateSpy = vi.spyOn(flowsDataService, 'setSessionState');
 
-      const resultCallbackContext = await lastValueFrom(
+      const resultCallbackContext = await firstValueFrom(
         service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
       );
       expect(setSessionStateSpy).toHaveBeenCalledExactlyOnceWith(
@@ -381,7 +381,7 @@ describe('UserCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
         );
       } catch (err: any) {
@@ -432,7 +432,7 @@ describe('UserCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackUser(callbackContext, allConfigs[0]!, allConfigs)
         );
       } catch (err: any) {

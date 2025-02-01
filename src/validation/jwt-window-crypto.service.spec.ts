@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { CryptoService } from '../utils/crypto/crypto.service';
 import { JwtWindowCryptoService } from './jwt-window-crypto.service';
 
@@ -25,7 +25,7 @@ describe('JwtWindowCryptoService', () => {
         '44445543344242132145455aaabbdc3b4'
       );
 
-      const value = await lastValueFrom(observable);
+      const value = await firstValueFrom(observable);
       expect(value).toBe(outcome);
     });
   });

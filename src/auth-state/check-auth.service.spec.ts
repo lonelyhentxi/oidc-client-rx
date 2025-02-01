@@ -4,7 +4,7 @@ import {
   mockRouterProvider,
   spyOnProperty,
 } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AutoLoginService } from '../auto-login/auto-login.service';
 import { CallbackService } from '../callback/callback.service';
@@ -49,6 +49,8 @@ describe('CheckAuthService', () => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
+        CheckAuthService,
+        StoragePersistenceService,
         mockRouterProvider(),
         mockProvider(CheckSessionService),
         mockProvider(SilentRenewService),
@@ -109,7 +111,7 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(
@@ -136,7 +138,7 @@ describe('CheckAuthService', () => {
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
         );
       } catch (err: any) {
@@ -155,7 +157,7 @@ describe('CheckAuthService', () => {
       ];
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalledExactlyOnceWith(
@@ -184,7 +186,7 @@ describe('CheckAuthService', () => {
       vi.spyOn(popUpService, 'isCurrentlyInPopup').mockReturnValue(true);
       const popupSpy = vi.spyOn(popUpService, 'sendMessageToMainWindow');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -216,7 +218,7 @@ describe('CheckAuthService', () => {
         'http://localhost:4200'
       );
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -249,7 +251,7 @@ describe('CheckAuthService', () => {
         .spyOn(callBackService, 'handleCallbackAndFireEvents')
         .mockReturnValue(of({} as CallbackContext));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -282,7 +284,7 @@ describe('CheckAuthService', () => {
       vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('at');
       vi.spyOn(authStateService, 'getIdToken').mockReturnValue('idt');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -322,7 +324,7 @@ describe('CheckAuthService', () => {
       );
       const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -362,7 +364,7 @@ describe('CheckAuthService', () => {
       );
       const userServiceSpy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -393,7 +395,7 @@ describe('CheckAuthService', () => {
         true
       );
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -420,7 +422,7 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(authStateService, 'setAuthenticatedAndFireEvent');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -443,7 +445,7 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(userService, 'publishUserDataIfExists');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -470,7 +472,7 @@ describe('CheckAuthService', () => {
         'startTokenValidationPeriodically'
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -495,7 +497,7 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkSessionService, 'start');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -520,7 +522,7 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -545,7 +547,7 @@ describe('CheckAuthService', () => {
         'checkSavedRedirectRouteAndNavigate'
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalledTimes(1);
@@ -568,7 +570,7 @@ describe('CheckAuthService', () => {
         'checkSavedRedirectRouteAndNavigate'
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalledTimes(0);
@@ -588,10 +590,10 @@ describe('CheckAuthService', () => {
 
       const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
-      expect(fireEventSpy).toHaveBeenCalledWith([
+      expect(fireEventSpy.mock.calls).toEqual([
         [EventTypes.CheckingAuth],
         [EventTypes.CheckingAuthFinished],
       ]);
@@ -611,10 +613,10 @@ describe('CheckAuthService', () => {
         'http://localhost:4200'
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
-      expect(fireEventSpy).toHaveBeenCalledWith([
+      expect(fireEventSpy.mock.calls).toEqual([
         [EventTypes.CheckingAuth],
         [EventTypes.CheckingAuthFinishedWithError, 'ERROR'],
       ]);
@@ -634,10 +636,10 @@ describe('CheckAuthService', () => {
 
       const fireEventSpy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuth(allConfigs[0]!, allConfigs)
       );
-      expect(fireEventSpy).toBeCalledWith([
+      expect(fireEventSpy.mock.calls).toEqual([
         [EventTypes.CheckingAuth],
         [EventTypes.CheckingAuthFinished],
       ]);
@@ -665,7 +667,7 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(silentRenewService, 'getOrCreateIframe');
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuthIncludingServer(allConfigs[0]!, allConfigs)
       );
       expect(spy).toHaveBeenCalled();
@@ -694,7 +696,7 @@ describe('CheckAuthService', () => {
         })
       );
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuthIncludingServer(allConfigs[0]!, allConfigs)
       );
       expect(result).toBeTruthy();
@@ -742,7 +744,7 @@ describe('CheckAuthService', () => {
         })
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuthIncludingServer(allConfigs[0]!, allConfigs)
       );
       expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
@@ -796,7 +798,7 @@ describe('CheckAuthService', () => {
         })
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         checkAuthService.checkAuthIncludingServer(allConfigs[0]!, allConfigs)
       );
       expect(checkSessionServiceStartSpy).toHaveBeenCalledExactlyOnceWith(
@@ -825,7 +827,7 @@ describe('CheckAuthService', () => {
       );
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuthMultiple(allConfigs)
       );
       expect(Array.isArray(result)).toBe(true);
@@ -855,11 +857,11 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuthMultiple(allConfigs)
       );
       expect(Array.isArray(result)).toBe(true);
-      expect(spy).toBeCalledWith([
+      expect(spy.mock.calls).toEqual([
         [
           { configId: 'configId1', authority: 'some-authority1' },
           allConfigs,
@@ -886,7 +888,7 @@ describe('CheckAuthService', () => {
 
       const spy = vi.spyOn(checkAuthService as any, 'checkAuthWithConfig');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkAuthService.checkAuthMultiple(allConfigs)
       );
       expect(Array.isArray(result)).toBe(true);
@@ -912,7 +914,7 @@ describe('CheckAuthService', () => {
       const allConfigs: OpenIdConfiguration[] = [];
 
       try {
-        await lastValueFrom(checkAuthService.checkAuthMultiple(allConfigs));
+        await firstValueFrom(checkAuthService.checkAuthMultiple(allConfigs));
       } catch (error: any) {
         expect(error.message).toEqual(
           'could not find matching config for state the-state-param'

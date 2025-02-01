@@ -1,4 +1,4 @@
-import { TestBed } from '@/testing';
+import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { vi } from 'vitest';
 import { mockProvider } from '../testing/mock';
 import { BrowserStorageService } from './browser-storage.service';
@@ -10,7 +10,10 @@ describe('Storage Persistence Service', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [mockProvider(BrowserStorageService)],
+      providers: [
+        StoragePersistenceService,
+        mockProvider(BrowserStorageService),
+      ],
     });
     service = TestBed.inject(StoragePersistenceService);
     securityStorage = TestBed.inject(BrowserStorageService);
@@ -239,10 +242,16 @@ describe('Storage Persistence Service', () => {
       };
       const spy = vi.spyOn(securityStorage, 'read');
 
-      spy
-        .withArgs('reusable_refresh_token', config)
-        .mockReturnValue(returnValue);
-      spy.withArgs('authnResult', config).mockReturnValue(undefined);
+      mockImplementationWhenArgsEqual(
+        spy,
+        ['reusable_refresh_token', config],
+        () => returnValue
+      );
+      mockImplementationWhenArgsEqual(
+        spy,
+        ['authnResult', config],
+        () => undefined
+      );
       const result = service.getRefreshToken(config);
 
       expect(result).toBe(returnValue.reusable_refresh_token);

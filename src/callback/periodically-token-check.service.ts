@@ -1,6 +1,6 @@
 import { Injectable, inject } from 'injection-js';
-import { type Observable, forkJoin, of, throwError } from 'rxjs';
-import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
+import { type Observable, ReplaySubject, forkJoin, of, throwError } from 'rxjs';
+import { catchError, map, share, switchMap } from 'rxjs/operators';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
@@ -52,16 +52,16 @@ export class PeriodicallyTokenCheckService {
   startTokenValidationPeriodically(
     allConfigs: OpenIdConfiguration[],
     currentConfig: OpenIdConfiguration
-  ): Observable<void> {
+  ): Observable<undefined> {
     const configsWithSilentRenewEnabled =
       this.getConfigsWithSilentRenewEnabled(allConfigs);
 
     if (configsWithSilentRenewEnabled.length <= 0) {
-      return;
+      return of(undefined);
     }
 
     if (this.intervalService.isTokenValidationRunning()) {
-      return;
+      return of(undefined);
     }
 
     const refreshTimeInSeconds = this.getSmallestRefreshTimeFromConfigs(
@@ -87,7 +87,14 @@ export class PeriodicallyTokenCheckService {
       );
 
     const o$ = periodicallyCheck$.pipe(
-      catchError((error) => throwError(() => new Error(error))),
+      catchError((error) => {
+        this.loggerService.logError(
+          currentConfig,
+          'silent renew failed!',
+          error
+        );
+        return throwError(() => error);
+      }),
       map((objectWithConfigIds) => {
         for (const [configId, _] of Object.entries(objectWithConfigIds)) {
           this.configurationService
@@ -104,20 +111,18 @@ export class PeriodicallyTokenCheckService {
                 this.flowsDataService.resetSilentRenewRunning(config);
               }
             });
+          return undefined;
         }
       }),
-      catchError((error) => {
-        this.loggerService.logError(
-          currentConfig,
-          'silent renew failed!',
-          error
-        );
-        return throwError(() => error);
-      }),
-      shareReplay(1)
+      share({
+        connector: () => new ReplaySubject(1),
+        resetOnError: false,
+        resetOnComplete: false,
+        resetOnRefCountZero: false,
+      })
     );
 
-    this.intervalService.runTokenValidationRunning = o$.subscribe();
+    this.intervalService.runTokenValidationRunning = o$.subscribe({});
 
     return o$;
   }

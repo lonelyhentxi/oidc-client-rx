@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -54,7 +54,7 @@ describe('RefreshSessionCallbackHandlerService', () => {
         existingIdToken: 'henlo-legger',
       } as CallbackContext;
 
-      const callbackContext = await lastValueFrom(
+      const callbackContext = await firstValueFrom(
         service.refreshSessionWithRefreshTokens({ configId: 'configId1' })
       );
       expect(callbackContext).toEqual(expectedCallbackContext);
@@ -69,7 +69,7 @@ describe('RefreshSessionCallbackHandlerService', () => {
       vi.spyOn(authStateService, 'getIdToken').mockReturnValue('henlo-legger');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.refreshSessionWithRefreshTokens({ configId: 'configId1' })
         );
       } catch (err: any) {

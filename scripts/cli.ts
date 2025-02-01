@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { rewriteAllObservableSubscribeToLastValueFrom } from './code-transform';
+import { rewriteAllObservableSubscribeTofirstValueFrom } from './code-transform';
 
 const program = new Command();
 
@@ -13,7 +13,7 @@ program
   .command('rewrite <pattern>')
   .description('Rewrite files matching the given glob pattern')
   .action(async (pattern: string) => {
-    await rewriteAllObservableSubscribeToLastValueFrom(pattern);
+    await rewriteAllObservableSubscribeTofirstValueFrom(pattern);
   });
 
 program.parse(process.argv);

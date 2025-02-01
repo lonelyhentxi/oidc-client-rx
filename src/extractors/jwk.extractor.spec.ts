@@ -102,21 +102,30 @@ describe('JwkExtractor', () => {
 
   describe('extractJwk', () => {
     it('throws error if no keys are present in array', () => {
-      expect(() => {
+      try {
         service.extractJwk([]);
-      }).toThrow(JwkExtractorInvalidArgumentError);
+        expect.fail('should error');
+      } catch (error: any) {
+        expect(error).toBe(JwkExtractorInvalidArgumentError);
+      }
     });
 
     it('throws error if spec.kid is present, but no key was matching', () => {
-      expect(() => {
+      try {
         service.extractJwk(keys, { kid: 'doot' });
-      }).toThrow(JwkExtractorNoMatchingKeysError);
+        expect.fail('should error');
+      } catch (error: any) {
+        expect(error).toBe(JwkExtractorNoMatchingKeysError);
+      }
     });
 
     it('throws error if spec.use is present, but no key was matching', () => {
-      expect(() => {
+      try {
         service.extractJwk(keys, { use: 'blorp' });
-      }).toThrow(JwkExtractorNoMatchingKeysError);
+        expect.fail('should error');
+      } catch (error: any) {
+        expect(error).toBe(JwkExtractorNoMatchingKeysError);
+      }
     });
 
     it('does not throw error if no key is matching when throwOnEmpty is false', () => {
@@ -126,9 +135,12 @@ describe('JwkExtractor', () => {
     });
 
     it('throws error if multiple keys are present, and spec is not present', () => {
-      expect(() => {
+      try {
         service.extractJwk(keys);
-      }).toThrow(JwkExtractorSeveralMatchingKeysError);
+        expect.fail('should error');
+      } catch (error: any) {
+        expect(error).toBe(JwkExtractorSeveralMatchingKeysError);
+      }
     });
 
     it('returns array of keys matching spec.kid', () => {

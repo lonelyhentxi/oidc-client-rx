@@ -135,7 +135,7 @@ export class AppComponent implements OnInit {
   }
 
   login() {
-    this.oidcSecurityService.authorize();
+    this.oidcSecurityService.authorize().subscribe();
   }
 
   logout() {

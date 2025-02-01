@@ -1,5 +1,5 @@
 import { Injectable, inject } from 'injection-js';
-import { type Observable, map, shareReplay, switchMap } from 'rxjs';
+import { type Observable, map, of, switchMap } from 'rxjs';
 import type { AuthOptions } from '../../auth-options';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
@@ -28,7 +28,7 @@ export class StandardLoginService {
   loginStandard(
     configuration: OpenIdConfiguration,
     authOptions?: AuthOptions
-  ): Observable<void> {
+  ): Observable<undefined> {
     if (
       !this.responseTypeValidationService.hasConfigValidResponseType(
         configuration
@@ -36,7 +36,7 @@ export class StandardLoginService {
     ) {
       this.loggerService.logError(configuration, 'Invalid response type!');
 
-      return;
+      return of(undefined);
     }
 
     this.loggerService.logDebug(
@@ -45,7 +45,7 @@ export class StandardLoginService {
     );
     this.flowsDataService.setCodeFlowInProgress(configuration);
 
-    const result$ = this.authWellKnownService
+    return this.authWellKnownService
       .queryAndStoreAuthWellKnownEndPoints(configuration)
       .pipe(
         switchMap(() => {
@@ -70,12 +70,8 @@ export class StandardLoginService {
           } else {
             this.redirectService.redirectTo(url);
           }
-        }),
-        shareReplay(1)
+          return undefined;
+        })
       );
-
-    result$.subscribe();
-
-    return result$;
   }
 }

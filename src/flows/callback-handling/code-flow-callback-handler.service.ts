@@ -1,5 +1,5 @@
 import { HttpHeaders } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import { type Observable, of, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
@@ -116,7 +116,7 @@ export class CodeFlowCallbackHandlerService {
         switchMap((response) => {
           if (response) {
             const authResult: AuthResult = {
-              ...response,
+              ...(response as any),
               state: callbackContext.state,
               session_state: callbackContext.sessionState,
             };

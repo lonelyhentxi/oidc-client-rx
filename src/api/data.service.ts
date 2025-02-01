@@ -1,7 +1,8 @@
-import { HttpHeaders, HttpParams } from '@ngify/http';
+import { HttpHeaders } from '@ngify/http';
 import { Injectable, inject } from 'injection-js';
 import type { Observable } from 'rxjs';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
+import { HttpParams } from '../http';
 import { HttpBaseService } from './http-base.service';
 
 const NGSW_CUSTOM_PARAM = 'ngsw-bypass';

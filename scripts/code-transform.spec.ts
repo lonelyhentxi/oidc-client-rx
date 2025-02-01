@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Biome, Distribution } from '@biomejs/js-api';
-import { rewriteObservableSubscribeToLastValueFrom } from './code-transform';
+import { rewriteObservableSubscribeTofirstValueFrom } from './code-transform';
 
-describe('rewriteSpecObservableSubscribeToLastValueFrom', () => {
+describe('rewriteSpecObservableSubscribeTofirstValueFrom', () => {
   it('should transform simple example valid string', async () => {
-    const actual = await rewriteObservableSubscribeToLastValueFrom(
+    const actual = await rewriteObservableSubscribeTofirstValueFrom(
       'index.ts',
       `refreshSessionIframeService
               .refreshSessionWithIframe(allConfigs[0]!, allConfigs)
@@ -20,7 +20,7 @@ describe('rewriteSpecObservableSubscribeToLastValueFrom', () => {
               });`
     );
 
-    const expect = `const result = await lastValueFrom(refreshSessionIframeService.refreshSessionWithIframe(allConfigs[0]!, allConfigs));
+    const expect = `const result = await firstValueFrom(refreshSessionIframeService.refreshSessionWithIframe(allConfigs[0]!, allConfigs));
       expect(result).toHaveBeenCalledExactlyOnceWith('a-url',allConfigs[0]!,allConfigs);`;
 
     const biome = await Biome.create({
@@ -34,7 +34,7 @@ describe('rewriteSpecObservableSubscribeToLastValueFrom', () => {
   });
 
   it('should rewrite complex exmaple to valid string', async () => {
-    const actual = await rewriteObservableSubscribeToLastValueFrom(
+    const actual = await rewriteObservableSubscribeTofirstValueFrom(
       'index.ts',
       `codeFlowCallbackService
           .authenticatedCallbackWithCode('some-url4', config, [config])
@@ -56,7 +56,7 @@ describe('rewriteSpecObservableSubscribeToLastValueFrom', () => {
 
     const expect = `
   try {
-    const abc = await lastValueFrom(codeFlowCallbackService.authenticatedCallbackWithCode('some-url4', config, [config]));
+    const abc = await firstValueFrom(codeFlowCallbackService.authenticatedCallbackWithCode('some-url4', config, [config]));
     expect(abc).toBeTruthy();
   } catch (err: any) {
     if (err instanceof EmptyError) {

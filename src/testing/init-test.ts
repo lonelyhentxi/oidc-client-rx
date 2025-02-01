@@ -1,14 +1,11 @@
-import { getTestBed } from '@/testing/testbed';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { TestBed } from '@/testing/testbed';
+import { DOCUMENT } from 'oidc-client-rx/dom';
+import 'reflect-metadata';
 
 // First, initialize the Angular testing environment.
-getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(),
+TestBed.initTestEnvironment([
   {
-    teardown: { destroyAfterEach: false },
-  }
-);
+    provide: DOCUMENT,
+    useValue: document,
+  },
+]);

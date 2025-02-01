@@ -1,5 +1,5 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { lastValueFrom } from 'rxjs';
+import { ReplaySubject, firstValueFrom, map, share } from 'rxjs';
 import { type MockInstance, vi } from 'vitest';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
@@ -18,6 +18,7 @@ describe('PopUpService', () => {
       providers: [
         mockProvider(StoragePersistenceService),
         mockProvider(LoggerService),
+        PopUpService,
       ],
     });
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
@@ -53,7 +54,11 @@ describe('PopUpService', () => {
       vi.spyOn(popUpService as any, 'canAccessSessionStorage').mockReturnValue(
         false
       );
-      spyOnProperty(popUpService as any, 'windowInternal').mockReturnValue({
+      spyOnProperty(
+        popUpService as any,
+        'windowInternal',
+        'get'
+      ).mockReturnValue({
         opener: {} as Window,
       });
       vi.spyOn(storagePersistenceService, 'read').mockReturnValue({
@@ -113,10 +118,23 @@ describe('PopUpService', () => {
         receivedUrl: 'some-url1111',
       };
 
-      const result = await lastValueFrom(popUpService.result$);
-      expect(result).toBe(popupResult);
+      const test$ = popUpService.result$.pipe(
+        map((result) => {
+          expect(result).toBe(popupResult);
+        }),
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnError: false,
+          resetOnComplete: false,
+          resetOnRefCountZero: true,
+        })
+      );
+
+      test$.subscribe();
 
       (popUpService as any).resultInternal$.next(popupResult);
+
+      await firstValueFrom(test$);
     });
   });
 
@@ -183,7 +201,8 @@ describe('PopUpService', () => {
       let popupResult: PopupResult;
       let cleanUpSpy: MockInstance;
 
-      beforeEach(async () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
         popup = {
           closed: false,
           close: () => undefined,
@@ -195,8 +214,14 @@ describe('PopUpService', () => {
 
         popupResult = {} as PopupResult;
 
-        const result = await lastValueFrom(popUpService.result$);
-        popupResult = result;
+        popUpService.result$.subscribe((result) => {
+          popupResult = result;
+        });
+      });
+
+      // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+      afterEach(() => {
+        vi.useRealTimers();
       });
 
       it('message received with data', async () => {
@@ -273,9 +298,18 @@ describe('PopUpService', () => {
   });
 
   describe('sendMessageToMainWindow', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({});
+    });
+
+    // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('does nothing if window.opener is null', async () => {
       // arrange
-      spyOnProperty(window, 'opener').mockReturnValue(null);
+      spyOnProperty(window, 'opener', 'get', () => null);
 
       const sendMessageSpy = vi.spyOn(popUpService as any, 'sendMessage');
 

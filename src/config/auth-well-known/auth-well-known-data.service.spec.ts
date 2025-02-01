@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -56,7 +56,7 @@ describe('AuthWellKnownDataService', () => {
       const urlWithoutSuffix = 'myUrl';
       const urlWithSuffix = `${urlWithoutSuffix}/.well-known/openid-configuration`;
 
-      await lastValueFrom(
+      await firstValueFrom(
         (service as any).getWellKnownDocument(urlWithoutSuffix, {
           configId: 'configId1',
         })
@@ -72,7 +72,7 @@ describe('AuthWellKnownDataService', () => {
         .mockReturnValue(of(null));
       const urlWithSuffix = 'myUrl/.well-known/openid-configuration';
 
-      await lastValueFrom(
+      await firstValueFrom(
         (service as any).getWellKnownDocument(urlWithSuffix, {
           configId: 'configId1',
         })
@@ -89,7 +89,7 @@ describe('AuthWellKnownDataService', () => {
       const urlWithSuffix =
         'myUrl/.well-known/openid-configuration/and/some/more/stuff';
 
-      await lastValueFrom(
+      await firstValueFrom(
         (service as any).getWellKnownDocument(urlWithSuffix, {
           configId: 'configId1',
         })
@@ -106,7 +106,7 @@ describe('AuthWellKnownDataService', () => {
       const urlWithoutSuffix = 'myUrl';
       const urlWithSuffix = `${urlWithoutSuffix}/.well-known/test-openid-configuration`;
 
-      await lastValueFrom(
+      await firstValueFrom(
         (service as any).getWellKnownDocument(urlWithoutSuffix, {
           configId: 'configId1',
           authWellknownUrlSuffix: '/.well-known/test-openid-configuration',
@@ -126,7 +126,7 @@ describe('AuthWellKnownDataService', () => {
         )
       );
 
-      const res: unknown = await lastValueFrom(
+      const res: unknown = await firstValueFrom(
         (service as any).getWellKnownDocument('anyurl', {
           configId: 'configId1',
         })
@@ -144,7 +144,7 @@ describe('AuthWellKnownDataService', () => {
         )
       );
 
-      const res: any = await lastValueFrom(
+      const res: any = await firstValueFrom(
         (service as any).getWellKnownDocument('anyurl', {
           configId: 'configId1',
         })
@@ -164,7 +164,7 @@ describe('AuthWellKnownDataService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           (service as any).getWellKnownDocument('anyurl', 'configId')
         );
       } catch (err: unknown) {
@@ -181,7 +181,7 @@ describe('AuthWellKnownDataService', () => {
 
       const spy = vi.spyOn(service as any, 'getWellKnownDocument');
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.getWellKnownEndPointsForConfig({
           configId: 'configId1',
           authWellknownEndpointUrl: 'any-url',
@@ -200,7 +200,7 @@ describe('AuthWellKnownDataService', () => {
       };
 
       try {
-        await lastValueFrom(service.getWellKnownEndPointsForConfig(config));
+        await firstValueFrom(service.getWellKnownEndPointsForConfig(config));
       } catch (error: any) {
         expect(loggerSpy).toHaveBeenCalledExactlyOnceWith(
           config,
@@ -221,7 +221,7 @@ describe('AuthWellKnownDataService', () => {
         jwksUri: DUMMY_WELL_KNOWN_DOCUMENT.jwks_uri,
       };
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.getWellKnownEndPointsForConfig({
           configId: 'configId1',
           authWellknownEndpointUrl: 'any-url',

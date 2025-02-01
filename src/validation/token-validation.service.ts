@@ -390,7 +390,8 @@ export class TokenValidationService {
     localState: any,
     configuration: OpenIdConfiguration
   ): boolean {
-    if ((state as string) !== (localState as string)) {
+    console.error(state, localState, `${state}`, `${localState}`);
+    if (`${state}` !== `${localState}`) {
       this.loggerService.logDebug(
         configuration,
         `ValidateStateFromHashCallback failed, state: ${state} local_state:${localState}`

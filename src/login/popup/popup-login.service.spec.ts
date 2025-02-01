@@ -1,5 +1,5 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
@@ -60,7 +60,7 @@ describe('PopUpLoginService', () => {
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           popUpLoginService.loginWithPopUpStandard(config, [config])
         );
       } catch (err: any) {
@@ -91,7 +91,7 @@ describe('PopUpLoginService', () => {
         of({} as LoginResponse)
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         popUpLoginService.loginWithPopUpStandard(config, [config])
       );
       expect(urlService.getAuthorizeUrl).toHaveBeenCalled();
@@ -120,7 +120,7 @@ describe('PopUpLoginService', () => {
       );
       const popupSpy = vi.spyOn(popupService, 'openPopUp');
 
-      await lastValueFrom(
+      await firstValueFrom(
         popUpLoginService.loginWithPopUpStandard(config, [config])
       );
       expect(popupSpy).toHaveBeenCalled();
@@ -160,7 +160,7 @@ describe('PopUpLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         popUpLoginService.loginWithPopUpStandard(config, [config])
       );
       expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
@@ -201,7 +201,7 @@ describe('PopUpLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         popUpLoginService.loginWithPopUpStandard(config, [config])
       );
       expect(checkAuthSpy).not.toHaveBeenCalled();

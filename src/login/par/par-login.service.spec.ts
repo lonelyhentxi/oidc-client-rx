@@ -1,5 +1,5 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { CheckAuthService } from '../../auth-state/check-auth.service';
 import { AuthWellKnownService } from '../../config/auth-well-known/auth-well-known.service';
@@ -65,7 +65,7 @@ describe('ParLoginService', () => {
       ).mockReturnValue(false);
       const loggerSpy = vi.spyOn(loggerService, 'logError');
 
-      const result = await lastValueFrom(service.loginPar({}));
+      const result = await firstValueFrom(service.loginPar({}));
 
       expect(result).toBeUndefined();
       expect(loggerSpy).toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('ParLoginService', () => {
         .spyOn(parService, 'postParRequest')
         .mockReturnValue(of({ requestUri: 'requestUri' } as ParResponse));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.loginPar({
           authWellknownEndpointUrl: 'authWellknownEndpoint',
           responseType: 'stubValue',
@@ -116,7 +116,7 @@ describe('ParLoginService', () => {
         .spyOn(parService, 'postParRequest')
         .mockReturnValue(of({ requestUri: 'requestUri' } as ParResponse));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.loginPar(config, {
           customParams: { some: 'thing' },
         })
@@ -149,7 +149,7 @@ describe('ParLoginService', () => {
       vi.spyOn(urlService, 'getAuthorizeParUrl').mockReturnValue('');
       const spy = vi.spyOn(loggerService, 'logError');
 
-      const result = await lastValueFrom(service.loginPar(config));
+      const result = await firstValueFrom(service.loginPar(config));
 
       expect(result).toBeUndefined();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -180,7 +180,7 @@ describe('ParLoginService', () => {
       );
       const spy = vi.spyOn(redirectService, 'redirectTo');
 
-      await lastValueFrom(service.loginPar(config, authOptions));
+      await firstValueFrom(service.loginPar(config, authOptions));
 
       expect(spy).toHaveBeenCalledExactlyOnceWith('some-par-url');
     });
@@ -212,7 +212,7 @@ describe('ParLoginService', () => {
         spy(url);
       };
 
-      service.loginPar(config, { urlHandler });
+      await firstValueFrom(service.loginPar(config, { urlHandler }));
 
       expect(spy).toHaveBeenCalledExactlyOnceWith('some-par-url');
       expect(redirectToSpy).not.toHaveBeenCalled();
@@ -230,7 +230,7 @@ describe('ParLoginService', () => {
       const allConfigs = [config];
 
       try {
-        await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+        await firstValueFrom(service.loginWithPopUpPar(config, allConfigs));
       } catch (err: any) {
         expect(loggerSpy).toHaveBeenCalled();
         expect(err.message).toBe('Invalid response type!');
@@ -258,7 +258,7 @@ describe('ParLoginService', () => {
         .mockReturnValue(of({ requestUri: 'requestUri' } as ParResponse));
 
       try {
-        await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+        await firstValueFrom(service.loginWithPopUpPar(config, allConfigs));
       } catch (err: any) {
         expect(spy).toHaveBeenCalled();
         expect(err.message).toBe(
@@ -288,7 +288,7 @@ describe('ParLoginService', () => {
         .mockReturnValue(of({ requestUri: 'requestUri' } as ParResponse));
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.loginWithPopUpPar(config, allConfigs, {
             customParams: { some: 'thing' },
           })
@@ -326,7 +326,7 @@ describe('ParLoginService', () => {
       const spy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.loginWithPopUpPar(config, allConfigs, {
             customParams: { some: 'thing' },
           })
@@ -369,7 +369,7 @@ describe('ParLoginService', () => {
       );
       const spy = vi.spyOn(popupService, 'openPopUp');
 
-      await lastValueFrom(service.loginWithPopUpPar(config, allConfigs));
+      await firstValueFrom(service.loginWithPopUpPar(config, allConfigs));
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'some-par-url',
         undefined,
@@ -419,7 +419,7 @@ describe('ParLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.loginWithPopUpPar(config, allConfigs)
       );
       expect(checkAuthSpy).toHaveBeenCalledExactlyOnceWith(
@@ -465,7 +465,7 @@ describe('ParLoginService', () => {
 
       spyOnProperty(popupService, 'result$').mockReturnValue(of(popupResult));
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.loginWithPopUpPar(config, allConfigs)
       );
       expect(checkAuthSpy).not.toHaveBeenCalled();

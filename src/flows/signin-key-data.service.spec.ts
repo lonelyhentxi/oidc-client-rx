@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpResponse } from '@ngify/http';
-import { EmptyError, isObservable, lastValueFrom, of, throwError } from 'rxjs';
+import { EmptyError, firstValueFrom, isObservable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../api/data.service';
 import { LoggerService } from '../logging/logger.service';
@@ -60,7 +60,7 @@ describe('Signin Key Data Service', () => {
       const result = service.getSigningKeys({ configId: 'configId1' });
 
       try {
-        await lastValueFrom(result);
+        await firstValueFrom(result);
       } catch (err: any) {
         expect(err).toBeTruthy();
       }
@@ -75,7 +75,7 @@ describe('Signin Key Data Service', () => {
       const result = service.getSigningKeys({ configId: 'configId1' });
 
       try {
-        await lastValueFrom(result);
+        await firstValueFrom(result);
       } catch (err: any) {
         expect(err).toBeTruthy();
       }
@@ -92,7 +92,7 @@ describe('Signin Key Data Service', () => {
       const result = service.getSigningKeys({ configId: 'configId1' });
 
       try {
-        await lastValueFrom(result);
+        await firstValueFrom(result);
       } catch (err: any) {
         if (err instanceof EmptyError) {
           expect(spy).toHaveBeenCalledExactlyOnceWith('someUrl', {
@@ -115,7 +115,7 @@ describe('Signin Key Data Service', () => {
         )
       );
 
-      const res = await lastValueFrom(
+      const res = await firstValueFrom(
         service.getSigningKeys({ configId: 'configId1' })
       );
       expect(res).toBeTruthy();
@@ -136,7 +136,7 @@ describe('Signin Key Data Service', () => {
         )
       );
 
-      const res = await lastValueFrom(
+      const res = await firstValueFrom(
         service.getSigningKeys({ configId: 'configId1' })
       );
       expect(res).toBeTruthy();
@@ -159,7 +159,7 @@ describe('Signin Key Data Service', () => {
       );
 
       try {
-        await lastValueFrom(service.getSigningKeys({ configId: 'configId1' }));
+        await firstValueFrom(service.getSigningKeys({ configId: 'configId1' }));
       } catch (err: any) {
         expect(err).toBeTruthy();
       }
@@ -180,7 +180,7 @@ describe('Signin Key Data Service', () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           (service as any).handleErrorGetSigningKeys(
             new HttpResponse({ status: 400, statusText: 'nono' }),
             { configId: 'configId1' }
@@ -198,7 +198,7 @@ describe('Signin Key Data Service', () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           (service as any).handleErrorGetSigningKeys('Just some Error', {
             configId: 'configId1',
           })
@@ -215,7 +215,7 @@ describe('Signin Key Data Service', () => {
       const logSpy = vi.spyOn(loggerService, 'logError');
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           (service as any).handleErrorGetSigningKeys(
             { message: 'Just some Error' },
             { configId: 'configId1' }

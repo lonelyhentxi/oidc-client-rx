@@ -1,4 +1,4 @@
-import { Injectable, NgZone, type OnDestroy, inject } from 'injection-js';
+import { Injectable, inject } from 'injection-js';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
@@ -14,7 +14,7 @@ const IFRAME_FOR_CHECK_SESSION_IDENTIFIER = 'myiFrameForCheckSession';
 // http://openid.net/specs/openid-connect-session-1_0-ID4.html
 
 @Injectable()
-export class CheckSessionService implements OnDestroy {
+export class CheckSessionService {
   private readonly loggerService = inject(LoggerService);
 
   private readonly storagePersistenceService = inject(
@@ -24,8 +24,6 @@ export class CheckSessionService implements OnDestroy {
   private readonly iFrameService = inject(IFrameService);
 
   private readonly eventService = inject(PublicEventsService);
-
-  private readonly zone = inject(NgZone);
 
   private readonly document = inject(DOCUMENT);
 
@@ -54,7 +52,7 @@ export class CheckSessionService implements OnDestroy {
     return this.checkSessionChangedInternal$.asObservable();
   }
 
-  ngOnDestroy(): void {
+  [Symbol.dispose]() {
     this.stop();
     const windowAsDefaultView = this.document.defaultView;
 
@@ -104,9 +102,9 @@ export class CheckSessionService implements OnDestroy {
     );
   }
 
-  private init(configuration: OpenIdConfiguration): Observable<void> {
+  private init(configuration: OpenIdConfiguration): Observable<undefined> {
     if (this.lastIFrameRefresh + this.iframeRefreshInterval > Date.now()) {
-      return of();
+      return of(undefined);
     }
 
     const authWellKnownEndPoints = this.storagePersistenceService.read(
@@ -120,7 +118,7 @@ export class CheckSessionService implements OnDestroy {
         'CheckSession - init check session: authWellKnownEndpoints is undefined. Returning.'
       );
 
-      return of();
+      return of(undefined);
     }
 
     const existingIframe = this.getOrCreateIframe(configuration);
@@ -138,7 +136,7 @@ export class CheckSessionService implements OnDestroy {
         'CheckSession - init check session: checkSessionIframe is not configured to run'
       );
 
-      return of();
+      return of(undefined);
     }
 
     if (contentWindow) {
@@ -228,13 +226,11 @@ export class CheckSessionService implements OnDestroy {
             );
           }
 
-          this.zone.runOutsideAngular(() => {
-            this.scheduledHeartBeatRunning =
-              this.document?.defaultView?.setTimeout(
-                () => this.zone.run(pollServerSessionRecur),
-                this.heartBeatInterval
-              ) ?? null;
-          });
+          this.scheduledHeartBeatRunning =
+            this.document?.defaultView?.setTimeout(
+              pollServerSessionRecur,
+              this.heartBeatInterval
+            ) ?? null;
         });
     };
 

@@ -13,6 +13,7 @@ describe('BrowserStorageService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        BrowserStorageService,
         mockProvider(LoggerService),
         {
           provide: AbstractSecurityStorage,

@@ -1,4 +1,5 @@
 import type { Provider } from 'injection-js';
+import { firstValueFrom } from 'rxjs';
 import {
   PASSED_CONFIG,
   type PassedInitialConfig,
@@ -65,7 +66,7 @@ export function withAppInitializerAuthCheck(): AuthFeature {
     ɵproviders: [
       {
         provide: APP_INITIALIZER,
-        useFactory: (oidcSecurityService: OidcSecurityService) => () =>
+        useFactory: (oidcSecurityService: OidcSecurityService) =>
           oidcSecurityService.checkAuthMultiple(),
         multi: true,
         deps: [OidcSecurityService],

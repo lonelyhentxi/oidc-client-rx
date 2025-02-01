@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { DOCUMENT } from '../../dom';
@@ -66,7 +66,7 @@ describe('StateValidationCallbackHandlerService', () => {
       );
       const allConfigs = [{ configId: 'configId1' }];
 
-      const newCallbackContext = await lastValueFrom(
+      const newCallbackContext = await firstValueFrom(
         service.callbackStateValidation(
           {} as CallbackContext,
           allConfigs[0]!,
@@ -95,7 +95,7 @@ describe('StateValidationCallbackHandlerService', () => {
       const allConfigs = [{ configId: 'configId1' }];
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackStateValidation(
             {} as CallbackContext,
             allConfigs[0]!,
@@ -132,7 +132,7 @@ describe('StateValidationCallbackHandlerService', () => {
       const allConfigs = [{ configId: 'configId1' }];
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackStateValidation(
             { isRenewProcess: true } as CallbackContext,
             allConfigs[0]!,

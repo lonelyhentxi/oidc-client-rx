@@ -1,6 +1,6 @@
 import { TestBed, mockRouterProvider } from '@/testing';
 import { AbstractRouter } from 'oidc-client-rx';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
@@ -85,7 +85,7 @@ describe('CodeFlowCallbackService ', () => {
         triggerAuthorizationResultEvent: true,
       };
 
-      await lastValueFrom(
+      await firstValueFrom(
         codeFlowCallbackService.authenticatedCallbackWithCode(
           'some-url2',
           config,
@@ -125,7 +125,7 @@ describe('CodeFlowCallbackService ', () => {
         postLoginRoute: 'postLoginRoute',
       };
 
-      await lastValueFrom(
+      await firstValueFrom(
         codeFlowCallbackService.authenticatedCallbackWithCode(
           'some-url3',
           config,
@@ -163,7 +163,7 @@ describe('CodeFlowCallbackService ', () => {
       };
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           codeFlowCallbackService.authenticatedCallbackWithCode(
             'some-url4',
             config,
@@ -201,7 +201,7 @@ describe('CodeFlowCallbackService ', () => {
       };
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           codeFlowCallbackService.authenticatedCallbackWithCode(
             'some-url5',
             config,

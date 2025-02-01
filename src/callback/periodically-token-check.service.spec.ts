@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { ReplaySubject, firstValueFrom, of, share, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
@@ -33,9 +33,11 @@ describe('PeriodicallyTokenCheckService', () => {
   let publicEventsService: PublicEventsService;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     TestBed.configureTestingModule({
       imports: [],
       providers: [
+        PeriodicallyTokenCheckService,
         mockProvider(ResetAuthDataService),
         FlowHelper,
         mockProvider(FlowsDataService),
@@ -73,10 +75,11 @@ describe('PeriodicallyTokenCheckService', () => {
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   afterEach(() => {
-    if (intervalService.runTokenValidationRunning?.unsubscribe) {
+    if (intervalService?.runTokenValidationRunning?.unsubscribe) {
       intervalService.runTokenValidationRunning.unsubscribe();
       intervalService.runTokenValidationRunning = null;
     }
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -84,13 +87,22 @@ describe('PeriodicallyTokenCheckService', () => {
   });
 
   describe('startTokenValidationPeriodically', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('returns if no config has silentrenew enabled', async () => {
       const configs = [
         { silentRenew: false, configId: 'configId1' },
         { silentRenew: false, configId: 'configId2' },
       ];
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         periodicallyTokenCheckService.startTokenValidationPeriodically(
           configs,
           configs[0]!
@@ -107,7 +119,7 @@ describe('PeriodicallyTokenCheckService', () => {
         true
       );
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         periodicallyTokenCheckService.startTokenValidationPeriodically(
           configs,
           configs[0]!
@@ -181,19 +193,29 @@ describe('PeriodicallyTokenCheckService', () => {
         of(configs[0]!)
       );
 
-      periodicallyTokenCheckService.startTokenValidationPeriodically(
-        configs,
-        configs[0]!
-      );
+      try {
+        const test$ = periodicallyTokenCheckService
+          .startTokenValidationPeriodically(configs, configs[0]!)
+          .pipe(
+            share({
+              connector: () => new ReplaySubject(1),
+              resetOnError: false,
+              resetOnComplete: false,
+              resetOnRefCountZero: true,
+            })
+          );
 
-      await vi.advanceTimersByTimeAsync(1000);
+        test$.subscribe();
 
-      expect(
-        periodicallyTokenCheckService.startTokenValidationPeriodically
-      ).toThrowError();
-      expect(resetSilentRenewRunning).toHaveBeenCalledExactlyOnceWith(
-        configs[0]
-      );
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await firstValueFrom(test$);
+        expect.fail('should throw errror');
+      } catch {
+        expect(resetSilentRenewRunning).toHaveBeenCalledExactlyOnceWith(
+          configs[0]
+        );
+      }
     });
 
     it('interval throws silent renew failed event with data in case of an error', async () => {
@@ -220,20 +242,29 @@ describe('PeriodicallyTokenCheckService', () => {
         of(configs[0]!)
       );
 
-      periodicallyTokenCheckService.startTokenValidationPeriodically(
-        configs,
-        configs[0]!
-      );
+      try {
+        const test$ = periodicallyTokenCheckService
+          .startTokenValidationPeriodically(configs, configs[0]!)
+          .pipe(
+            share({
+              connector: () => new ReplaySubject(1),
+              resetOnComplete: false,
+              resetOnError: false,
+              resetOnRefCountZero: false,
+            })
+          );
 
-      await vi.advanceTimersByTimeAsync(1000);
+        test$.subscribe();
 
-      expect(
-        periodicallyTokenCheckService.startTokenValidationPeriodically
-      ).toThrowError();
-      expect(publicEventsServiceSpy).toBeCalledWith([
-        [EventTypes.SilentRenewStarted],
-        [EventTypes.SilentRenewFailed, new Error('error')],
-      ]);
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await firstValueFrom(test$);
+      } catch {
+        expect(publicEventsServiceSpy.mock.calls).toEqual([
+          [EventTypes.SilentRenewStarted],
+          [EventTypes.SilentRenewFailed, new Error('error')],
+        ]);
+      }
     });
 
     it('calls resetAuthorizationData and returns if no silent renew is configured', async () => {

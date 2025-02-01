@@ -1,7 +1,6 @@
-﻿import { HttpParams } from '@ngify/http';
-import { Injectable, inject } from 'injection-js';
-import { type Observable, Subject, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+﻿import { Injectable, inject } from 'injection-js';
+import { type Observable, Subject, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ImplicitFlowCallbackService } from '../callback/implicit-flow-callback.service';
 import { IntervalService } from '../callback/interval.service';
@@ -10,6 +9,7 @@ import type { CallbackContext } from '../flows/callback-context';
 import { FlowsDataService } from '../flows/flows-data.service';
 import { FlowsService } from '../flows/flows.service';
 import { ResetAuthDataService } from '../flows/reset-auth-data.service';
+import { HttpParams } from '../http';
 import { LoggerService } from '../logging/logger.service';
 import { FlowHelper } from '../utils/flowHelper/flow-helper.service';
 import { ValidationResult } from '../validation/validation-result';
@@ -70,8 +70,9 @@ export class SilentRenewService {
     config: OpenIdConfiguration,
     allConfigs: OpenIdConfiguration[]
   ): Observable<CallbackContext> {
-    // TODO: fix @ngify/http
-    const params = new HttpParams(urlParts[1] || undefined);
+    const params = new HttpParams({
+      fromString: urlParts[1],
+    });
 
     const errorParam = params.get('error');
 
@@ -120,10 +121,10 @@ export class SilentRenewService {
     e: CustomEvent,
     config: OpenIdConfiguration,
     allConfigs: OpenIdConfiguration[]
-  ): void {
+  ): Observable<undefined> {
     this.loggerService.logDebug(config, 'silentRenewEventHandler');
     if (!e.detail) {
-      return;
+      return of(undefined);
     }
 
     let callback$: Observable<CallbackContext>;
@@ -146,17 +147,19 @@ export class SilentRenewService {
         );
     }
 
-    callback$.subscribe({
-      next: (callbackContext) => {
+    return callback$.pipe(
+      map((callbackContext) => {
         this.refreshSessionWithIFrameCompletedInternal$.next(callbackContext);
         this.flowsDataService.resetSilentRenewRunning(config);
-      },
-      error: (err: unknown) => {
+        return undefined;
+      }),
+      catchError((err: unknown) => {
         this.loggerService.logError(config, `Error: ${err}`);
         this.refreshSessionWithIFrameCompletedInternal$.next(null);
         this.flowsDataService.resetSilentRenewRunning(config);
-      },
-    });
+        return of(undefined);
+      })
+    );
   }
 
   private getExistingIframe(): HTMLIFrameElement | null {

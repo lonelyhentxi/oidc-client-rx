@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../../auth-state/auth-state.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -83,14 +83,14 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(
+      await firstValueFrom(
         service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
         )
       );
-      expect(storagePersistenceServiceSpy).toBeCalledWith([
+      expect(storagePersistenceServiceSpy.mock.calls).toEqual([
         ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
         ['jwtKeys', { keys: [] }, allConfigs[0]],
       ]);
@@ -121,14 +121,14 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
         of({ keys: [] } as JwtKeys)
       );
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
         )
       );
-      expect(storagePersistenceServiceSpy).toBeCalledWith([
+      expect(storagePersistenceServiceSpy.mock.calls).toEqual([
         ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
         ['jwtKeys', { keys: [] }, allConfigs[0]],
       ]);
@@ -159,14 +159,14 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(
+      await firstValueFrom(
         service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
           allConfigs
         )
       );
-      expect(storagePersistenceServiceSpy).toBeCalledWith([
+      expect(storagePersistenceServiceSpy.mock.calls).toEqual([
         ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
         ['reusable_refresh_token', 'dummy_refresh_token', allConfigs[0]],
         ['jwtKeys', { keys: [] }, allConfigs[0]],
@@ -194,7 +194,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [] } as JwtKeys)
       );
-      await lastValueFrom(
+      await firstValueFrom(
         service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
@@ -223,7 +223,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       vi.spyOn(signInKeyDataService, 'getSigningKeys').mockReturnValue(
         of({ keys: [{ kty: 'henlo' } as JwtKey] } as JwtKeys)
       );
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.callbackHistoryAndResetJwtKeys(
           callbackContext,
           allConfigs[0]!,
@@ -257,7 +257,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
         of({} as JwtKeys)
       );
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             callbackContext,
             allConfigs[0]!,
@@ -290,7 +290,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
         throwError(() => new Error('error'))
       );
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             callbackContext,
             allConfigs[0]!,
@@ -316,7 +316,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       ];
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             callbackContext,
             allConfigs[0]!,
@@ -353,7 +353,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             callbackContext,
             allConfigs[0]!,
@@ -394,7 +394,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             callbackContext,
             allConfigs[0]!,
@@ -436,7 +436,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        const callbackContext: CallbackContext = await lastValueFrom(
+        const callbackContext: CallbackContext = await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             initialCallbackContext,
             allConfigs[0]!,
@@ -444,7 +444,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
           )
         );
         expect(storagePersistenceServiceSpy).toHaveBeenCalledTimes(2);
-        expect(storagePersistenceServiceSpy).toBeCalledWith([
+        expect(storagePersistenceServiceSpy.mock.calls).toEqual([
           ['authnResult', DUMMY_AUTH_RESULT, allConfigs[0]],
           ['jwtKeys', DUMMY_JWT_KEYS, allConfigs[0]],
         ]);
@@ -479,7 +479,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        const callbackContext: CallbackContext = await lastValueFrom(
+        const callbackContext: CallbackContext = await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             initialCallbackContext,
             allConfigs[0]!,
@@ -523,7 +523,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        const callbackContext: CallbackContext = await lastValueFrom(
+        const callbackContext: CallbackContext = await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             initialCallbackContext,
             allConfigs[0]!,
@@ -560,7 +560,7 @@ describe('HistoryJwtKeysCallbackHandlerService', () => {
       );
 
       try {
-        const callbackContext: CallbackContext = await lastValueFrom(
+        const callbackContext: CallbackContext = await firstValueFrom(
           service.callbackHistoryAndResetJwtKeys(
             initialCallbackContext,
             allConfigs[0]!,

@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { mockProvider } from '../testing/mock';
@@ -41,25 +41,26 @@ describe('RefreshSessionIframeService ', () => {
         .mockReturnValue(of(null));
       const allConfigs = [{ configId: 'configId1' }];
 
-      await lastValueFrom(refreshSessionIframeService
-        .refreshSessionWithIframe(allConfigs[0]!, allConfigs));
-expect(
-            sendAuthorizeRequestUsingSilentRenewSpy
-          ).toHaveBeenCalledExactlyOnceWith(
-            'a-url',
-            allConfigs[0]!,
-            allConfigs
-          );
+      await firstValueFrom(
+        refreshSessionIframeService.refreshSessionWithIframe(
+          allConfigs[0]!,
+          allConfigs
+        )
+      );
+      expect(
+        sendAuthorizeRequestUsingSilentRenewSpy
+      ).toHaveBeenCalledExactlyOnceWith('a-url', allConfigs[0]!, allConfigs);
     });
   });
 
   describe('initSilentRenewRequest', () => {
-    it('dispatches customevent to window object', async () => {
-      const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
-
-      await lastValueFrom(
-        (refreshSessionIframeService as any).initSilentRenewRequest()
+    it('dispatches customevent to window object', () => {
+      const dispatchEventSpy = vi.spyOn(
+        document.defaultView?.window!,
+        'dispatchEvent'
       );
+
+      (refreshSessionIframeService as any).initSilentRenewRequest();
 
       expect(dispatchEventSpy).toHaveBeenCalledExactlyOnceWith(
         new CustomEvent('oidc-silent-renew-init', {

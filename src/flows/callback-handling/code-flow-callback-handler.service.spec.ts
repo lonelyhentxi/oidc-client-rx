@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
 import { HttpErrorResponse, HttpHeaders } from '@ngify/http';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { DataService } from '../../api/data.service';
 import { LoggerService } from '../../logging/logger.service';
@@ -56,7 +56,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCallback('test-url', { configId: 'configId1' })
         );
       } catch (err: any) {
@@ -76,7 +76,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCallback('test-url', { configId: 'configId1' })
         );
       } catch (err: any) {
@@ -99,7 +99,7 @@ describe('CodeFlowCallbackHandlerService', () => {
         existingIdToken: null,
       } as CallbackContext;
 
-      const callbackContext = await lastValueFrom(
+      const callbackContext = await firstValueFrom(
         service.codeFlowCallback('test-url', { configId: 'configId1' })
       );
       expect(callbackContext).toEqual(expectedCallbackContext);
@@ -122,7 +122,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       ).mockReturnValue(false);
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, {
             configId: 'configId1',
           })
@@ -144,7 +144,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, {
             configId: 'configId1',
           })
@@ -166,7 +166,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, {
             configId: 'configId1',
           })
@@ -190,7 +190,7 @@ describe('CodeFlowCallbackHandlerService', () => {
         'validateStateFromHashCallback'
       ).mockReturnValue(true);
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.codeFlowCodeRequest({} as CallbackContext, {
           configId: 'configId1',
         })
@@ -226,7 +226,7 @@ describe('CodeFlowCallbackHandlerService', () => {
 
       const postSpy = vi.spyOn(dataService, 'post').mockReturnValue(of({}));
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.codeFlowCodeRequest({ code: 'foo' } as CallbackContext, config)
       );
       expect(urlServiceSpy).toHaveBeenCalledExactlyOnceWith('foo', config, {
@@ -253,7 +253,7 @@ describe('CodeFlowCallbackHandlerService', () => {
         'validateStateFromHashCallback'
       ).mockReturnValue(true);
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.codeFlowCodeRequest({} as CallbackContext, config)
       );
       const httpHeaders = postSpy.mock.calls.at(-1)?.[3] as HttpHeaders;
@@ -280,7 +280,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, config)
         );
       } catch (err: any) {
@@ -313,7 +313,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       ).mockReturnValue(true);
 
       try {
-        const res = await lastValueFrom(
+        const res = await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, config)
         );
         expect(res).toBeTruthy();
@@ -348,7 +348,7 @@ describe('CodeFlowCallbackHandlerService', () => {
       ).mockReturnValue(true);
 
       try {
-        const res = await lastValueFrom(
+        const res = await firstValueFrom(
           service.codeFlowCodeRequest({} as CallbackContext, config)
         );
         expect(res).toBeFalsy();

@@ -1,6 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { ReplaySubject, firstValueFrom, of } from 'rxjs';
+import { share, skip } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { OidcSecurityService } from '../oidc.security.service';
@@ -333,7 +333,7 @@ describe('CheckSessionService', () => {
   });
 
   describe('init', () => {
-    it('returns falsy observable when lastIframerefresh and iframeRefreshInterval are bigger than now', async () => {
+    it('angular oidc client', async () => {
       const serviceAsAny = checkSessionService as any;
       const dateNow = new Date();
       const lastRefresh = dateNow.setMinutes(dateNow.getMinutes() + 30);
@@ -341,7 +341,7 @@ describe('CheckSessionService', () => {
       serviceAsAny.lastIFrameRefresh = lastRefresh;
       serviceAsAny.iframeRefreshInterval = lastRefresh;
 
-      const result = await lastValueFrom(serviceAsAny.init());
+      const result = await firstValueFrom(serviceAsAny.init());
       expect(result).toBeUndefined();
     });
   });
@@ -366,18 +366,27 @@ describe('CheckSessionService', () => {
 
   describe('checkSessionChanged$', () => {
     it('emits when internal event is thrown', async () => {
-      const result = await lastValueFrom(
-        checkSessionService.checkSessionChanged$.pipe(skip(1))
+      const test$ = checkSessionService.checkSessionChanged$.pipe(
+        skip(1),
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnError: false,
+          resetOnComplete: false,
+          resetOnRefCountZero: true,
+        })
       );
-      expect(result).toBe(true);
 
+      test$.subscribe();
       const serviceAsAny = checkSessionService as any;
 
       serviceAsAny.checkSessionChangedInternal$.next(true);
+
+      const result = await firstValueFrom(test$);
+      expect(result).toBe(true);
     });
 
     it('emits false initially', async () => {
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkSessionService.checkSessionChanged$
       );
       expect(result).toBe(false);
@@ -387,7 +396,7 @@ describe('CheckSessionService', () => {
       const expectedResultsInOrder = [false, true];
       let counter = 0;
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         checkSessionService.checkSessionChanged$
       );
       expect(result).toBe(expectedResultsInOrder[counter]);

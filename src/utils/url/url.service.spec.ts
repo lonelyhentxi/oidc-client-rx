@@ -1,5 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { FlowsDataService } from '../../flows/flows-data.service';
@@ -1041,14 +1041,14 @@ describe('UrlService Tests', () => {
 
   describe('getAuthorizeUrl', () => {
     it('returns null if no config is given', async () => {
-      const url = await lastValueFrom(service.getAuthorizeUrl(null));
+      const url = await firstValueFrom(service.getAuthorizeUrl(null));
       expect(url).toBeNull();
     });
 
     it('returns null if current flow is code flow and no redirect url is defined', async () => {
       vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(true);
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         service.getAuthorizeUrl({ configId: 'configId1' })
       );
       expect(result).toBeNull();
@@ -1062,7 +1062,7 @@ describe('UrlService Tests', () => {
         redirectUrl: 'some-redirectUrl',
       } as OpenIdConfiguration;
 
-      const result = await lastValueFrom(service.getAuthorizeUrl(config));
+      const result = await firstValueFrom(service.getAuthorizeUrl(config));
       expect(result).toBe('');
     });
 
@@ -1090,7 +1090,7 @@ describe('UrlService Tests', () => {
         () => ({ authorizationEndpoint })
       );
 
-      const result = await lastValueFrom(service.getAuthorizeUrl(config));
+      const result = await firstValueFrom(service.getAuthorizeUrl(config));
       expect(result).toBe(
         'authorizationEndpoint?client_id=some-clientId&redirect_uri=some-redirectUrl&response_type=testResponseType&scope=testScope&nonce=undefined&state=undefined&code_challenge=some-code-challenge&code_challenge_method=S256'
       );
@@ -1107,7 +1107,7 @@ describe('UrlService Tests', () => {
         'createUrlImplicitFlowAuthorize'
       );
 
-      await lastValueFrom(service.getAuthorizeUrl({ configId: 'configId1' }));
+      await firstValueFrom(service.getAuthorizeUrl({ configId: 'configId1' }));
       expect(spyCreateUrlCodeFlowAuthorize).not.toHaveBeenCalled();
       expect(spyCreateUrlImplicitFlowAuthorize).toHaveBeenCalled();
     });
@@ -1119,18 +1119,20 @@ describe('UrlService Tests', () => {
         .mockReturnValue('');
       const resultObs$ = service.getAuthorizeUrl({ configId: 'configId1' });
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(spy).toHaveBeenCalled();
       expect(result).toBe('');
     });
   });
 
   describe('getRefreshSessionSilentRenewUrl', () => {
-    it('calls createUrlCodeFlowWithSilentRenew if current flow is code flow', () => {
+    it('calls createUrlCodeFlowWithSilentRenew if current flow is code flow', async () => {
       vi.spyOn(flowHelper, 'isCurrentFlowCodeFlow').mockReturnValue(true);
       const spy = vi.spyOn(service as any, 'createUrlCodeFlowWithSilentRenew');
 
-      service.getRefreshSessionSilentRenewUrl({ configId: 'configId1' });
+      await firstValueFrom(
+        service.getRefreshSessionSilentRenewUrl({ configId: 'configId1' })
+      );
       expect(spy).toHaveBeenCalled();
     });
 
@@ -1159,7 +1161,7 @@ describe('UrlService Tests', () => {
         configId: 'configId1',
       });
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(spy).toHaveBeenCalled();
       expect(result).toBe('');
     });
@@ -1344,7 +1346,7 @@ describe('UrlService Tests', () => {
         redirectUrl: '',
       });
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(null);
     });
 
@@ -1372,7 +1374,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256'
       );
@@ -1402,7 +1404,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam'
       );
@@ -1432,7 +1434,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = service.createBodyForParCodeFlowRequest(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing'
       );
@@ -1466,7 +1468,7 @@ describe('UrlService Tests', () => {
         },
       });
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         'client_id=testClientId&redirect_uri=testRedirectUrl&response_type=testResponseType&scope=testScope&nonce=testNonce&state=testState&code_challenge=testCodeChallenge&code_challenge_method=S256&hd=testHdParam&any=thing&any=otherThing'
       );
@@ -1596,7 +1598,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe('');
     });
 
@@ -1639,7 +1641,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         `authorizationEndpoint?client_id=${clientId}&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&prompt=none`
       );
@@ -1680,7 +1682,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowWithSilentRenew(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe('');
     });
   });
@@ -1796,7 +1798,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBeNull();
     });
 
@@ -1838,7 +1840,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}`
       );
@@ -1887,7 +1889,7 @@ describe('UrlService Tests', () => {
         customParams: { to: 'add', as: 'well' },
       });
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe(
         `authorizationEndpoint?client_id=clientId&redirect_uri=http%3A%2F%2Fany-url.com&response_type=${responseType}&scope=${scope}&nonce=${nonce}&state=${state}&to=add&as=well`
       );
@@ -1924,7 +1926,7 @@ describe('UrlService Tests', () => {
 
       const resultObs$ = serviceAsAny.createUrlCodeFlowAuthorize(config);
 
-      const result = await lastValueFrom(resultObs$);
+      const result = await firstValueFrom(resultObs$);
       expect(result).toBe('');
     });
   });

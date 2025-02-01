@@ -13,7 +13,6 @@ export abstract class StsConfigLoader {
 
 export class StsConfigStaticLoader implements StsConfigLoader {
   constructor(
-    // biome-ignore lint/style/noParameterProperties: <explanation>
     private readonly passedConfigs: OpenIdConfiguration | OpenIdConfiguration[]
   ) {}
 

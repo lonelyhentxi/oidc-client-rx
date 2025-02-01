@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
@@ -93,7 +93,7 @@ describe('Configuration Service', () => {
       };
       const spy = vi.spyOn(configService as any, 'loadConfigs');
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('configId1')
       );
       expect(config).toBeTruthy();
@@ -108,7 +108,7 @@ describe('Configuration Service', () => {
 
       vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('configId1')
       );
       expect(config).toBeTruthy();
@@ -126,7 +126,7 @@ describe('Configuration Service', () => {
       );
       const consoleSpy = vi.spyOn(console, 'warn');
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('configId1')
       );
       expect(config).toBeNull();
@@ -141,7 +141,7 @@ describe('Configuration Service', () => {
         configId2: { configId: 'configId2' },
       };
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('notExisting')
       );
       expect(config).toBeNull();
@@ -160,7 +160,7 @@ describe('Configuration Service', () => {
         issuer: 'auth-well-known',
       });
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('configId1')
       );
       expect(config?.authWellknownEndpoints).toEqual({
@@ -182,7 +182,7 @@ describe('Configuration Service', () => {
 
       const spy = vi.spyOn(publicEventsService, 'fireEvent');
 
-      await lastValueFrom(configService.getOpenIDConfiguration('configId1'));
+      await firstValueFrom(configService.getOpenIDConfiguration('configId1'));
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         EventTypes.ConfigLoaded,
         expect.anything()
@@ -209,7 +209,7 @@ describe('Configuration Service', () => {
         'storeWellKnownEndpoints'
       );
 
-      const config = await lastValueFrom(
+      const config = await firstValueFrom(
         configService.getOpenIDConfiguration('configId1')
       );
       expect(config).toBeTruthy();
@@ -237,7 +237,7 @@ describe('Configuration Service', () => {
 
       vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         configService.getOpenIDConfigurations('configId1')
       );
       expect(result.allConfigs.length).toEqual(2);
@@ -254,7 +254,7 @@ describe('Configuration Service', () => {
 
       vi.spyOn(configValidationService, 'validateConfig').mockReturnValue(true);
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         configService.getOpenIDConfigurations()
       );
       expect(result.allConfigs.length).toEqual(2);
@@ -276,7 +276,7 @@ describe('Configuration Service', () => {
         false
       );
 
-      const { allConfigs, currentConfig } = await lastValueFrom(
+      const { allConfigs, currentConfig } = await firstValueFrom(
         configService.getOpenIDConfigurations()
       );
       expect(allConfigs).toEqual([]);

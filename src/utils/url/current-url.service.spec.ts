@@ -13,6 +13,7 @@ describe('CurrentUrlService with existing Url', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        CurrentUrlService,
         {
           provide: DOCUMENT,
           useValue: documentValue,

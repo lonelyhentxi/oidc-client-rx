@@ -1,6 +1,12 @@
 import { TestBed, spyOnProperty } from '@/testing';
-import { EmptyError, lastValueFrom, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import {
+  EmptyError,
+  ReplaySubject,
+  firstValueFrom,
+  of,
+  throwError,
+} from 'rxjs';
+import { delay, share } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { AuthWellKnownService } from '../config/auth-well-known/auth-well-known.service';
@@ -22,6 +28,7 @@ import {
 } from './refresh-session.service';
 
 describe('RefreshSessionService ', () => {
+  vi.useFakeTimers();
   let refreshSessionService: RefreshSessionService;
   let flowHelper: FlowHelper;
   let authStateService: AuthStateService;
@@ -63,6 +70,11 @@ describe('RefreshSessionService ', () => {
     storagePersistenceService = TestBed.inject(StoragePersistenceService);
   });
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should create', () => {
     expect(refreshSessionService).toBeTruthy();
   });
@@ -91,7 +103,7 @@ describe('RefreshSessionService ', () => {
 
       const extraCustomParams = { extra: 'custom' };
 
-      await lastValueFrom(
+      await firstValueFrom(
         refreshSessionService.userForceRefreshSession(
           allConfigs[0]!,
           allConfigs,
@@ -128,7 +140,7 @@ describe('RefreshSessionService ', () => {
 
       const extraCustomParams = { extra: 'custom' };
 
-      await lastValueFrom(
+      await firstValueFrom(
         refreshSessionService.userForceRefreshSession(
           allConfigs[0]!,
           allConfigs,
@@ -163,7 +175,7 @@ describe('RefreshSessionService ', () => {
       ];
       const writeSpy = vi.spyOn(storagePersistenceService, 'write');
 
-      await lastValueFrom(
+      await firstValueFrom(
         refreshSessionService.userForceRefreshSession(
           allConfigs[0]!,
           allConfigs
@@ -186,7 +198,7 @@ describe('RefreshSessionService ', () => {
       ];
 
       try {
-        const result = await lastValueFrom(
+        const result = await firstValueFrom(
           refreshSessionService.userForceRefreshSession(
             allConfigs[0]!,
             allConfigs
@@ -217,7 +229,7 @@ describe('RefreshSessionService ', () => {
       ];
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           refreshSessionService.userForceRefreshSession(
             allConfigs[0]!,
             allConfigs
@@ -259,7 +271,7 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
       );
       expect(result.idToken).toEqual('id-token');
@@ -285,7 +297,7 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -328,7 +340,7 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
       );
       expect(result.idToken).toBeDefined();
@@ -358,7 +370,7 @@ describe('RefreshSessionService ', () => {
         },
       ];
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
       );
       expect(result).toEqual({
@@ -372,6 +384,8 @@ describe('RefreshSessionService ', () => {
     });
 
     it('occurs timeout error and retry mechanism exhausted max retry count throws error', async () => {
+      vi.useRealTimers();
+      vi.useFakeTimers();
       vi.spyOn(
         flowHelper,
         'isCurrentFlowCodeFlowWithRefreshTokens'
@@ -402,9 +416,24 @@ describe('RefreshSessionService ', () => {
       const expectedInvokeCount = MAX_RETRY_ATTEMPTS;
 
       try {
-        const result = await lastValueFrom(
-          refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
+        const o$ = refreshSessionService
+          .forceRefreshSession(allConfigs[0]!, allConfigs)
+          .pipe(
+            share({
+              connector: () => new ReplaySubject(1),
+              resetOnError: false,
+              resetOnComplete: false,
+              resetOnRefCountZero: true,
+            })
+          );
+
+        o$.subscribe();
+
+        await vi.advanceTimersByTimeAsync(
+          allConfigs[0]!.silentRenewTimeoutInSeconds * 10000
         );
+
+        const result = await firstValueFrom(o$);
 
         if (result) {
           expect.fail('It should not return any result.');
@@ -415,10 +444,6 @@ describe('RefreshSessionService ', () => {
           expectedInvokeCount
         );
       }
-
-      await vi.advanceTimersByTimeAsync(
-        allConfigs[0]!.silentRenewTimeoutInSeconds * 10000
-      );
     });
 
     it('occurs unknown error throws it to subscriber', async () => {
@@ -453,7 +478,7 @@ describe('RefreshSessionService ', () => {
       );
 
       try {
-        await lastValueFrom(
+        await firstValueFrom(
           refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
         );
         expect.fail('It should not return any result.');
@@ -489,7 +514,7 @@ describe('RefreshSessionService ', () => {
           'refreshSessionWithIFrameCompleted$'
         ).mockReturnValue(of(null));
 
-        const result = await lastValueFrom(
+        const result = await firstValueFrom(
           refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
         );
         expect(result).toEqual({
@@ -533,7 +558,7 @@ describe('RefreshSessionService ', () => {
           .spyOn(authStateService, 'areAuthStorageTokensValid')
           .mockReturnValue(true);
 
-        const result = await lastValueFrom(
+        const result = await firstValueFrom(
           refreshSessionService.forceRefreshSession(allConfigs[0]!, allConfigs)
         );
         expect(result).toEqual({
@@ -552,7 +577,7 @@ describe('RefreshSessionService ', () => {
     it('returns null if no auth well known endpoint defined', async () => {
       vi.spyOn(flowsDataService, 'isSilentRenewRunning').mockReturnValue(true);
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         (refreshSessionService as any).startRefreshSession()
       );
       expect(result).toBe(null);
@@ -561,7 +586,7 @@ describe('RefreshSessionService ', () => {
     it('returns null if silent renew Is running', async () => {
       vi.spyOn(flowsDataService, 'isSilentRenewRunning').mockReturnValue(true);
 
-      const result = await lastValueFrom(
+      const result = await firstValueFrom(
         (refreshSessionService as any).startRefreshSession()
       );
       expect(result).toBe(null);
@@ -594,7 +619,7 @@ describe('RefreshSessionService ', () => {
         'refreshSessionWithRefreshTokens'
       ).mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         (refreshSessionService as any).startRefreshSession(
           allConfigs[0]!,
           allConfigs
@@ -629,7 +654,7 @@ describe('RefreshSessionService ', () => {
         )
         .mockReturnValue(of({} as CallbackContext));
 
-      await lastValueFrom(
+      await firstValueFrom(
         (refreshSessionService as any).startRefreshSession(
           allConfigs[0]!,
           allConfigs
@@ -668,7 +693,7 @@ describe('RefreshSessionService ', () => {
         .spyOn(refreshSessionIframeService, 'refreshSessionWithIframe')
         .mockReturnValue(of(false));
 
-      await lastValueFrom(
+      await firstValueFrom(
         (refreshSessionService as any).startRefreshSession(
           allConfigs[0]!,
           allConfigs

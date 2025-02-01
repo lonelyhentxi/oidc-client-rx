@@ -8,7 +8,7 @@ describe('Token Helper Service', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [mockProvider(LoggerService)],
+      providers: [TokenHelperService, mockProvider(LoggerService)],
     });
     tokenHelperService = TestBed.inject(TokenHelperService);
   });

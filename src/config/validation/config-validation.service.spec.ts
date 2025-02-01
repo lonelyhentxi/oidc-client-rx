@@ -1,4 +1,5 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
+import { mockImplementationWhenArgs, spyOnWithOrigin } from '@/testing/spy';
 import { vi } from 'vitest';
 import { LogLevel } from '../../logging/log-level';
 import { LoggerService } from '../../logging/logger.service';
@@ -51,12 +52,12 @@ describe('Config Validation Service', () => {
 
   it('calls `logWarning` if one rule has warning level', () => {
     const loggerWarningSpy = vi.spyOn(loggerService, 'logWarning');
-    const messageTypeSpy = vi.spyOn(
-      configValidationService as any,
-      'getAllMessagesOfType'
+    const messageTypeSpy = spyOnWithOrigin(
+      configValidationService,
+      'getAllMessagesOfType' as any
     );
 
-    mockImplementationWhenArgsEqual(
+    mockImplementationWhenArgs(
       messageTypeSpy,
       (arg1: any, arg2: any) => arg1 === 'warning' && Array.isArray(arg2),
       () => ['A warning message']

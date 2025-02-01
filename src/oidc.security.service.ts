@@ -1,6 +1,6 @@
 import { Injectable, inject } from 'injection-js';
-import type { Observable } from 'rxjs';
-import { concatMap, map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, type Observable } from 'rxjs';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import type { AuthOptions, LogoutAuthOptions } from './auth-options';
 import type { AuthenticatedResult } from './auth-state/auth-result';
 import { AuthStateService } from './auth-state/auth-state.service';
@@ -20,6 +20,7 @@ import type { PopupOptions } from './login/popup/popup-options';
 import { LogoffRevocationService } from './logoff-revoke/logoff-revocation.service';
 import { UserService } from './user-data/user.service';
 import type { UserDataResult } from './user-data/userdata-result';
+import { MockUtil } from './utils/reflect/index';
 import { TokenHelperService } from './utils/tokenHelper/token-helper.service';
 import { UrlService } from './utils/url/url.service';
 
@@ -160,6 +161,8 @@ export class OidcSecurityService {
    *
    * @returns An array of `LoginResponse` objects containing all information about the logins
    */
+
+  @MockUtil({ implementation: () => new BehaviorSubject(undefined) })
   checkAuthMultiple(url?: string): Observable<LoginResponse[]> {
     return this.configurationService
       .getOpenIDConfigurations()
@@ -336,16 +339,11 @@ export class OidcSecurityService {
    * @param authOptions The custom options for the the authentication request.
    */
   authorize(configId?: string, authOptions?: AuthOptions): Observable<void> {
-    const result$ = this.configurationService
+    return this.configurationService
       .getOpenIDConfiguration(configId)
       .pipe(
-        map((config) => this.loginService.login(config, authOptions)),
-        shareReplay(1)
+        switchMap((config) => this.loginService.login(config, authOptions))
       );
-
-    result$.subscribe();
-
-    return result$;
   }
 
   /**
@@ -458,17 +456,13 @@ export class OidcSecurityService {
    *
    * @param configId The configId to perform the action in behalf of. If not passed, the first configs will be taken
    */
-  logoffLocal(configId?: string): Observable<void> {
-    const result$ = this.configurationService
-      .getOpenIDConfigurations(configId)
-      .pipe(
-        map(({ allConfigs, currentConfig }) =>
-          this.logoffRevocationService.logoffLocal(currentConfig, allConfigs)
-        ),
-        shareReplay(1)
-      );
-    result$.subscribe();
-    return result$;
+  logoffLocal(configId?: string): Observable<undefined> {
+    return this.configurationService.getOpenIDConfigurations(configId).pipe(
+      map(({ allConfigs, currentConfig }) => {
+        this.logoffRevocationService.logoffLocal(currentConfig, allConfigs);
+        return undefined;
+      })
+    );
   }
 
   /**
@@ -476,16 +470,13 @@ export class OidcSecurityService {
    * Use this method if you have _multiple_ configs enabled.
    */
   logoffLocalMultiple(): Observable<void> {
-    const result$ = this.configurationService.getOpenIDConfigurations().pipe(
-      map(({ allConfigs }) =>
-        this.logoffRevocationService.logoffLocalMultiple(allConfigs)
-      ),
-      shareReplay(1)
-    );
-
-    result$.subscribe();
-
-    return result$;
+    return this.configurationService
+      .getOpenIDConfigurations()
+      .pipe(
+        map(({ allConfigs }) =>
+          this.logoffRevocationService.logoffLocalMultiple(allConfigs)
+        )
+      );
   }
 
   /**

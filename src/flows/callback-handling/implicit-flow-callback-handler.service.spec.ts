@@ -1,5 +1,5 @@
 import { TestBed } from '@/testing';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import { DOCUMENT } from '../../dom';
 import { LoggerService } from '../../logging/logger.service';
@@ -58,7 +58,7 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
       );
       expect(resetAuthorizationDataSpy).toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      await lastValueFrom(
+      await firstValueFrom(
         service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'any-hash')
       );
       expect(resetAuthorizationDataSpy).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      const callbackContext = await lastValueFrom(
+      const callbackContext = await firstValueFrom(
         service.implicitFlowCallback(allConfigs[0]!, allConfigs, 'anyHash')
       );
       expect(callbackContext).toEqual(expectedCallbackContext);
@@ -128,7 +128,7 @@ describe('ImplicitFlowCallbackHandlerService', () => {
         },
       ];
 
-      const callbackContext = await lastValueFrom(
+      const callbackContext = await firstValueFrom(
         service.implicitFlowCallback(allConfigs[0]!, allConfigs)
       );
       expect(callbackContext).toEqual(expectedCallbackContext);
