@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// TODO
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
