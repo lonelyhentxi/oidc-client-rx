@@ -1,8 +1,10 @@
 import { TestBed } from '@/testing';
-import { provideHttpClientTesting } from '@/testing/http';
+import {
+  HTTP_CLIENT_TEST_CONTROLLER,
+  provideHttpClientTesting,
+} from '@/testing/http';
 import { HttpHeaders } from '@ngify/http';
-import { HttpTestingController } from '@ngify/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from 'oidc-client-rx';
+import type { HttpTestingController } from '@ngify/http/testing';
 import { firstValueFrom } from 'rxjs';
 import { DataService } from './data.service';
 import { HttpBaseService } from './http-base.service';
@@ -14,15 +16,10 @@ describe('Data Service', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [],
-      providers: [
-        DataService,
-        HttpBaseService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [DataService, HttpBaseService, provideHttpClientTesting()],
     });
     dataService = TestBed.inject(DataService);
-    httpMock = TestBed.inject(HttpTestingController);
+    httpMock = TestBed.inject(HTTP_CLIENT_TEST_CONTROLLER);
   });
 
   it('should create', () => {

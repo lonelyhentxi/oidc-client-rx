@@ -1,16 +1,12 @@
 import { TestBed } from '@/testing';
 import {
-  HTTP_INTERCEPTORS,
-  HttpClient,
-  provideHttpClient,
-  withInterceptors,
-  withInterceptorsFromDi,
-} from '@ngify/http';
-import {
-  HttpTestingController,
+  HTTP_CLIENT_TEST_CONTROLLER,
   provideHttpClientTesting,
-} from '@ngify/http/testing';
-import { firstValueFrom } from 'rxjs';
+} from '@/testing';
+import { HttpClient } from '@ngify/http';
+import type { HttpTestingController } from '@ngify/http/testing';
+import { HTTP_INTERCEPTOR_FNS, HTTP_LEGACY_INTERCEPTORS } from 'oidc-client-rx';
+import { ReplaySubject, firstValueFrom, share } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
@@ -33,20 +29,19 @@ describe('AuthHttpInterceptor', () => {
         providers: [
           ClosestMatchingRouteService,
           {
-            provide: HTTP_INTERCEPTORS,
+            provide: HTTP_LEGACY_INTERCEPTORS,
             useClass: AuthInterceptor,
             multi: true,
           },
           mockProvider(AuthStateService),
           mockProvider(LoggerService),
           mockProvider(ConfigurationService),
-          provideHttpClient(withInterceptorsFromDi()),
           provideHttpClientTesting(),
         ],
       });
 
       httpClient = TestBed.inject(HttpClient);
-      httpTestingController = TestBed.inject(HttpTestingController);
+      httpTestingController = TestBed.inject(HTTP_CLIENT_TEST_CONTROLLER);
       configurationService = TestBed.inject(ConfigurationService);
       authStateService = TestBed.inject(AuthStateService);
       closestMatchingRouteService = TestBed.inject(ClosestMatchingRouteService);
@@ -64,8 +59,12 @@ describe('AuthHttpInterceptor', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: HTTP_INTERCEPTOR_FNS,
+            useFactory: authInterceptor,
+            multi: true,
+          },
           ClosestMatchingRouteService,
-          provideHttpClient(withInterceptors([authInterceptor()])),
           provideHttpClientTesting(),
           mockProvider(AuthStateService),
           mockProvider(LoggerService),
@@ -74,7 +73,7 @@ describe('AuthHttpInterceptor', () => {
       });
 
       httpClient = TestBed.inject(HttpClient);
-      httpTestingController = TestBed.inject(HttpTestingController);
+      httpTestingController = TestBed.inject(HTTP_CLIENT_TEST_CONTROLLER);
       configurationService = TestBed.inject(ConfigurationService);
       authStateService = TestBed.inject(AuthStateService);
       closestMatchingRouteService = TestBed.inject(ClosestMatchingRouteService);
@@ -106,14 +105,27 @@ describe('AuthHttpInterceptor', () => {
         true
       );
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
+      httpRequest.flush('something');
+
       expect(httpRequest.request.headers.has('Authorization')).toEqual(true);
 
-      httpRequest.flush('something');
+      const response = await firstValueFrom(test$);
+
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -132,14 +144,26 @@ describe('AuthHttpInterceptor', () => {
         true
       );
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -159,15 +183,27 @@ describe('AuthHttpInterceptor', () => {
       vi.spyOn(authStateService, 'getAccessToken').mockReturnValue(
         'thisIsAToken'
       );
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -185,14 +221,26 @@ describe('AuthHttpInterceptor', () => {
         true
       );
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -211,14 +259,27 @@ describe('AuthHttpInterceptor', () => {
       );
       vi.spyOn(authStateService, 'getAccessToken').mockReturnValue('');
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -229,14 +290,26 @@ describe('AuthHttpInterceptor', () => {
         false
       );
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+      expect(response).toBeTruthy();
+
       httpTestingController.verify();
     });
 
@@ -260,14 +333,25 @@ describe('AuthHttpInterceptor', () => {
         matchingConfig: null,
       });
 
-      const response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+
+      test$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
       expect(httpRequest.request.headers.has('Authorization')).toEqual(false);
 
       httpRequest.flush('something');
+
+      const response = await firstValueFrom(test$);
+      expect(response).toBeTruthy();
       httpTestingController.verify();
     });
 
@@ -286,11 +370,25 @@ describe('AuthHttpInterceptor', () => {
         true
       );
 
-      let response = await firstValueFrom(httpClient.get(actionUrl));
-      expect(response).toBeTruthy();
+      const test$ = httpClient.get(actionUrl).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
+      const test2$ = httpClient.get(actionUrl2).pipe(
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnComplete: false,
+          resetOnError: false,
+          resetOnRefCountZero: false,
+        })
+      );
 
-      response = await firstValueFrom(httpClient.get(actionUrl2));
-      expect(response).toBeTruthy();
+      test$.subscribe();
+      test2$.subscribe();
 
       const httpRequest = httpTestingController.expectOne(actionUrl);
 
@@ -302,6 +400,14 @@ describe('AuthHttpInterceptor', () => {
 
       httpRequest.flush('something');
       httpRequest2.flush('something');
+
+      const [response, response2] = await Promise.all([
+        firstValueFrom(test$),
+        firstValueFrom(test2$),
+      ]);
+      expect(response).toBeTruthy();
+      expect(response2).toBeTruthy();
+
       httpTestingController.verify();
     });
   }

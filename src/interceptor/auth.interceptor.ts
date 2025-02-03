@@ -40,13 +40,14 @@ export class AuthInterceptor implements HttpInterceptor {
 }
 
 export function authInterceptor(): HttpInterceptorFn {
+  const deps = {
+    configurationService: inject(ConfigurationService),
+    authStateService: inject(AuthStateService),
+    closestMatchingRouteService: inject(ClosestMatchingRouteService),
+    loggerService: inject(LoggerService),
+  };
   return (req, next) => {
-    return interceptRequest(req, next, {
-      configurationService: inject(ConfigurationService),
-      authStateService: inject(AuthStateService),
-      closestMatchingRouteService: inject(ClosestMatchingRouteService),
-      loggerService: inject(LoggerService),
-    });
+    return interceptRequest(req, next, deps);
   };
 }
 
