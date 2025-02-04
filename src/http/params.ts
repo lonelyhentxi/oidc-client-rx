@@ -6,7 +6,10 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import type { HttpParameterCodec } from '@ngify/http';
+import {
+  type HttpParameterCodec,
+  HttpParams as NgifyHttpParams,
+} from '@ngify/http';
 
 /**
  * Provides encoding and decoding of URL parameter and query-string values.
@@ -295,6 +298,13 @@ export class HttpParams {
         // which results in `a=1&&c=1&c=2` instead of `a=1&c=1&c=2` if we don't
         .filter((param) => param !== '')
         .join('&')
+    );
+  }
+
+  toNgify(): NgifyHttpParams {
+    this.init();
+    return new NgifyHttpParams().appendAll(
+      Object.fromEntries(this.map.entries())
     );
   }
 

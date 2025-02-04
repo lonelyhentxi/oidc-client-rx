@@ -95,6 +95,19 @@ export class TestBed {
   static [Symbol.dispose]() {
     TestBed.#instance = undefined;
   }
+
+  static getImportByType<T extends Injector>(typeClass: Type<T>): T {
+    const importItem = TestBed.instance.imports.find(
+      (i): i is T => i instanceof typeClass
+    );
+    if (!importItem) {
+      throw new Error(
+        `can not find import by type ${typeClass.prototype.constructor.name}`
+      );
+    }
+
+    return importItem;
+  }
 }
 
 export function getTestBed() {

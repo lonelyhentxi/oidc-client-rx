@@ -27,7 +27,6 @@ export class StsConfigStaticLoader implements StsConfigLoader {
 
 export class StsConfigHttpLoader implements StsConfigLoader {
   constructor(
-    // biome-ignore lint/style/noParameterProperties: <explanation>
     private readonly configs$:
       | Observable<OpenIdConfiguration>
       | Observable<OpenIdConfiguration>[]
