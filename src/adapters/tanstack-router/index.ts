@@ -1,13 +1,9 @@
 import { InjectionToken, inject } from '@outposts/injection-js';
-import type {
-  AnyRoute,
-  Router,
-  TrailingSlashOption,
-} from '@tanstack/react-router';
+import type { Router } from '@tanstack/react-router';
 import { AbstractRouter } from 'src/router';
 import type { AuthFeature } from '../../provide-auth';
 
-export type TanStackRouter = Router<AnyRoute, TrailingSlashOption, boolean>;
+export type TanStackRouter = Router<any, any, any, any, any, any>;
 
 export const TANSTACK_ROUTER = new InjectionToken<TanStackRouter>(
   'TANSTACK_ROUTER'

@@ -11,17 +11,54 @@
 
 ## Quick Start
 
-@TODO Add More Detailed Informations
+@TODO Add More Details
+
+### Install
 
 ```sh
-# or yarn/npm
-pnpm install oidc-client-rx
+pnpm add oidc-client-rx @outposts/injection-js @abraham/reflection
+# npm install oidc-client-rx @outposts/injection-js @abraham/reflection
+# yarn add oidc-client-rx @outposts/injection-js @abraham/reflection
 ```
 
-```ts
-import {} from ''
+### Basic Usage
+
+```typescript
+import '@abraham/reflection'; // or 'reflect-metadata' | 'core-js/es7/reflect'
+import { type Injector, ReflectiveInjector } from '@outposts/injection-js';
+import { LogLevel, OidcSecurityService, provideAuth } from 'oidc-client-rx';
+
+const injector = ReflectiveInjector.resolveAndCreate(
+  provideAuth(
+    {
+      config: {
+        authority: '<your-authority>',
+        redirectUrl: `${window.location.origin}/auth/callback`,
+        postLogoutRedirectUri: window.location.origin,
+        clientId: '<your-client-id>',
+        scope: 'openid profile email offline_access',
+        responseType: 'code',
+        silentRenew: true,
+        useRefreshToken: true,
+        logLevel: LogLevel.Debug,
+        ...
+      },
+    }
+  )
+) as Injector;
+
+const oidcSecurityService = injector.get(OidcSecurityService);
+
+oidcSecurityService.checkAuth().subscribe((result) => {
+  console.debug('checkAuth result: ', result);
+});
+
+const isAuthenticated$ = oidcSecurityService.isAuthenticated$;
 ```
 
+### More Examples
+
+- [React + TanStack Router](https://github.com/lonelyhentxi/oidc-client-rx/tree/main/examples/react-tanstack-router)
 
 ## License
 

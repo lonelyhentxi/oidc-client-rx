@@ -1,39 +1,76 @@
+import '@abraham/reflection'; // or 'reflect-metadata' | 'core-js/es7/reflect'
 import { type Injector, ReflectiveInjector } from '@outposts/injection-js';
+import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { LogLevel, OidcSecurityService, provideAuth } from 'oidc-client-rx';
-import { InjectorProvider } from 'oidc-client-rx/adapters/react';
+import {
+  InjectorContextVoidInjector,
+  InjectorProvider,
+} from 'oidc-client-rx/adapters/react';
+import { withTanstackRouter } from 'oidc-client-rx/adapters/tanstack-router';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import { routeTree } from './routeTree.gen';
 
-const rootEl = document.getElementById('root');
+import './style.css';
 
-if (rootEl) {
-  const injector = ReflectiveInjector.resolveAndCreate(
-    provideAuth({
+// Set up a Router instance
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  scrollRestoration: true,
+  context: {
+    injector: InjectorContextVoidInjector,
+    oidcSecurityService: {} as OidcSecurityService,
+  },
+});
+
+// Register things for typesafety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+const injector = ReflectiveInjector.resolveAndCreate(
+  provideAuth(
+    {
       config: {
-        authority: '<your authority address here>',
-        redirectUrl: window.location.origin,
+        authority: 'https://k9bor3.logto.app/oidc',
+        redirectUrl: `${window.location.origin}/auth/callback`,
         postLogoutRedirectUri: window.location.origin,
-        clientId: '<your clientId>',
-        scope: 'openid profile email offline_access',
+        clientId: 'zz5vo27wtvtjf36srwtbp',
+        scope: 'openid offline_access',
         responseType: 'code',
         silentRenew: true,
         useRefreshToken: true,
         logLevel: LogLevel.Debug,
+        autoUserInfo: true,
+        renewUserInfoAfterTokenRenew: true,
+        customParamsAuthRequest: {
+          prompt: 'consent',
+        },
       },
-    })
-  ) as Injector;
+    },
+    withTanstackRouter(router)
+  )
+) as Injector;
 
-  // if needed, check when init
-  const oidcSecurityService = injector.get(OidcSecurityService);
-  oidcSecurityService.checkAuthMultiple();
+// if needed, check when init
+const oidcSecurityService = injector.get(OidcSecurityService);
+oidcSecurityService.checkAuth().subscribe();
 
+const rootEl = document.getElementById('root');
+
+if (rootEl) {
   const root = ReactDOM.createRoot(rootEl);
 
   root.render(
     <React.StrictMode>
       <InjectorProvider injector={injector}>
-        <App />
+        <RouterProvider
+          router={router}
+          context={{ injector, oidcSecurityService }}
+        />
       </InjectorProvider>
     </React.StrictMode>
   );
