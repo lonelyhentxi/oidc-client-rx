@@ -111,6 +111,14 @@
     "injection"
   ],
   "pnpm": {
-    "onlyBuiltDependencies": ["core-js"]
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "@swc/core",
+      "core-js",
+      "edgedriver",
+      "esbuild",
+      "geckodriver",
+      "msw"
+    ]
   }
 }
