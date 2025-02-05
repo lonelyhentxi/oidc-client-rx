@@ -1,5 +1,5 @@
 import { HttpClientTestingBackend } from '@ngify/http/testing';
-import { InjectionToken, type Provider } from 'injection-js';
+import { InjectionToken, type Provider } from '@outposts/injection-js';
 import { HTTP_BACKEND, provideHttpClient } from 'oidc-client-rx';
 
 export const HTTP_CLIENT_TEST_CONTROLLER =

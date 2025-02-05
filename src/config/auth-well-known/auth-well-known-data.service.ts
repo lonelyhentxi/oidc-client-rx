@@ -1,4 +1,4 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, throwError } from 'rxjs';
 import { map, retry } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
@@ -42,7 +42,7 @@ export class AuthWellKnownDataService {
             introspectionEndpoint: wellKnownEndpoints.introspection_endpoint,
             parEndpoint:
               wellKnownEndpoints.pushed_authorization_request_endpoint,
-          } as AuthWellKnownEndpoints)
+          }) as AuthWellKnownEndpoints
       ),
       map((mappedWellKnownEndpoints) => ({
         ...mappedWellKnownEndpoints,

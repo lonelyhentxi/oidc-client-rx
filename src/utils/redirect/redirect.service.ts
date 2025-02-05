@@ -1,6 +1,5 @@
-
+import { Injectable, inject } from '@outposts/injection-js';
 import { DOCUMENT } from '../../dom';
-import { inject, Injectable } from 'injection-js';
 
 @Injectable()
 export class RedirectService {

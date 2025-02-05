@@ -1,17 +1,15 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": ".",
     "composite": true,
-    "noUncheckedIndexedAccess": true,
-    "outDir": "./dist/tsc-test",
+    "rootDir": ".",
     "types": ["vitest/globals", "node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "noEmit": true,
     "paths": {
       "@/testing": ["./src/testing"],
       "@/testing/*": ["./src/testing/*"],
-      "injection-js": ["./node_modules/injection-js/lib/index.ts"],
       "oidc-client-rx": ["./src"],
       "oidc-client-rx/*": ["./src/*"]
     }

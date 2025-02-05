@@ -14,24 +14,15 @@ export interface UrlTree {
   toString(): string;
 }
 
-export interface NavigationExtras {
-  [key: string]: any;
+export interface Navigation<URL extends UrlTree = UrlTree> {
+  extractedUrl: URL;
 }
 
-export interface Navigation {
-  id: number;
-  initialUrl: UrlTree;
-  extractedUrl: UrlTree;
-  finalUrl?: UrlTree | undefined;
-  trigger: 'imperative' | 'popstate' | 'hashchange';
-  previousNavigation: Navigation | null;
-  extras?: NavigationExtras;
-}
-
-export abstract class AbstractRouter {
+export abstract class AbstractRouter<
+  URL extends UrlTree = UrlTree,
+  NAVIGATION extends Navigation<URL> = Navigation<URL>,
+> {
   abstract navigateByUrl(url: string): void;
 
-  abstract getCurrentNavigation(): Navigation;
-
-  abstract parseUrl(_url: string): any;
+  abstract getCurrentNavigation(): NAVIGATION;
 }

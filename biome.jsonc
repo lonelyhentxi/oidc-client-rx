@@ -6,7 +6,7 @@
       "style": {
         "noNonNullAssertion": "off",
         "noParameterAssign": "off",
-        "useFilenamingConvention": "warn",
+        "useFilenamingConvention": "off",
         "noParameterProperties": "off"
       },
       "suspicious": {

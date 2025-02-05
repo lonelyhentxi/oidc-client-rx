@@ -1,4 +1,4 @@
-import { inject } from 'injection-js';
+import { inject } from '@outposts/injection-js';
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation>
 export interface AbstractType<T> extends Function {

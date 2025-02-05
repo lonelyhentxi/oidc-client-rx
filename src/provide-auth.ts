@@ -1,15 +1,12 @@
-import type { Provider } from 'injection-js';
-import { firstValueFrom } from 'rxjs';
+import type { Provider } from '@outposts/injection-js';
 import {
   PASSED_CONFIG,
   type PassedInitialConfig,
   createStaticLoader,
 } from './auth-config';
 import { StsConfigLoader } from './config/loader/config-loader';
-import { APP_INITIALIZER } from './injection';
 import { AbstractLoggerService } from './logging/abstract-logger.service';
 import { ConsoleLoggerService } from './logging/console-logger.service';
-import { OidcSecurityService } from './oidc.security.service';
 import { AbstractSecurityStorage } from './storage/abstract-security-storage';
 import { DefaultSessionStorageService } from './storage/default-sessionstorage.service';
 
@@ -50,27 +47,4 @@ export function _provideAuth(passedConfig: PassedInitialConfig): Provider[] {
     },
     { provide: AbstractLoggerService, useClass: ConsoleLoggerService },
   ];
-}
-
-/**
- * Configures an app initializer, which is called before the app starts, and
- * resolves any OAuth callback variables.
- * When used, it replaces the need to manually call
- * `OidcSecurityService.checkAuth(...)` or
- * `OidcSecurityService.checkAuthMultiple(...)`.
- *
- * @see https://angular.dev/api/core/APP_INITIALIZER
- */
-export function withAppInitializerAuthCheck(): AuthFeature {
-  return {
-    ɵproviders: [
-      {
-        provide: APP_INITIALIZER,
-        useFactory: (oidcSecurityService: OidcSecurityService) =>
-          oidcSecurityService.checkAuthMultiple(),
-        multi: true,
-        deps: [OidcSecurityService],
-      },
-    ],
-  };
 }

@@ -1,4 +1,4 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { CryptoService } from '../utils/crypto/crypto.service';
 
 @Injectable()

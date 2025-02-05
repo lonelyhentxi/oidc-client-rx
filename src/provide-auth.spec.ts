@@ -1,8 +1,6 @@
 import { TestBed } from '@/testing';
-import { mockClass, mockProvider } from '@/testing/mock';
-import { APP_INITIALIZER } from 'oidc-client-rx';
+import { mockProvider } from '@/testing/mock';
 import { of } from 'rxjs';
-import { vi } from 'vitest';
 import { PASSED_CONFIG } from './auth-config';
 import { ConfigurationService } from './config/config.service';
 import {
@@ -10,8 +8,7 @@ import {
   StsConfigLoader,
   StsConfigStaticLoader,
 } from './config/loader/config-loader';
-import { OidcSecurityService } from './oidc.security.service';
-import { provideAuth, withAppInitializerAuthCheck } from './provide-auth';
+import { provideAuth } from './provide-auth';
 
 describe('provideAuth', () => {
   describe('APP_CONFIG', () => {
@@ -59,37 +56,37 @@ describe('provideAuth', () => {
     });
   });
 
-  describe('features', () => {
-    let oidcSecurityServiceMock: OidcSecurityService;
-    let spy: any;
+  // describe('features', () => {
+  //   let oidcSecurityServiceMock: OidcSecurityService;
+  //   let spy: any;
 
-    beforeEach(async () => {
-      //@ts-ignore
+  //   beforeEach(async () => {
+  //     //@ts-ignore
 
-      oidcSecurityServiceMock = new (mockClass(OidcSecurityService))();
-      spy = vi.spyOn(oidcSecurityServiceMock, 'checkAuthMultiple');
-      await TestBed.configureTestingModule({
-        providers: [
-          provideAuth(
-            { config: { authority: 'something' } },
-            withAppInitializerAuthCheck()
-          ),
-          mockProvider(ConfigurationService),
-          {
-            provide: OidcSecurityService,
-            useValue: oidcSecurityServiceMock,
-          },
-        ],
-      }).compileComponents();
-    });
+  //     oidcSecurityServiceMock = new (mockClass(OidcSecurityService))();
+  //     spy = vi.spyOn(oidcSecurityServiceMock, 'checkAuthMultiple');
+  //     await TestBed.configureTestingModule({
+  //       providers: [
+  //         provideAuth(
+  //           { config: { authority: 'something' } },
+  //           withAppInitializerAuthCheck()
+  //         ),
+  //         mockProvider(ConfigurationService),
+  //         {
+  //           provide: OidcSecurityService,
+  //           useValue: oidcSecurityServiceMock,
+  //         },
+  //       ],
+  //     }).compileComponents();
+  //   });
 
-    it('should provide APP_INITIALIZER config', () => {
-      const config = TestBed.inject(APP_INITIALIZER);
-      expect(
-        config.length,
-        'Expected an APP_INITIALIZER to be registered'
-      ).toBe(1);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-  });
+  // it('should provide APP_INITIALIZER config', () => {
+  //   const config = TestBed.inject(APP_INITIALIZER);
+  //   expect(
+  //     config.length,
+  //     'Expected an APP_INITIALIZER to be registered'
+  //   ).toBe(1);
+  //   expect(spy).toHaveBeenCalledTimes(1);
+  // });
+  // });
 });

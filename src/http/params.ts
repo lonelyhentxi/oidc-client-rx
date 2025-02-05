@@ -88,6 +88,7 @@ function paramParser(
     // The `window.location.search` can be used while creating an instance of the `HttpParams` class
     // (e.g. `new HttpParams({ fromString: window.location.search })`). The `window.location.search`
     // may start with the `?` char, so we strip it if it's present.
+    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     const params: string[] = rawParams.replace(/^\?/, '').split('&');
     params.forEach((param: string) => {
       const eqIdx = param.indexOf('=');
@@ -304,7 +305,7 @@ export class HttpParams {
   toNgify(): NgifyHttpParams {
     this.init();
     return new NgifyHttpParams().appendAll(
-      Object.fromEntries(this.map.entries())
+      Object.fromEntries(this.map!.entries())
     );
   }
 

@@ -1,5 +1,5 @@
 import { HttpHeaders } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, of, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';

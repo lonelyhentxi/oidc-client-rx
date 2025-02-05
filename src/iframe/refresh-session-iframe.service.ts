@@ -1,4 +1,4 @@
-import { Injectable, inject } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import {
   Observable,
   ReplaySubject,
@@ -82,14 +82,14 @@ export class RefreshSessionIframeService {
   ): void {
     const instanceId = Math.random();
 
-    const oidcSilentRenewInit$ = fromEventPattern(
+    const oidcSilentRenewInit$ = fromEventPattern<CustomEvent>(
       (handler) =>
-        this.document.defaultView.window.addEventListener(
+        this.document.defaultView?.window?.addEventListener(
           'oidc-silent-renew-init',
           handler
         ),
       (handler) =>
-        this.document.defaultView.window.removeEventListener(
+        this.document.defaultView?.window?.removeEventListener(
           'oidc-silent-renew-init',
           handler
         )
@@ -104,12 +104,12 @@ export class RefreshSessionIframeService {
     }
     this.silentRenewEventHandlerSubscription = fromEventPattern<CustomEvent>(
       (handler) =>
-        this.document.defaultView.window.addEventListener(
+        this.document.defaultView?.window?.addEventListener(
           'oidc-silent-renew-message',
           handler
         ),
       (handler) =>
-        this.document.defaultView.window.removeEventListener(
+        this.document.defaultView?.window?.removeEventListener(
           'oidc-silent-renew-message',
           handler
         )

@@ -1,14 +1,17 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": ".",
-    "outDir": "./dist/tsc-lib",
-    "lib": ["dom", "es2018"],
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "paths": {
-      "injection-js": ["./node_modules/injection-js/lib/index.ts"]
-    }
+    "lib": ["ES2021", "DOM", "DOM.Iterable"]
   },
   "include": ["src"],
   "exclude": ["src/testing/**/*", "**/*.spec.ts"]

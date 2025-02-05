@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+**/dist
 /tmp
 /out-tsc
 # Only exists if Bazel was run
@@ -45,7 +46,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-/.angulardoc.json
 debug.log
 
 /.husky
@@ -55,3 +55,5 @@ debug.log
 /blob-report/
 /playwright/.cache/
 /.vitest
+/.rslib
+**/*.tsbuildinfo

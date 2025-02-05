@@ -1,0 +1,55 @@
+name: Build, Lint & Test Lib
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_job:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build, Lint and Test Library
+    steps:
+      - name: Check Permissions When Workflow Dispatch
+        id: check_admin
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node and Install Dependencies
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile]
+        with:
+          node-version: 22
+
+      - name: Linting Library
+        run: npm run lint
+
+      - name: Testing Frontend
+        run: npm run test-ci
+
+      - name: 'Report Coverage'
+        if: always()
+        uses:  davelosert/vitest-coverage-report-action@v2
+
+      - name: Building Frontend
+        run: npm run build
+
+      - name: Show files
+        run: ls
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oidc_client_rx_artifact
+          path: dist

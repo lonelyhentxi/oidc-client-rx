@@ -1,5 +1,5 @@
 import { HttpClient, type HttpHeaders } from '@ngify/http';
-import { Injectable, inject } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import type { Observable } from 'rxjs';
 import type { HttpParams } from '../http';
 
@@ -13,7 +13,7 @@ export class HttpBaseService {
   ): Observable<T> {
     return this.http.get<T>(url, {
       ...options,
-      params: options.params.toNgify(),
+      params: options.params?.toNgify(),
     });
   }
 
@@ -24,7 +24,7 @@ export class HttpBaseService {
   ): Observable<T> {
     return this.http.post<T>(url, body, {
       ...options,
-      params: options.params.toNgify(),
+      params: options.params?.toNgify(),
     });
   }
 }

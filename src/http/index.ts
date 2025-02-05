@@ -8,9 +8,13 @@ import {
   withInterceptors,
   withLegacyInterceptors,
 } from '@ngify/http';
-import { InjectionToken, Optional, type Provider } from 'injection-js';
+import {
+  InjectionToken,
+  Optional,
+  type Provider,
+} from '@outposts/injection-js';
 import type { ArrayOrNullableOne } from '../utils/types';
-export { HttpParams, HttpParamsOptions } from './params';
+export { HttpParams, type HttpParamsOptions } from './params';
 
 export const HTTP_FEATURES = new InjectionToken<HttpFeature[]>('HTTP_FEATURES');
 

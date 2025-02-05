@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from 'injection-js';
+﻿import { Injectable, inject } from '@outposts/injection-js';
 import { base64url } from 'rfc4648';
 import { type Observable, from, of } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
@@ -390,7 +390,6 @@ export class TokenValidationService {
     localState: any,
     configuration: OpenIdConfiguration
   ): boolean {
-    console.error(state, localState, `${state}`, `${localState}`);
     if (`${state}` !== `${localState}`) {
       this.loggerService.logDebug(
         configuration,

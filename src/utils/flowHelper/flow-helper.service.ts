@@ -1,4 +1,4 @@
-import { Injectable } from 'injection-js';
+import { Injectable } from '@outposts/injection-js';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 
 @Injectable()

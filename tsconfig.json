@@ -1,22 +1,5 @@
 {
-  "compilerOptions": {
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "moduleResolution": "bundler",
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
-    "useDefineForClassFields": true,
-    "resolveJsonModule": true
-  },
+  "extends": "./tsconfig.base.json",
   "files": [],
   "include": [],
   "exclude": ["node_modules"],
@@ -29,6 +12,9 @@
     },
     {
       "path": "./tsconfig.scripts.json"
+    },
+    {
+      "path": "./examples/react-tanstack-router"
     }
   ]
 }

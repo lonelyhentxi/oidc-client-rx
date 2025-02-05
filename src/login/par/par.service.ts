@@ -1,5 +1,5 @@
 import { HttpHeaders } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, throwError } from 'rxjs';
 import { catchError, map, retry, switchMap } from 'rxjs/operators';
 import { DataService } from '../../api/data.service';
@@ -74,7 +74,8 @@ export class ParService {
                 };
               }),
               catchError((error) => {
-                const errorMessage = 'There was an error on ParService postParRequest';
+                const errorMessage =
+                  'There was an error on ParService postParRequest';
 
                 this.loggerService.logError(configuration, errorMessage, error);
 

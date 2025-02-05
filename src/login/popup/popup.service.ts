@@ -1,7 +1,7 @@
-import { DOCUMENT } from '../../dom';
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, Subject } from 'rxjs';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
+import { DOCUMENT } from '../../dom';
 import { LoggerService } from '../../logging/logger.service';
 import { StoragePersistenceService } from '../../storage/storage-persistence.service';
 import type { PopupOptions } from './popup-options';

@@ -4,8 +4,8 @@ import {
   type Provider,
   ReflectiveInjector,
   type Type,
-} from 'injection-js';
-import { setCurrentInjector } from 'injection-js/lib/injector_compatibility';
+  runInInjectionContext,
+} from '@outposts/injection-js';
 
 export interface TestModuleMetadata {
   providers?: Provider[];
@@ -45,9 +45,6 @@ export class TestBed {
     return newTestBed;
   }
 
-  /**
-   * 在 TestBed 的注入上下文中运行函数
-   */
   static runInInjectionContext<T>(fn: () => T): T {
     const injector = TestBed.#instance?.injector;
     if (!injector) {
@@ -56,16 +53,7 @@ export class TestBed {
       );
     }
 
-    // 保存当前的注入器
-    const previousInjector = setCurrentInjector(injector);
-
-    try {
-      // 在注入上下文中执行函数
-      return fn();
-    } finally {
-      // 恢复之前的注入器
-      setCurrentInjector(previousInjector);
-    }
+    return runInInjectionContext(injector, fn);
   }
 
   compileComponents(): Promise<any> {

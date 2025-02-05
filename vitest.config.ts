@@ -10,20 +10,23 @@ export default defineConfig({
     include: ['src/**/*.spec.ts'],
     globals: true,
     restoreMocks: true,
-    // browser: {
-    //   provider: 'playwright', // or 'webdriverio'
-    //   enabled: true,
-    //   instances: [{ browser: 'chromium' }],
-    // },
+    coverage: {
+      // you can include other reporters, but 'json-summary' is required, json is recommended
+      reporter: ['text', 'json-summary', 'json'],
+      // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
+      reportOnFailure: true,
+    },
   },
   plugins: [
     tsconfigPaths(),
     swc.vite({
       include: /\.[mc]?[jt]sx?$/,
+      // for git+ package only
       exclude: [
-        /node_modules\/(?!injection-js|\.pnpm)/,
-        /node_modules\/\.pnpm\/(?!injection-js)/,
+        /node_modules\/(?!injection-js|@outposts\/injection-js|\.pnpm)/,
+        /node_modules\/\.pnpm\/(?!injection-js|@outposts\/injection-js)/,
       ] as any,
+      tsconfigFile: './tsconfig.spec.json',
     }),
   ],
 });

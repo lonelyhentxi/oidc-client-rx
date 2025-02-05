@@ -4,6 +4,7 @@ test('has title', async ({ page }) => {
   await page.goto('https://playwright.dev/');
 
   // Expect a title "to contain" a substring.
+  // biome-ignore lint/performance/useTopLevelRegex: <explanation>
   await expect(page).toHaveTitle(/Playwright/);
 });
 

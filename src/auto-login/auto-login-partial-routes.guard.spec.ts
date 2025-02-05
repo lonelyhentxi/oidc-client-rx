@@ -1,4 +1,4 @@
-import { TestBed, mockRouterProvider } from '@/testing';
+import { type MockRouter, TestBed, mockRouterProvider } from '@/testing';
 import {
   AbstractRouter,
   type ActivatedRouteSnapshot,
@@ -43,7 +43,7 @@ describe('AutoLoginPartialRoutesGuard', () => {
     let storagePersistenceService: StoragePersistenceService;
     let configurationService: ConfigurationService;
     let autoLoginService: AutoLoginService;
-    let router: AbstractRouter;
+    let router: MockRouter;
 
     beforeEach(() => {
       authStateService = TestBed.inject(AuthStateService);
@@ -293,11 +293,6 @@ describe('AutoLoginPartialRoutesGuard', () => {
           extractedUrl: router.parseUrl(
             'some-url12/with/some-param?queryParam=true'
           ),
-          extras: {},
-          id: 1,
-          initialUrl: router.parseUrl(''),
-          previousNavigation: null,
-          trigger: 'imperative',
         });
 
         await firstValueFrom(guard.canLoad());
@@ -342,7 +337,7 @@ describe('AutoLoginPartialRoutesGuard', () => {
       let storagePersistenceService: StoragePersistenceService;
       let configurationService: ConfigurationService;
       let autoLoginService: AutoLoginService;
-      let router: AbstractRouter;
+      let router: MockRouter;
 
       beforeEach(() => {
         authStateService = TestBed.inject(AuthStateService);
@@ -398,11 +393,6 @@ describe('AutoLoginPartialRoutesGuard', () => {
           extractedUrl: router.parseUrl(
             'some-url12/with/some-param?queryParam=true'
           ),
-          extras: {},
-          id: 1,
-          initialUrl: router.parseUrl(''),
-          previousNavigation: null,
-          trigger: 'imperative',
         });
 
         vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(

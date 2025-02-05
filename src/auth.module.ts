@@ -3,7 +3,7 @@ import {
   Injector,
   ReflectiveInjector,
   type Type,
-} from 'injection-js';
+} from '@outposts/injection-js';
 import type { PassedInitialConfig } from './auth-config';
 import type { Module } from './injection';
 import { _provideAuth } from './provide-auth';
@@ -34,7 +34,7 @@ export class AuthModule extends Injector {
   }
 
   get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T): T;
-  get(token: any, notFoundValue?: any);
+  get(token: any, notFoundValue?: any): any;
   get(token: unknown, notFoundValue?: unknown): any {
     return this.injector.get(token, notFoundValue);
   }

@@ -1,4 +1,4 @@
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import type { OpenIdConfiguration } from '../../config/openid-configuration';
 import { LoggerService } from '../../logging/logger.service';
 import { FlowHelper } from '../../utils/flowHelper/flow-helper.service';

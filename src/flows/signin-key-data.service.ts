@@ -1,5 +1,5 @@
 import { HttpResponse } from '@ngify/http';
-import { inject, Injectable } from 'injection-js';
+import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { DataService } from '../api/data.service';

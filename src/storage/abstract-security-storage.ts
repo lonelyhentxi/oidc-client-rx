@@ -1,4 +1,4 @@
-import { Injectable } from 'injection-js';
+import { Injectable } from '@outposts/injection-js';
 
 /**
  * Implement this class-interface to create a custom storage.

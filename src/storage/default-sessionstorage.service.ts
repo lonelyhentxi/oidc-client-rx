@@ -1,4 +1,4 @@
-import { Injectable } from 'injection-js';
+import { Injectable } from '@outposts/injection-js';
 import type { AbstractSecurityStorage } from './abstract-security-storage';
 
 @Injectable()
