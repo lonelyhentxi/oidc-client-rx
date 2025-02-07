@@ -1,11 +1,15 @@
-import { TestBed } from '@/testing';
 import {
+  type DefaultHttpTestingController,
   HTTP_CLIENT_TEST_CONTROLLER,
+  TestBed,
   provideHttpClientTesting,
 } from '@/testing';
-import { HttpClient } from '@ngify/http';
-import type { HttpTestingController } from '@ngify/http/testing';
-import { HTTP_INTERCEPTOR_FNS, HTTP_LEGACY_INTERCEPTORS } from 'oidc-client-rx';
+import {
+  type DefaultHttpClient,
+  HTTP_CLIENT,
+  HTTP_INTERCEPTOR_FNS,
+  HTTP_LEGACY_INTERCEPTORS,
+} from 'oidc-client-rx';
 import { ReplaySubject, firstValueFrom, share } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthStateService } from '../auth-state/auth-state.service';
@@ -16,9 +20,9 @@ import { AuthInterceptor, authInterceptor } from './auth.interceptor';
 import { ClosestMatchingRouteService } from './closest-matching-route.service';
 
 describe('AuthHttpInterceptor', () => {
-  let httpTestingController: HttpTestingController;
+  let httpTestingController: DefaultHttpTestingController;
   let configurationService: ConfigurationService;
-  let httpClient: HttpClient;
+  let httpClient: DefaultHttpClient;
   let authStateService: AuthStateService;
   let closestMatchingRouteService: ClosestMatchingRouteService;
 
@@ -40,7 +44,7 @@ describe('AuthHttpInterceptor', () => {
         ],
       });
 
-      httpClient = TestBed.inject(HttpClient);
+      httpClient = TestBed.inject(HTTP_CLIENT) as DefaultHttpClient;
       httpTestingController = TestBed.inject(HTTP_CLIENT_TEST_CONTROLLER);
       configurationService = TestBed.inject(ConfigurationService);
       authStateService = TestBed.inject(AuthStateService);
@@ -72,7 +76,7 @@ describe('AuthHttpInterceptor', () => {
         ],
       });
 
-      httpClient = TestBed.inject(HttpClient);
+      httpClient = TestBed.inject(HTTP_CLIENT) as DefaultHttpClient;
       httpTestingController = TestBed.inject(HTTP_CLIENT_TEST_CONTROLLER);
       configurationService = TestBed.inject(ConfigurationService);
       authStateService = TestBed.inject(AuthStateService);

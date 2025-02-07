@@ -1,7 +1,12 @@
 import '@abraham/reflection'; // or 'reflect-metadata' | 'core-js/es7/reflect'
 import { type Injector, ReflectiveInjector } from '@outposts/injection-js';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { LogLevel, OidcSecurityService, provideAuth } from 'oidc-client-rx';
+import {
+  LogLevel,
+  OidcSecurityService,
+  provideAuth,
+  withDefaultFeatures,
+} from 'oidc-client-rx';
 import {
   InjectorContextVoidInjector,
   InjectorProvider,
@@ -51,6 +56,11 @@ const injector = ReflectiveInjector.resolveAndCreate(
         },
       },
     },
+    withDefaultFeatures(
+      // the after feature will replace the before same type feature
+      // so the following line can be ignored
+      { router: { enabled: false } }
+    ),
     withTanstackRouter(router)
   )
 ) as Injector;

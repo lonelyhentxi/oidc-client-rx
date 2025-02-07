@@ -1,17 +1,17 @@
 import { TestBed } from '@/testing';
 import {
+  type DefaultHttpTestingController,
   HTTP_CLIENT_TEST_CONTROLLER,
   provideHttpClientTesting,
 } from '@/testing/http';
 import { HttpHeaders } from '@ngify/http';
-import type { HttpTestingController } from '@ngify/http/testing';
 import { ReplaySubject, firstValueFrom, share } from 'rxjs';
 import { DataService } from './data.service';
 import { HttpBaseService } from './http-base.service';
 
 describe('Data Service', () => {
   let dataService: DataService;
-  let httpMock: HttpTestingController;
+  let httpMock: DefaultHttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

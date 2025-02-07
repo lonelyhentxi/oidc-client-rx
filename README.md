@@ -26,7 +26,7 @@ pnpm add oidc-client-rx @outposts/injection-js @abraham/reflection
 ```typescript
 import '@abraham/reflection'; // or 'reflect-metadata' | 'core-js/es7/reflect'
 import { type Injector, ReflectiveInjector } from '@outposts/injection-js';
-import { LogLevel, OidcSecurityService, provideAuth } from 'oidc-client-rx';
+import { LogLevel, OidcSecurityService, provideAuth, withDefaultFeatures } from 'oidc-client-rx';
 
 const injector = ReflectiveInjector.resolveAndCreate(
   provideAuth(
@@ -43,7 +43,8 @@ const injector = ReflectiveInjector.resolveAndCreate(
         logLevel: LogLevel.Debug,
         ...
       },
-    }
+    },
+    withDefaultFeatures()
   )
 ) as Injector;
 

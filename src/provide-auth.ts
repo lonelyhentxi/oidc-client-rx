@@ -1,4 +1,3 @@
-import { HttpClient } from '@ngify/http';
 import type { Provider } from '@outposts/injection-js';
 import { DataService } from './api/data.service';
 import { HttpBaseService } from './api/http-base.service';
@@ -24,6 +23,7 @@ import { StsConfigLoader } from './config/loader/config-loader';
 import { ConfigValidationService } from './config/validation/config-validation.service';
 import { DOCUMENT } from './dom';
 import { JwkExtractor } from './extractors/jwk.extractor';
+import type { AuthFeature } from './features';
 import { CodeFlowCallbackHandlerService } from './flows/callback-handling/code-flow-callback-handler.service';
 import { HistoryJwtKeysCallbackHandlerService } from './flows/callback-handling/history-jwt-keys-callback-handler.service';
 import { ImplicitFlowCallbackHandlerService } from './flows/callback-handling/implicit-flow-callback-handler.service';
@@ -62,10 +62,7 @@ import { UserService } from './user-data/user.service';
 import { CryptoService } from './utils/crypto/crypto.service';
 import { EqualityService } from './utils/equality/equality.service';
 import { FlowHelper } from './utils/flowHelper/flow-helper.service';
-import {
-  PLATFORM_ID,
-  PlatformProvider,
-} from './utils/platform-provider/platform.provider';
+import { PlatformProvider } from './utils/platform-provider/platform.provider';
 import { RedirectService } from './utils/redirect/redirect.service';
 import { TokenHelperService } from './utils/tokenHelper/token-helper.service';
 import { CurrentUrlService } from './utils/url/current-url.service';
@@ -75,20 +72,17 @@ import { JwtWindowCryptoService } from './validation/jwt-window-crypto.service';
 import { StateValidationService } from './validation/state-validation.service';
 import { TokenValidationService } from './validation/token-validation.service';
 
-/**
- * A feature to be used with `provideAuth`.
- */
-export interface AuthFeature {
-  ɵproviders: Provider[];
-}
-
 export function provideAuth(
   passedConfig: PassedInitialConfig,
-  ...features: AuthFeature[]
+  ...features: (AuthFeature | AuthFeature[])[]
 ): Provider[] {
   const providers = _provideAuth(passedConfig);
 
-  for (const feature of features) {
+  const normailizedFeatures = features
+    .flat(Number.MAX_SAFE_INTEGER)
+    .filter(Boolean) as AuthFeature[];
+
+  for (const feature of normailizedFeatures) {
     providers.push(...feature.ɵproviders);
   }
 
@@ -97,15 +91,6 @@ export function provideAuth(
 
 export function _provideAuth(passedConfig: PassedInitialConfig): Provider[] {
   return [
-    {
-      provide: DOCUMENT,
-      useFactory: () => document,
-    },
-    HttpClient,
-    {
-      provide: PLATFORM_ID,
-      useValue: 'browser',
-    },
     // Make the PASSED_CONFIG available through injection
     { provide: PASSED_CONFIG, useValue: passedConfig },
     // Create the loader: Either the one getting passed or a static one
