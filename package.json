@@ -1,5 +1,6 @@
 {
   "name": "oidc-client-rx",
+  "version": "0.1.0-alpha.1",
   "homepage": "https://github.com/lonelyhentxi/oidc-client-rx",
   "author": "lonelyhentxi",
   "description": "ReactiveX enhanced OIDC and OAuth2 protocol support for browser-based JavaScript applications",
@@ -10,7 +11,6 @@
   "bugs": {
     "url": "https://github.com/lonelyhentxi/oidc-client-rx/issues"
   },
-  "version": "0.1.0",
   "type": "module",
   "exports": {
     ".": {
@@ -32,14 +32,13 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "licenses", "LICENSE", "README.md"],
   "scripts": {
     "build": "rslib build",
     "dev": "rslib build --watch",
     "test": "vitest --coverage",
     "test-ci": "vitest --watch=false --coverage",
-    "pack": "npm run build && npm pack ./dist",
-    "publish": "npm run build && npm publish ./dist",
+    "prepublishOnly": "npm run build",
     "lint": "ultracite lint",
     "format": "ultracite format",
     "cli": "tsx scripts/cli.ts"
