@@ -2,6 +2,10 @@ import { TestBed } from '@/testing';
 import { vi } from 'vitest';
 import { DefaultLocalStorageService } from './default-localstorage.service';
 
+/**
+ * if use jsdom, then use Storage.prototype, https://github.com/jsdom/jsdom/issues/2318
+ */
+
 describe('DefaultLocalStorageService', () => {
   let service: DefaultLocalStorageService;
 
@@ -18,8 +22,7 @@ describe('DefaultLocalStorageService', () => {
 
   describe('read', () => {
     it('should call localstorage.getItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'getItem');
+      const spy = vi.spyOn(localStorage, 'getItem');
 
       service.read('henlo');
 
@@ -29,8 +32,7 @@ describe('DefaultLocalStorageService', () => {
 
   describe('write', () => {
     it('should call localstorage.setItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'setItem');
+      const spy = vi.spyOn(localStorage, 'setItem');
 
       service.write('henlo', 'furiend');
 
@@ -40,8 +42,7 @@ describe('DefaultLocalStorageService', () => {
 
   describe('remove', () => {
     it('should call localstorage.removeItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'removeItem');
+      const spy = vi.spyOn(localStorage, 'removeItem');
 
       service.remove('henlo');
 
@@ -51,8 +52,7 @@ describe('DefaultLocalStorageService', () => {
 
   describe('clear', () => {
     it('should call localstorage.clear', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'clear');
+      const spy = vi.spyOn(localStorage, 'clear');
 
       service.clear();
 

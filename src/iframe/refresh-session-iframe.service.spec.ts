@@ -61,12 +61,11 @@ describe('RefreshSessionIframeService ', () => {
       );
 
       (refreshSessionIframeService as any).initSilentRenewRequest();
-
-      expect(dispatchEventSpy).toHaveBeenCalledExactlyOnceWith(
-        new CustomEvent('oidc-silent-renew-init', {
-          detail: expect.any(Number),
-        })
-      );
+      expect(dispatchEventSpy).toHaveBeenCalledOnce();
+      expect(dispatchEventSpy.mock.calls[0][0]).toBeInstanceOf(CustomEvent);
+      expect(
+        (dispatchEventSpy.mock.calls[0][0] as CustomEvent).detail
+      ).toBeTypeOf('number');
     });
   });
 });

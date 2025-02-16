@@ -6,7 +6,7 @@ export default defineConfig({
   cacheDir: '.vitest',
   test: {
     setupFiles: ['src/testing/init-test.ts'],
-    environment: 'jsdom',
+    environment: 'happy-dom',
     include: ['src/**/*.spec.ts'],
     globals: true,
     restoreMocks: true,
@@ -15,6 +15,14 @@ export default defineConfig({
       reporter: ['text', 'json-summary', 'json'],
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
+      exclude: [
+        'vitest.config.ts',
+        'playwright.config.ts',
+        'rslib.config.ts',
+        'scripts/**',
+        'examples/**',
+        'dist/**',
+      ],
     },
   },
   plugins: [

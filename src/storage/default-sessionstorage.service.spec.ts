@@ -2,6 +2,9 @@ import { TestBed } from '@/testing';
 import { vi } from 'vitest';
 import { DefaultSessionStorageService } from './default-sessionstorage.service';
 
+/**
+ * if use jsdom, then use Storage.prototype, https://github.com/jsdom/jsdom/issues/2318
+ */
 describe('DefaultSessionStorageService', () => {
   let service: DefaultSessionStorageService;
 
@@ -18,8 +21,7 @@ describe('DefaultSessionStorageService', () => {
 
   describe('read', () => {
     it('should call sessionstorage.getItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'getItem');
+      const spy = vi.spyOn(sessionStorage, 'getItem');
 
       service.read('henlo');
 
@@ -29,8 +31,7 @@ describe('DefaultSessionStorageService', () => {
 
   describe('write', () => {
     it('should call sessionstorage.setItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'setItem');
+      const spy = vi.spyOn(sessionStorage, 'setItem');
 
       service.write('henlo', 'furiend');
 
@@ -40,8 +41,7 @@ describe('DefaultSessionStorageService', () => {
 
   describe('remove', () => {
     it('should call sessionstorage.removeItem', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'removeItem');
+      const spy = vi.spyOn(sessionStorage, 'removeItem');
 
       service.remove('henlo');
 
@@ -51,8 +51,7 @@ describe('DefaultSessionStorageService', () => {
 
   describe('clear', () => {
     it('should call sessionstorage.clear', () => {
-      // https://github.com/jsdom/jsdom/issues/2318
-      const spy = vi.spyOn(Storage.prototype, 'clear');
+      const spy = vi.spyOn(sessionStorage, 'clear');
 
       service.clear();
 

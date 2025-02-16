@@ -31,7 +31,7 @@ export abstract class AbstractRouter<
 }
 
 export class VanillaLocationRouter extends AbstractRouter {
-  private document = inject(DOCUMENT);
+  protected document = inject(DOCUMENT);
 
   private get location(): Location {
     const location = this.document.defaultView?.window?.location;
