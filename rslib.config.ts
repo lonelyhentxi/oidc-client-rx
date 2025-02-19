@@ -11,7 +11,7 @@ export default defineConfig({
       bundle: false,
       dts: {
         bundle: false,
-        build: true,
+        build: false,
         distPath: './dist',
       },
     },
