@@ -1,6 +1,6 @@
 {
   "name": "oidc-client-rx",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "homepage": "https://github.com/lonelyhentxi/oidc-client-rx",
   "author": "lonelyhentxi",
   "description": "ReactiveX enhanced OIDC and OAuth2 protocol support for browser-based JavaScript applications",
@@ -45,7 +45,8 @@
   },
   "dependencies": {
     "@ngify/http": "^2.0.4",
-    "@outposts/injection-js": "^2.5.1"
+    "@outposts/injection-js": "^2.5.1",
+    "rfc4648": "^1.5.0"
   },
   "peerDependencies": {
     "@tanstack/react-router": "*",
@@ -72,7 +73,6 @@
     "playwright": "^1.50.0",
     "react": "^19.0.0",
     "reflect-metadata": "^0.2.2",
-    "rfc4648": "^1.5.0",
     "rxjs": "^7.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
