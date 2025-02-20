@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@outposts/injection-js';
-import { type Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, type Observable, of, throwError } from 'rxjs';
+import { MockUtil } from 'src/utils/reflect';
 import type { AuthOptions } from '../auth-options';
 import type { OpenIdConfiguration } from '../config/openid-configuration';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
@@ -24,6 +25,7 @@ export class LoginService {
 
   private readonly popupService = inject(PopUpService);
 
+  @MockUtil({ implementation: () => new BehaviorSubject(undefined) })
   login(
     configuration: OpenIdConfiguration | null,
     authOptions?: AuthOptions

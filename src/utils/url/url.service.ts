@@ -249,6 +249,7 @@ export class UrlService {
     configuration: OpenIdConfiguration
   ): string | null {
     const clientId = this.getClientId(configuration);
+    const clientSecret = this.getClientSecret(configuration);
 
     if (!clientId) {
       return null;
@@ -259,6 +260,9 @@ export class UrlService {
     params = params.set('client_id', clientId);
     params = params.set('token', token);
     params = params.set('token_type_hint', 'access_token');
+    if (clientSecret) {
+      params = params.set('client_secret', clientSecret);
+    }
 
     return params.toString();
   }
@@ -268,6 +272,7 @@ export class UrlService {
     configuration: OpenIdConfiguration
   ): string | null {
     const clientId = this.getClientId(configuration);
+    const clientSecret = this.getClientSecret(configuration);
 
     if (!clientId) {
       return null;
@@ -278,6 +283,9 @@ export class UrlService {
     params = params.set('client_id', clientId);
     params = params.set('token', token);
     params = params.set('token_type_hint', 'refresh_token');
+    if (clientSecret) {
+      params = params.set('client_secret', clientSecret);
+    }
 
     return params.toString();
   }
@@ -304,6 +312,7 @@ export class UrlService {
     customTokenParams?: { [p: string]: string | number | boolean }
   ): string | null {
     const clientId = this.getClientId(configuration);
+    const clientSecret = this.getClientSecret(configuration);
 
     if (!clientId) {
       return null;
@@ -313,6 +322,9 @@ export class UrlService {
 
     params = params.set('grant_type', 'authorization_code');
     params = params.set('client_id', clientId);
+    if (clientSecret) {
+      params = params.set('client_secret', clientSecret);
+    }
 
     if (!configuration.disablePkce) {
       const codeVerifier = this.flowsDataService.getCodeVerifier(configuration);
@@ -364,6 +376,7 @@ export class UrlService {
     customParamsRefresh?: { [key: string]: string | number | boolean }
   ): string | null {
     const clientId = this.getClientId(configuration);
+    const clientSecret = this.getClientSecret(configuration);
 
     if (!clientId) {
       return null;
@@ -374,6 +387,9 @@ export class UrlService {
     params = params.set('grant_type', 'refresh_token');
     params = params.set('client_id', clientId);
     params = params.set('refresh_token', refreshToken);
+    if (clientSecret) {
+      params = params.set('client_secret', clientSecret);
+    }
 
     if (customParamsRefresh) {
       params = this.appendCustomParams({ ...customParamsRefresh }, params);
@@ -849,6 +865,18 @@ export class UrlService {
     }
 
     return clientId;
+  }
+
+  private getClientSecret(configuration: OpenIdConfiguration): string | null {
+    const { clientSecret } = configuration;
+
+    if (!clientSecret) {
+      this.loggerService.logDebug(configuration, 'could not get clientSecret');
+
+      return null;
+    }
+
+    return clientSecret;
   }
 
   private appendCustomParams(

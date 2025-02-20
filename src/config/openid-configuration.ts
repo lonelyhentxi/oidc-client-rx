@@ -41,6 +41,12 @@ export interface OpenIdConfiguration {
    */
   clientId?: string;
   /**
+   * @dangerous
+   * @see [client secret is missing](https://github.com/damienbod/angular-auth-oidc-client/issues/399)
+   * The client secret. For some oidc service the must provide this.
+   */
+  clientSecret?: string;
+  /**
    * `code`, `id_token token` or `id_token`.
    * Name of the flow which can be configured.
    * You must use the `id_token token` flow, if you want to access an API

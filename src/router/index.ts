@@ -30,7 +30,7 @@ export abstract class AbstractRouter<
   abstract getCurrentNavigation(): NAVIGATION;
 }
 
-export class VanillaLocationRouter extends AbstractRouter {
+export class VanillaLocationRouter extends AbstractRouter<string> {
   protected document = inject(DOCUMENT);
 
   private get location(): Location {

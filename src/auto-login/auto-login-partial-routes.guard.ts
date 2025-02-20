@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@outposts/injection-js';
-import type { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { type Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import type { AuthOptions } from '../auth-options';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';
@@ -126,7 +126,7 @@ function checkAuth(
   configId?: string
 ): Observable<boolean> {
   return configurationService.getOpenIDConfiguration(configId).pipe(
-    map((configuration) => {
+    switchMap((configuration) => {
       const isAuthenticated =
         authStateService.areAuthStorageTokensValid(configuration);
 
@@ -137,13 +137,16 @@ function checkAuth(
       if (!isAuthenticated) {
         autoLoginService.saveRedirectRoute(configuration, url);
         if (authOptions) {
-          loginService.login(configuration, authOptions);
-        } else {
-          loginService.login(configuration);
+          return loginService
+            .login(configuration, authOptions)
+            .pipe(switchMap(() => of(isAuthenticated)));
         }
+        return loginService
+          .login(configuration)
+          .pipe(switchMap(() => of(isAuthenticated)));
       }
 
-      return isAuthenticated;
+      return of(isAuthenticated);
     })
   );
 }
