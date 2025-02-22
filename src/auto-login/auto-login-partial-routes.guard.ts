@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@outposts/injection-js';
 import { type Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import type { AuthOptions } from '../auth-options';
 import { AuthStateService } from '../auth-state/auth-state.service';
 import { ConfigurationService } from '../config/config.service';

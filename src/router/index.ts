@@ -30,6 +30,8 @@ export abstract class AbstractRouter<
   abstract getCurrentNavigation(): NAVIGATION;
 }
 
+export const ROUTER_ABS_PATH_PATTERN = /^\//;
+
 export class VanillaLocationRouter extends AbstractRouter<string> {
   protected document = inject(DOCUMENT);
 
@@ -42,7 +44,7 @@ export class VanillaLocationRouter extends AbstractRouter<string> {
   }
 
   navigateByUrl(url: string): void {
-    this.location.href = url;
+    this.location.href = ROUTER_ABS_PATH_PATTERN.test(url) ? url : `/${url}`;
   }
 
   getCurrentNavigation() {
@@ -72,7 +74,11 @@ export class VanillaHistoryRouter extends AbstractRouter<string> {
   }
 
   navigateByUrl(url: string): void {
-    this.history.pushState({}, '', url);
+    this.history.pushState(
+      {},
+      '',
+      ROUTER_ABS_PATH_PATTERN.test(url) ? url : `/${url}`
+    );
   }
 
   getCurrentNavigation() {

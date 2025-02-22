@@ -1,7 +1,7 @@
 import { InjectionToken, inject } from '@outposts/injection-js';
 import type { AnyRouter } from '@tanstack/react-router';
 import type { AuthFeature } from '../../features';
-import { AbstractRouter } from '../../router';
+import { AbstractRouter, ROUTER_ABS_PATH_PATTERN } from '../../router';
 
 export type TanStackRouter = AnyRouter;
 
@@ -14,7 +14,7 @@ export class TanStackRouterAdapter implements AbstractRouter<string> {
 
   navigateByUrl(url: string): void {
     this.router.navigate({
-      href: url,
+      href: ROUTER_ABS_PATH_PATTERN.test(url) ? url : `/${url}`,
     });
   }
 
