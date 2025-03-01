@@ -24,7 +24,11 @@ export default defineConfig({
         entry: {
           index: './src/index.ts',
           'adapters/react': './src/adapters/react/index.ts',
-          'adapters/tanstack-router': './src/adapters/tanstack-router/index.ts',
+          'adapters/solid-js': './src/adapters/solid-js/index.ts',
+          'adapters/@tanstack/react-router':
+            './src/adapters/@tanstack/react-router.ts',
+          'adapters/@tanstack/solid-router':
+            './src/adapters/@tanstack/solid-router.ts',
         },
       },
     },

@@ -1,16 +1,16 @@
 import type { HttpFeature } from '@ngify/http';
 import type { Provider } from '@outposts/injection-js';
-import { DOCUMENT } from './dom';
-import { provideHttpClient } from './http';
+import { DOCUMENT } from '../dom';
+import { provideHttpClient } from '../http';
 import {
   AbstractRouter,
   VanillaHistoryRouter,
   VanillaLocationRouter,
-} from './router';
-import { AbstractSecurityStorage } from './storage/abstract-security-storage';
-import { DefaultLocalStorageService } from './storage/default-localstorage.service';
-import { DefaultSessionStorageService } from './storage/default-sessionstorage.service';
-import { PLATFORM_ID } from './utils/platform-provider/platform.provider';
+} from '../router';
+import { AbstractSecurityStorage } from '../storage/abstract-security-storage';
+import { DefaultLocalStorageService } from '../storage/default-localstorage.service';
+import { DefaultSessionStorageService } from '../storage/default-sessionstorage.service';
+import { PLATFORM_ID } from '../utils/platform-provider/platform.provider';
 
 /**
  * A feature to be used with `provideAuth`.

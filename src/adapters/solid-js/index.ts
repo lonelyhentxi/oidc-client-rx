@@ -1,11 +1,13 @@
 import type { InjectionToken, Injector, Type } from '@outposts/injection-js';
 import {
-  type PropsWithChildren,
+  type ParentProps,
   createContext,
-  createElement,
+  createMemo,
+  mergeProps,
+  splitProps,
   useContext,
-  useMemo,
-} from 'react';
+} from 'solid-js';
+import h from 'solid-js/h';
 import { OidcSecurityService } from '../../oidc.security.service';
 
 export const InjectorContextVoidInjector: Injector = {
@@ -18,14 +20,10 @@ export const InjectorContext = createContext<Injector>(
   InjectorContextVoidInjector
 );
 
-export function InjectorProvider({
-  injector,
-  ...props
-}: PropsWithChildren<{ injector: Injector }>) {
-  return createElement(InjectorContext, {
-    ...props,
-    value: injector,
-  });
+export function InjectorProvider(props: ParentProps<{ injector: Injector }>) {
+  const [local, others] = splitProps(props, ['children', 'injector']);
+  const providerProps = mergeProps(others, { value: local.injector });
+  return h(InjectorContext.Provider, providerProps, local.children);
 }
 
 export function useInjector() {
@@ -35,9 +33,8 @@ export function useInjector() {
 export function useOidcClient() {
   const injector = useInjector();
 
-  const oidcSecurityService = useMemo(
-    () => injector.get(OidcSecurityService),
-    [injector]
+  const oidcSecurityService = createMemo(() =>
+    injector.get(OidcSecurityService)
   );
 
   return {

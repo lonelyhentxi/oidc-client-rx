@@ -7,11 +7,11 @@ import {
   provideAuth,
   withDefaultFeatures,
 } from 'oidc-client-rx';
+import { withTanstackRouter } from 'oidc-client-rx/adapters/@tanstack/react-router';
 import {
   InjectorContextVoidInjector,
   InjectorProvider,
 } from 'oidc-client-rx/adapters/react';
-import { withTanstackRouter } from 'oidc-client-rx/adapters/tanstack-router';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { routeTree } from './routeTree.gen';

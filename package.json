@@ -1,6 +1,6 @@
 {
   "name": "oidc-client-rx",
-  "version": "0.1.0-alpha.6",
+  "version": "0.1.0-alpha.7",
   "homepage": "https://github.com/lonelyhentxi/oidc-client-rx",
   "author": "lonelyhentxi",
   "description": "ReactiveX enhanced OIDC and OAuth2 protocol support for browser-based JavaScript applications",
@@ -23,10 +23,20 @@
       "import": "./dist/adapters/react/index.js",
       "require": "./dist/adapters/react.cjs"
     },
-    "./adapters/tanstack-router": {
-      "types": "./dist/adapters/tanstack-router/index.d.ts",
-      "import": "./dist/adapters/tanstack-router/index.js",
-      "require": "./dist/adapters/tanstack-router.cjs"
+    "./adapters/solid-js": {
+      "types": "./dist/adapters/solid-js/index.d.ts",
+      "import": "./dist/adapters/solid-js/index.js",
+      "require": "./dist/adapters/solid-js.cjs"
+    },
+    "./adapters/@tanstack/react-router": {
+      "types": "./dist/adapters/@tanstack/react-router.d.ts",
+      "import": "./dist/adapters/@tanstack/react-router.js",
+      "require": "./dist/adapters/@tanstack/react-router.cjs"
+    },
+    "./adapters/@tanstack/solid-router": {
+      "types": "./dist/adapters/@tanstack/solid-router.d.ts",
+      "import": "./dist/adapters/@tanstack/solid-router.js",
+      "require": "./dist/adapters/@tanstack/solid-router.cjs"
     }
   },
   "main": "./dist/index.cjs",
@@ -50,8 +60,10 @@
   },
   "peerDependencies": {
     "@tanstack/react-router": "*",
+    "@tanstack/solid-router": "*",
     "react": ">=16.8.0",
-    "rxjs": "^7.4.0||>=8.0.0"
+    "rxjs": "^7.4.0||>=8.0.0",
+    "solid-js": "^1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -60,7 +72,8 @@
     "@playwright/test": "^1.49.1",
     "@rslib/core": "^0.5.0",
     "@swc/core": "^1.10.12",
-    "@tanstack/react-router": "^1.99.6",
+    "@tanstack/react-router": "^1.112.11",
+    "@tanstack/solid-router": "^1.112.11",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.12.0",
     "@types/react": "^19.0.8",
@@ -68,12 +81,13 @@
     "commander": "^13.1.0",
     "happy-dom": "^17.1.0",
     "lodash-es": "^4.17.21",
-    "oxc-parser": "^0.48.1",
+    "oxc-parser": "^0.54.0",
     "oxc-walker": "^0.2.2",
     "playwright": "^1.50.0",
     "react": "^19.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.4.0",
+    "solid-js": "^1.9.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "ultracite": "^4.1.15",
@@ -86,6 +100,12 @@
       "optional": true
     },
     "@tanstack/react-router": {
+      "optional": true
+    },
+    "@tanstack/solid-router": {
+      "optional": true
+    },
+    "solid-js": {
       "optional": true
     }
   },
