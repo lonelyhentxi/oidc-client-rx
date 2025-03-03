@@ -14,6 +14,11 @@ export default defineConfig({
         build: false,
         distPath: './dist',
       },
+      source: {
+        entry: {
+          index: ['src/**/*.ts', '!**/*.spec.ts', '!src/testing/**/*'],
+        },
+      },
     },
     {
       format: 'cjs',
