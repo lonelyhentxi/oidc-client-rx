@@ -70,7 +70,7 @@ export function withSecurityStorage({
   return {
     ɵproviders: enabled
       ? [
-          type === 'session-storage'
+          type === 'local-storage'
             ? {
                 provide: AbstractSecurityStorage,
                 useClass: DefaultLocalStorageService,
