@@ -1,5 +1,7 @@
 import type { HttpFeature } from '@ngify/http';
 import type { Provider } from '@outposts/injection-js';
+import { NEVER, fromEvent, shareReplay, take } from 'rxjs';
+import { DESTORY_REF } from 'src/resources';
 import { DOCUMENT } from '../dom';
 import { provideHttpClient } from '../http';
 import {
@@ -36,6 +38,19 @@ export function withBrowserPlatform({
           {
             provide: PLATFORM_ID,
             useValue: 'browser',
+          },
+          {
+            provide: DESTORY_REF,
+            useFactory: (document: Document) => {
+              if (document?.defaultView) {
+                return fromEvent(document.defaultView, 'beforeunload').pipe(
+                  take(1),
+                  shareReplay(1)
+                );
+              }
+              return NEVER;
+            },
+            deps: [DOCUMENT],
           },
         ]
       : [],

@@ -1,5 +1,6 @@
 import { TestBed, mockImplementationWhenArgsEqual } from '@/testing';
-import { ReplaySubject, firstValueFrom, of } from 'rxjs';
+import { DESTORY_REF } from 'oidc-client-rx';
+import { NEVER, ReplaySubject, firstValueFrom, of } from 'rxjs';
 import { share, skip } from 'rxjs/operators';
 import { vi } from 'vitest';
 import { LoggerService } from '../logging/logger.service';
@@ -26,6 +27,10 @@ describe('CheckSessionService', () => {
         OidcSecurityService,
         IFrameService,
         PublicEventsService,
+        {
+          provide: DESTORY_REF,
+          useFactory: () => NEVER,
+        },
         mockProvider(StoragePersistenceService),
         mockProvider(LoggerService),
         mockProvider(PlatformProvider),

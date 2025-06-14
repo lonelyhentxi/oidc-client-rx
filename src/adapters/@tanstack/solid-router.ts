@@ -1,6 +1,8 @@
 import { InjectionToken, inject } from '@outposts/injection-js';
-import type { AnyRouter } from '@tanstack/solid-router';
+import type { AnyRouter, RouterEvents } from '@tanstack/solid-router';
+import { fromEventPattern, takeUntil } from 'rxjs';
 import type { AuthFeature } from '../../features';
+import { DESTORY_REF } from '../../resources';
 import { AbstractRouter, ROUTER_ABS_PATH_PATTERN } from '../../router';
 
 export type TanStackRouter = AnyRouter;
@@ -11,6 +13,31 @@ export const TANSTACK_ROUTER = new InjectionToken<TanStackRouter>(
 
 export class TanStackRouterAdapter implements AbstractRouter<string> {
   private router = inject(TANSTACK_ROUTER);
+  private beforeLoadToLocation:
+    | RouterEvents['onBeforeLoad']['toLocation']
+    | null = null;
+  private destoryRef$ = inject(DESTORY_REF);
+
+  constructor() {
+    // 监听导航事件以跟踪目标 URL
+    fromEventPattern<RouterEvents['onBeforeLoad']>(
+      (handler) => this.router.subscribe('onBeforeLoad', handler),
+      (unsubscribe) => unsubscribe()
+    )
+      .pipe(takeUntil(this.destoryRef$))
+      .subscribe((event) => {
+        this.beforeLoadToLocation = event.toLocation;
+      });
+
+    fromEventPattern<RouterEvents['onResolved']>(
+      (handler) => this.router.subscribe('onResolved', handler),
+      (unsubscribe) => unsubscribe()
+    )
+      .pipe(takeUntil(this.destoryRef$))
+      .subscribe(() => {
+        this.beforeLoadToLocation = null;
+      });
+  }
 
   navigateByUrl(url: string): void {
     this.router.navigate({
@@ -20,7 +47,8 @@ export class TanStackRouterAdapter implements AbstractRouter<string> {
 
   getCurrentNavigation() {
     return {
-      extractedUrl: this.router.state.location.href,
+      extractedUrl:
+        this.beforeLoadToLocation?.href || this.router.state.location.href,
     };
   }
 }

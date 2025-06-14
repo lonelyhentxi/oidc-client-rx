@@ -31,3 +31,4 @@ export * from './injection';
 export * from './router';
 export * from './http';
 export * from './features';
+export * from './resources';

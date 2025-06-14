@@ -6,6 +6,7 @@ import { DOCUMENT } from '../dom';
 import { LoggerService } from '../logging/logger.service';
 import { EventTypes } from '../public-events/event-types';
 import { PublicEventsService } from '../public-events/public-events.service';
+import { DESTORY_REF } from '../resources';
 import { StoragePersistenceService } from '../storage/storage-persistence.service';
 import { IFrameService } from './existing-iframe.service';
 
@@ -15,6 +16,8 @@ const IFRAME_FOR_CHECK_SESSION_IDENTIFIER = 'myiFrameForCheckSession';
 
 @Injectable()
 export class CheckSessionService {
+  private readonly destoryRef$ = inject(DESTORY_REF);
+
   private readonly loggerService = inject(LoggerService);
 
   private readonly storagePersistenceService = inject(
@@ -43,6 +46,21 @@ export class CheckSessionService {
     false
   );
 
+  constructor() {
+    this.destoryRef$.subscribe(() => {
+      this.stop();
+      const windowAsDefaultView = this.document.defaultView;
+
+      if (windowAsDefaultView && this.iframeMessageEventListener) {
+        windowAsDefaultView.removeEventListener(
+          'message',
+          this.iframeMessageEventListener,
+          false
+        );
+      }
+    });
+  }
+
   private iframeMessageEventListener?: (
     this: Window,
     ev: MessageEvent<any>
@@ -50,19 +68,6 @@ export class CheckSessionService {
 
   get checkSessionChanged$(): Observable<boolean> {
     return this.checkSessionChangedInternal$.asObservable();
-  }
-
-  [Symbol.dispose]() {
-    this.stop();
-    const windowAsDefaultView = this.document.defaultView;
-
-    if (windowAsDefaultView && this.iframeMessageEventListener) {
-      windowAsDefaultView.removeEventListener(
-        'message',
-        this.iframeMessageEventListener,
-        false
-      );
-    }
   }
 
   isCheckSessionConfigured(configuration: OpenIdConfiguration): boolean {

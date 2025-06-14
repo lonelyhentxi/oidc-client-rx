@@ -290,9 +290,9 @@ describe('AutoLoginPartialRoutesGuard', () => {
         const loginSpy = vi.spyOn(loginService, 'login');
 
         vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({
-          extractedUrl: router.parseUrl(
-            'some-url12/with/some-param?queryParam=true'
-          ),
+          extractedUrl: router
+            .parseUrl('some-url12/with/some-param?queryParam=true')
+            .toString(),
         });
 
         await firstValueFrom(guard.canLoad());
@@ -390,9 +390,9 @@ describe('AutoLoginPartialRoutesGuard', () => {
 
       it('should save current route (with router extractedUrl) and call `login` if not authenticated already', async () => {
         vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({
-          extractedUrl: router.parseUrl(
-            'some-url12/with/some-param?queryParam=true'
-          ),
+          extractedUrl: router
+            .parseUrl('some-url12/with/some-param?queryParam=true')
+            .toString(),
         });
 
         vi.spyOn(authStateService, 'areAuthStorageTokensValid').mockReturnValue(
