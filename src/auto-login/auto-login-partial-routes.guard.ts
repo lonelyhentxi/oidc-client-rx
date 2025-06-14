@@ -80,7 +80,7 @@ export class AutoLoginPartialRoutesGuard {
 
 export function autoLoginPartialRoutesGuard(
   route?: ActivatedRouteSnapshot,
-  _state?: RouterStateSnapshot,
+  state?: RouterStateSnapshot,
   configId?: string
 ): Observable<boolean> {
   const configurationService = inject(ConfigurationService);
@@ -93,7 +93,9 @@ export function autoLoginPartialRoutesGuard(
     : undefined;
 
   const url =
-    router.getCurrentNavigation()?.extractedUrl.toString().substring(1) ?? '';
+    (
+      state?.url ?? router.getCurrentNavigation()?.extractedUrl.toString()
+    )?.substring(1) ?? '';
 
   return checkAuth(
     url,

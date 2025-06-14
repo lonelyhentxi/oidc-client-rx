@@ -13,19 +13,19 @@ export const TANSTACK_ROUTER = new InjectionToken<TanStackRouter>(
 
 export class TanStackRouterAdapter implements AbstractRouter<string> {
   private router = inject(TANSTACK_ROUTER);
-  private beforeNavigateToLocation:
-    | RouterEvents['onBeforeNavigate']['toLocation']
+  private beforeLoadToLocation:
+    | RouterEvents['onBeforeLoad']['toLocation']
     | null = null;
   private destoryRef$ = inject(DESTORY_REF);
 
   constructor() {
-    fromEventPattern<RouterEvents['onBeforeNavigate']>(
-      (handler) => this.router.subscribe('onBeforeNavigate', handler),
+    fromEventPattern<RouterEvents['onBeforeLoad']>(
+      (handler) => this.router.subscribe('onBeforeLoad', handler),
       (unsubscribe) => unsubscribe()
     )
       .pipe(takeUntil(this.destoryRef$))
       .subscribe((event) => {
-        this.beforeNavigateToLocation = event.toLocation;
+        this.beforeLoadToLocation = event.toLocation;
       });
 
     fromEventPattern<RouterEvents['onResolved']>(
@@ -34,7 +34,7 @@ export class TanStackRouterAdapter implements AbstractRouter<string> {
     )
       .pipe(takeUntil(this.destoryRef$))
       .subscribe(() => {
-        this.beforeNavigateToLocation = null;
+        this.beforeLoadToLocation = null;
       });
   }
 
@@ -47,7 +47,7 @@ export class TanStackRouterAdapter implements AbstractRouter<string> {
   getCurrentNavigation() {
     return {
       extractedUrl:
-        this.beforeNavigateToLocation?.href || this.router.state.location.href,
+        this.beforeLoadToLocation?.href || this.router.state.location.href,
     };
   }
 }
