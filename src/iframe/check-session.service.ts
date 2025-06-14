@@ -156,7 +156,7 @@ export class CheckSessionService {
     return new Observable((observer) => {
       existingIframe.onload = (): void => {
         this.lastIFrameRefresh = Date.now();
-        observer.next();
+        observer.next(undefined);
         observer.complete();
       };
     });
