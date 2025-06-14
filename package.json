@@ -48,7 +48,7 @@
     "dev": "rslib build --watch",
     "test": "vitest --coverage",
     "test-ci": "vitest --watch=false --coverage",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run lint && npm run build",
     "lint": "ultracite lint",
     "format": "ultracite format",
     "cli": "tsx scripts/cli.ts"

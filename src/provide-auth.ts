@@ -21,7 +21,6 @@ import { AuthWellKnownService } from './config/auth-well-known/auth-well-known.s
 import { ConfigurationService } from './config/config.service';
 import { StsConfigLoader } from './config/loader/config-loader';
 import { ConfigValidationService } from './config/validation/config-validation.service';
-import { DOCUMENT } from './dom';
 import { JwkExtractor } from './extractors/jwk.extractor';
 import type { AuthFeature } from './features';
 import { CodeFlowCallbackHandlerService } from './flows/callback-handling/code-flow-callback-handler.service';
